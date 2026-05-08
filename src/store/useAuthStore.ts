@@ -1,29 +1,43 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { storeRefreshToken, clearStoredRefreshToken } from '@/lib/tokenStorage';
 
-interface User {
-  id: string;
+export interface AuthUser {
+  userId: number;
+  email: string;
   username: string;
-  avatar?: string;
+  emailVerified: boolean;
+  profileImage?: string;
 }
 
 interface AuthState {
-  user: User | null;
-  token: string | null;
-  setUser: (user: User) => void;
-  setToken: (token: string) => void;
+  user: AuthUser | null;
+  accessToken: string | null;
+  setUser: (user: AuthUser) => void;
+  setAccessToken: (token: string | null) => void;
+  login: (user: AuthUser, accessToken: string, refreshToken: string, rememberMe: boolean) => void;
   logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
-      user:     null,
-      token:    null,
-      setUser:  (user)  => set({ user }),
-      setToken: (token) => set({ token }),
-      logout:   ()      => set({ user: null, token: null }),
+      user: null,
+      accessToken: null,
+      setUser: (user) => set({ user }),
+      setAccessToken: (accessToken) => set({ accessToken }),
+      login: (user, accessToken, refreshToken, rememberMe) => {
+        storeRefreshToken(refreshToken, rememberMe);
+        set({ user, accessToken });
+      },
+      logout: () => {
+        clearStoredRefreshToken();
+        set({ user: null, accessToken: null });
+      },
     }),
-    { name: 'rekko-auth' }
+    {
+      name: 'rekko-auth',
+      partialize: (state) => ({ user: state.user }),
+    }
   )
 );

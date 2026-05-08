@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import Button from '@/components/ui/common/Button';
 import { authService, decodeJwtUserId } from '@/lib/authService';
 import { signInWithGoogle } from '@/lib/firebase';
@@ -9,11 +9,7 @@ const styles = {
   page:      'min-h-screen bg-app-bg flex items-center justify-center font-gabarito',
   card:      'bg-surface w-[400px] rounded-[10px] shadow-card px-12 py-10 flex flex-col gap-3',
   title:     'text-[32px] font-normal text-text-main text-center mb-0',
-  successBanner: 'bg-status-green/10 border border-status-green rounded-[5px] px-3 py-2 text-xs text-status-green text-center',
   input:     'w-full h-[42px] rounded-btn border border-border bg-[rgba(246,246,246,0.6)] shadow-input px-3 text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-text-secondary',
-  row:       'flex items-center justify-between text-xs',
-  check:     'flex items-center gap-2 cursor-pointer text-text-secondary',
-  forgot:    'text-primary text-xs cursor-pointer hover:underline',
   error:     'text-xs text-status-red text-center -mt-1',
   divider:   'flex items-center gap-3 text-text-muted text-xs',
   line:      'flex-1 h-px bg-border',
@@ -23,31 +19,43 @@ const styles = {
   linkA:     'text-primary hover:underline cursor-pointer',
 };
 
-export default function Login() {
-  const [email, setEmail]       = useState('');
-  const [password, setPassword] = useState('');
-  const [remember, setRemember] = useState(false);
-  const [error, setError]       = useState('');
-  const [loading, setLoading]   = useState(false);
+function validate(form: { email: string; username: string; password: string; passwordRepeat: string }) {
+  if (!form.email || !form.username || !form.password || !form.passwordRepeat) return 'All fields are required.';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return 'Invalid email address.';
+  if (form.password.length < 8) return 'Password must be at least 8 characters.';
+  if (!/[A-Z]/.test(form.password)) return 'Password must contain at least one uppercase letter.';
+  if (!/[a-z]/.test(form.password)) return 'Password must contain at least one lowercase letter.';
+  if (!/[0-9]/.test(form.password)) return 'Password must contain at least one number.';
+  if (form.password !== form.passwordRepeat) return 'Passwords do not match.';
+  return null;
+}
 
+export default function Register() {
+  const [form, setForm] = useState({ email: '', username: '', password: '', passwordRepeat: '' });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const justRegistered = searchParams.get('registered') === 'true';
-
   const { login } = useAuthStore();
+
+  function set(field: keyof typeof form) {
+    return (e: React.ChangeEvent<HTMLInputElement>) => {
+      setForm(prev => ({ ...prev, [field]: e.target.value }));
+      setError('');
+    };
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError('');
+    const err = validate(form);
+    if (err) { setError(err); return; }
+
     setLoading(true);
     try {
-      const { accessToken, refreshToken, user } = await authService.login(email, password);
-      const fullUser = await authService.getUserByUsername(user.username);
-      login(fullUser, accessToken, refreshToken, remember);
-      navigate('/feed');
+      await authService.register(form);
+      navigate('/login?registered=true');
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
-      setError(msg ?? 'Invalid email or password.');
+      setError(msg ?? 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -74,10 +82,10 @@ export default function Login() {
       console.log('[Google OAuth] Decoded userId:', userId);
 
       console.log('[Google OAuth] Sending GET /user/' + userId);
-      const fullUser = await authService.getUserById(userId);
-      console.log('[Google OAuth] getUserById response:', fullUser);
+      const user = await authService.getUserById(userId);
+      console.log('[Google OAuth] getUserById response:', user);
 
-      login(fullUser, accessToken, refreshToken, remember);
+      login(user, accessToken, refreshToken, false);
       navigate('/feed');
     } catch (err: unknown) {
       console.error('[Google OAuth] Error caught:', err);
@@ -95,43 +103,45 @@ export default function Login() {
   return (
     <div className={styles.page}>
       <form className={styles.card} onSubmit={handleSubmit}>
-        <h1 className={styles.title}>Login</h1>
-
-        {justRegistered && (
-          <div className={styles.successBanner}>
-            Account created! Please log in.
-          </div>
-        )}
+        <h1 className={styles.title}>Sign Up</h1>
 
         <input
           className={styles.input}
           type="email"
           placeholder="Email"
-          value={email}
-          onChange={e => { setEmail(e.target.value); setError(''); }}
+          value={form.email}
+          onChange={set('email')}
           autoComplete="email"
+        />
+        <input
+          className={styles.input}
+          type="text"
+          placeholder="Username"
+          value={form.username}
+          onChange={set('username')}
+          autoComplete="username"
         />
         <input
           className={styles.input}
           type="password"
           placeholder="Password"
-          value={password}
-          onChange={e => { setPassword(e.target.value); setError(''); }}
-          autoComplete="current-password"
+          value={form.password}
+          onChange={set('password')}
+          autoComplete="new-password"
         />
-
-        <div className={styles.row}>
-          <label className={styles.check}>
-            <input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} className="accent-primary" />
-            Remember me
-          </label>
-          <span className={styles.forgot}>Forgot password?</span>
-        </div>
+        <input
+          className={styles.input}
+          type="password"
+          placeholder="Repeat Password"
+          value={form.passwordRepeat}
+          onChange={set('passwordRepeat')}
+          autoComplete="new-password"
+        />
 
         {error && <p className={styles.error}>{error}</p>}
 
         <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? 'LOGGING IN...' : 'LOGIN'}
+          {loading ? 'CREATING ACCOUNT...' : 'CREATE ACCOUNT'}
         </Button>
 
         <div className={styles.divider}>
@@ -142,20 +152,20 @@ export default function Login() {
 
         <button type="button" className={styles.socialBtn} onClick={handleGoogleLogin}>
           <img src="/icon_google.png" alt="Google" className={styles.icon} />
-          Login with Google
+          Sign up with Google
         </button>
         <button type="button" className={styles.socialBtn} onClick={handleDiscordLogin}>
           <img src="/icon_discord.png" alt="Discord" className={styles.icon} />
-          Login with Discord
+          Sign up with Discord
         </button>
         <button type="button" className={`${styles.socialBtn} opacity-50 cursor-not-allowed`} disabled>
           <img src="/icon_x.png" alt="X" className={styles.icon} />
-          Login with X
+          Sign up with X
         </button>
 
         <p className={styles.link}>
-          Don't have an account?{' '}
-          <Link to="/register" className={styles.linkA}>Sign up</Link>
+          Already have an account?{' '}
+          <Link to="/login" className={styles.linkA}>Log in</Link>
         </p>
       </form>
     </div>
