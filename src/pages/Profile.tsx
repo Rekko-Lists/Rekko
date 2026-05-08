@@ -1,15 +1,22 @@
-import { Edit, Star } from 'lucide-react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Edit, Star, Settings as SettingsIcon, Image } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
 import Avatar from '@/components/ui/common/Avatar';
+import Button from '@/components/ui/common/Button';
 import PostCard from '@/components/ui/feed/PostCard';
+import ImageUploadModal, { type UploadImageType } from '@/components/ui/profile/ImageUploadModal';
 import rekkoSword from '@/assets/rekko_sword.png';
+import { authService } from '@/lib/authService';
+import type { PublicProfile } from '@/lib/authService';
+import { useAuthStore } from '@/store/useAuthStore';
+import { logger } from '@/lib/logger';
 import type { Post } from '@/store/useFeedStore';
 
 const MOCK_POST: Post = {
   id: '1',
   user: 'Username',
   time: '10 hours ago',
-  text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam non diam nulla. Sed lectus orci, iaculis nec justo in, placerat interdum risus. Nunc eu venenatis nunc, vitae sollicitudin tortor. Integer ipsum',
+  text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam non diam nulla. Sed lectus orci, iaculis nec justo in, placerat interdum risus.',
   relatedAnimes: [
     { id: 'a1', title: 'Frieren', cover: '' },
     { id: 'a2', title: 'Frieren S2', cover: '' },
@@ -25,87 +32,214 @@ const MOCK_LIST = [
 ];
 
 const styles = {
-  page:         'font-gabarito relative',
-  contentWrap:  'flex flex-col gap-6 px-[6%] py-6',
-  bannerWrap:   'relative',
-  banner:       'bg-gradient-banner rounded-card h-[153px] relative overflow-hidden',
-  bannerClouds: 'absolute inset-0 bg-cover bg-center opacity-30',
-  editBtn:      'absolute top-3 right-3 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center cursor-pointer hover:bg-white transition-colors',
-  avatarWrap:   'absolute -bottom-[59px] left-8',
-  mainRow:      'flex gap-6 mt-16',
-  leftCol:      'flex-1 flex flex-col gap-6 min-w-0',
-  userInfo:     'pl-2',
-  userHandle:   'text-sm text-text-muted',
-  userName:     'text-[28px] font-semibold text-text-main leading-tight',
-  miniTable:    'bg-surface border border-border rounded-card shadow-card overflow-hidden',
-  tableHead:    'flex',
-  thImg:        'bg-primary text-white text-xs font-semibold px-3 py-1.5 w-[86px]',
-  th:           'text-xs font-semibold text-text-secondary px-3 py-1.5',
-  tableRow:     'flex items-center border-t border-border',
-  tdImg:        'w-[86px] px-3 py-2',
-  imgCircle:    'w-[73px] h-[74px] rounded-full bg-gradient-to-br from-slate-400 to-slate-700',
-  tdText:       'flex-1 px-3 py-2 text-sm text-text-main',
-  tdScore:      'px-3 py-2 flex items-center gap-1 text-sm font-semibold',
-  swordDeco:    'absolute right-0 top-1/2 -translate-y-1/2 h-[160px] object-contain rotate-[-20deg] opacity-70 pointer-events-none',
+  tableHead: 'flex',
+  thImg:     'bg-primary text-white text-xs font-semibold px-3 py-1.5 w-[86px] flex-shrink-0',
+  th:        'text-xs font-semibold text-text-secondary px-3 py-1.5',
+  tableRow:  'flex items-center border-t border-border',
+  tdImg:     'w-[86px] px-3 py-2 flex-shrink-0',
+  imgCircle: 'w-[55px] h-[55px] rounded-full bg-gradient-to-br from-slate-400 to-slate-700',
+  tdText:    'flex-1 px-3 py-2 text-sm text-text-main',
+  tdScore:   'px-3 py-2 flex items-center gap-1 text-sm font-semibold',
 };
 
 export default function Profile() {
   const { username } = useParams<{ username: string }>();
+  const navigate     = useNavigate();
+  const { user, setUser } = useAuthStore();
+
+  const [profileUser, setProfileUser] = useState<PublicProfile | null>(null);
+  const [loading,     setLoading]     = useState(true);
+  const [notFound,    setNotFound]    = useState(false);
+  const [loadError,   setLoadError]   = useState(false);
+  const [uploadModal, setUploadModal] = useState<UploadImageType | null>(null);
+
+  const isOwnProfile = !!user && user.username === username;
+
+  useEffect(() => {
+    if (!username) return;
+    setLoading(true);
+    setNotFound(false);
+    setLoadError(false);
+    authService.getPublicProfile(username)
+      .then(data => { setProfileUser(data); logger.info('Profile loaded', data); })
+      .catch((err: unknown) => {
+        const status = (err as { response?: { status?: number } })?.response?.status;
+        logger.error('Profile load error', err);
+        if (status === 404) setNotFound(true);
+        else setLoadError(true);
+      })
+      .finally(() => setLoading(false));
+  }, [username]);
+
+  function handleUploadSuccess(imageUrl: string) {
+    setProfileUser(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        ...(uploadModal === 'profile'    ? { profileImage:    imageUrl } :
+           uploadModal === 'banner'     ? { bannerImage:     imageUrl } :
+                                          { backgroundImage: imageUrl }),
+      };
+    });
+    // Keep navbar avatar in sync when own profile image changes.
+    // Read current user from store directly to avoid stale closure.
+    if (uploadModal === 'profile') {
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser) setUser({ ...currentUser, profileImage: imageUrl });
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[60vh] font-gabarito">
+        <p className="text-text-muted text-sm">Loading profile...</p>
+      </div>
+    );
+  }
+
+  if (notFound) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] gap-4 font-gabarito">
+        <p className="text-6xl font-semibold text-text-muted">404</p>
+        <p className="text-xl text-text-secondary">User not found</p>
+        <Button variant="amber" onClick={() => navigate('/feed')}>Back to feed</Button>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] gap-4 font-gabarito">
+        <p className="text-xl text-text-secondary">Couldn't load this profile. Please try again.</p>
+        <Button variant="amber" onClick={() => window.location.reload()}>Retry</Button>
+      </div>
+    );
+  }
 
   return (
-    <div className={styles.page}>
-      <div className={styles.contentWrap}>
-        {/* Banner + Avatar */}
-        <div className={styles.bannerWrap}>
-          <div className={styles.banner}>
-            <div
-              className={styles.bannerClouds}
-              style={{ backgroundImage: 'url(/bg_clouds.png)' }}
-            />
-            <button className={styles.editBtn}>
-              <Edit size={14} className="text-text-main" />
+    <div className="relative font-gabarito overflow-x-hidden" style={{ minHeight: '100%' }}>
+
+      {/* Full-page background */}
+      <div
+        className="absolute inset-0 bg-app-bg bg-cover bg-center"
+        style={profileUser?.backgroundImage ? { backgroundImage: `url(${profileUser.backgroundImage})` } : {}}
+      />
+
+      {/* Background change button (own profile only) */}
+      {isOwnProfile && (
+        <button
+          className="absolute top-3 right-4 z-10 flex items-center gap-1.5 text-xs bg-black/40 hover:bg-black/60 text-white rounded-[5px] px-2.5 py-1.5 transition-colors"
+          onClick={() => setUploadModal('background')}
+        >
+          <Image size={13} /> Background
+        </button>
+      )}
+
+      {/* Sword decoration — outside card, floating right */}
+      <img
+        src={rekkoSword}
+        alt=""
+        className="absolute right-2 top-[60px] h-[220px] object-contain rotate-[-20deg] opacity-75 pointer-events-none z-10"
+      />
+
+      {/* Profile card — centered */}
+      <div className="relative max-w-[760px] mx-auto bg-surface border-[1.5px] border-border border-top-none" style={{ minHeight: '100%' }}>
+
+        {/* Banner area */}
+        <div className="relative h-[153px] bg-gradient-banner overflow-hidden">
+          {profileUser?.bannerImage && (
+            <img src={profileUser.bannerImage} alt="Banner" className="absolute inset-0 w-full h-full object-cover" />
+          )}
+          {isOwnProfile && (
+            <button
+              className="absolute top-3 right-3 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors"
+              onClick={() => setUploadModal('banner')}
+            >
+              <Edit size={13} className="text-text-main" />
             </button>
-          </div>
-          <div className={styles.avatarWrap}>
-            <Avatar size="lg" className="border-4 border-surface shadow-card" />
-          </div>
-          <img src={rekkoSword} alt="" className={styles.swordDeco} />
+          )}
         </div>
 
-        <div className={styles.mainRow}>
-          <div className={styles.leftCol}>
-            <div className={styles.userInfo}>
-              <p className={styles.userHandle}>@{username ?? 'username'}</p>
-              <h1 className={styles.userName}>{username ?? 'Username'} List -</h1>
-            </div>
-
-            {/* Mini anime list */}
-            <div className={styles.miniTable}>
-              <div className={styles.tableHead}>
-                <span className={styles.thImg}>Image</span>
-                <span className={styles.th}>Status</span>
-                <span className={styles.th}>Situation</span>
-                <span className={styles.th}>Progress</span>
-                <span className={styles.th}>Score</span>
-              </div>
-              {MOCK_LIST.map(e => (
-                <div key={e.id} className={styles.tableRow}>
-                  <div className={styles.tdImg}><div className={styles.imgCircle} /></div>
-                  <div className={styles.tdText}>{e.title}</div>
-                  <div className={styles.tdText}>{e.situation}</div>
-                  <div className={styles.tdText}>{e.progress}</div>
-                  <div className={styles.tdScore}>
-                    {e.score} <Star size={16} fill="#FF9E00" className="text-primary" />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Post card */}
-            <PostCard post={MOCK_POST} />
+        {/* Avatar — overlaps banner bottom */}
+        <div className="absolute top-[94px] left-8">
+          <div className="relative">
+            <Avatar
+              src={profileUser?.profileImage}
+              username={profileUser?.username}
+              size="lg"
+              className="border-4 border-surface shadow-card"
+            />
+            {isOwnProfile && (
+              <button
+                className="absolute bottom-1 right-1 w-7 h-7 bg-white rounded-full border border-border flex items-center justify-center shadow-card hover:bg-app-bg transition-colors"
+                onClick={() => setUploadModal('profile')}
+              >
+                <Edit size={11} className="text-text-main" />
+              </button>
+            )}
           </div>
+        </div>
+
+        {/* Main content */}
+        <div className="px-8 pt-[72px] pb-10 flex flex-col gap-6">
+
+          {/* User info */}
+          <div>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-text-muted">@{profileUser?.username ?? username}</span>
+              {isOwnProfile && (
+                <button
+                  className="flex items-center gap-1 text-xs text-text-muted hover:text-primary border border-border rounded-[5px] px-2 py-0.5 transition-colors"
+                  onClick={() => navigate('/settings')}
+                >
+                  <SettingsIcon size={12} /> Settings
+                </button>
+              )}
+            </div>
+            <h1 className="text-[28px] font-semibold text-text-main leading-tight">
+              {profileUser?.username ?? username} List -
+            </h1>
+            {profileUser?.biography && (
+              <p className="text-sm text-text-secondary mt-1">{profileUser.biography}</p>
+            )}
+          </div>
+
+          {/* Anime list — mock until anime API is integrated */}
+          <div className="bg-surface border border-border rounded-card shadow-card overflow-hidden">
+            <div className={styles.tableHead}>
+              <span className={styles.thImg}>Image</span>
+              <span className={styles.th}>Status</span>
+              <span className={styles.th}>Situation</span>
+              <span className={styles.th}>Progress</span>
+              <span className={styles.th}>Score</span>
+            </div>
+            {MOCK_LIST.map(e => (
+              <div key={e.id} className={styles.tableRow}>
+                <div className={styles.tdImg}><div className={styles.imgCircle} /></div>
+                <div className={styles.tdText}>{e.title}</div>
+                <div className={styles.tdText}>{e.situation}</div>
+                <div className={styles.tdText}>{e.progress}</div>
+                <div className={styles.tdScore}>
+                  {e.score} <Star size={15} fill="#FF9E00" className="text-primary" />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Posts */}
+          <PostCard post={{ ...MOCK_POST, user: profileUser?.username ?? 'Username' }} />
         </div>
       </div>
+
+      {/* Image upload modal */}
+      {uploadModal && username && (
+        <ImageUploadModal
+          type={uploadModal}
+          username={username}
+          onSuccess={handleUploadSuccess}
+          onClose={() => setUploadModal(null)}
+        />
+      )}
     </div>
   );
 }

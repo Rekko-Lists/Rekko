@@ -4,6 +4,8 @@ import Button from '@/components/ui/common/Button';
 import { authService, decodeJwtUserId } from '@/lib/authService';
 import { signInWithGoogle } from '@/lib/firebase';
 import { useAuthStore } from '@/store/useAuthStore';
+import { extractApiError } from '@/lib/apiErrors';
+import { logger } from '@/lib/logger';
 
 const styles = {
   page:      'min-h-screen bg-app-bg flex items-center justify-center font-gabarito',
@@ -46,8 +48,7 @@ export default function Login() {
       login(fullUser, accessToken, refreshToken, remember);
       navigate('/feed');
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
-      setError(msg ?? 'Invalid email or password.');
+      setError(extractApiError(err, 'Unable to sign in. Please check your credentials and try again.'));
     } finally {
       setLoading(false);
     }
@@ -57,7 +58,7 @@ export default function Login() {
     let tokenId: string;
     try {
       tokenId = await signInWithGoogle();
-      console.log('[Google OAuth] Firebase tokenId (first 40 chars):', tokenId.slice(0, 40));
+      logger.info('Google OAuth: Firebase token obtained');
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code;
       if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return;
@@ -65,24 +66,15 @@ export default function Login() {
       return;
     }
     try {
-      console.log('[Google OAuth] Sending POST /oauth/google with tokenId...');
       const { accessToken, refreshToken } = await authService.loginWithGoogle(tokenId);
-      console.log('[Google OAuth] Backend response OK:', { accessToken: accessToken.slice(0, 40), refreshToken: refreshToken.slice(0, 20) });
-
-      console.log('[Google OAuth] Raw JWT payload segment:', accessToken.split('.')[1]);
       const userId = decodeJwtUserId(accessToken);
-      console.log('[Google OAuth] Decoded userId:', userId);
-
-      console.log('[Google OAuth] Sending GET /user/' + userId);
+      logger.info('Google OAuth: userId decoded', userId);
       const fullUser = await authService.getUserById(userId);
-      console.log('[Google OAuth] getUserById response:', fullUser);
-
       login(fullUser, accessToken, refreshToken, remember);
       navigate('/feed');
     } catch (err: unknown) {
-      console.error('[Google OAuth] Error caught:', err);
-      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
-      setError(msg ?? 'Backend OAuth failed. Please try again.');
+      logger.error('Google OAuth error', err);
+      setError(extractApiError(err, 'Google sign-in failed. Please try again in a moment.'));
     }
   }
 

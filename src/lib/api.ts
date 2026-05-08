@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { getStoredRefreshToken, storeRefreshToken, clearStoredRefreshToken } from '@/lib/tokenStorage';
 import { useAuthStore } from '@/store/useAuthStore';
+import { logger } from '@/lib/logger';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000',
+  baseURL: import.meta.env.VITE_API_BASE_URL,
 });
 
 api.interceptors.request.use((config) => {
@@ -33,7 +34,7 @@ api.interceptors.response.use(
 
         refreshing = axios
           .post<{ success: boolean; data: { accessToken: string } }>(
-            'http://localhost:5000/auth/refresh',
+            `${import.meta.env.VITE_API_BASE_URL}/auth/refresh`,
             { refreshToken }
           )
           .then((res) => {
@@ -52,7 +53,8 @@ api.interceptors.response.use(
       const newToken = await refreshing;
       original.headers.Authorization = `Bearer ${newToken}`;
       return api(original);
-    } catch {
+    } catch (refreshErr) {
+      logger.error('Token refresh failed, logging out', refreshErr);
       clearStoredRefreshToken();
       useAuthStore.getState().logout();
       window.location.href = '/login';

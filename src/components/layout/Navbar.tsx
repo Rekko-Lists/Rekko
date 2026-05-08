@@ -70,8 +70,8 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Button variant="amber" onClick={() => navigate('/login')}>Log in</Button>
-              <Button variant="primary" onClick={() => navigate('/register')}>Sign up</Button>
+              <Button variant="nav" onClick={() => navigate('/login')}>Log in</Button>
+              <Button variant="nav" onClick={() => navigate('/register')}>Sign up</Button>
             </>
           )}
         </div>

@@ -1,7 +1,8 @@
 import axios from 'axios';
 import type { AuthUser } from '@/store/useAuthStore';
+import api from '@/lib/api';
 
-const BASE = 'http://localhost:5000';
+const BASE = import.meta.env.VITE_API_BASE_URL;
 
 interface LoginResponse {
   accessToken: string;
@@ -43,36 +44,20 @@ export const authService = {
     return res.data.data.accessToken;
   },
 
-  async requestEmailVerification(username: string, accessToken: string) {
-    return axios.post(
-      `${BASE}/user/${username}/verify-email`,
-      {},
-      { headers: { Authorization: `Bearer ${accessToken}` } }
-    );
+  async requestEmailVerification(username: string) {
+    return api.post(`/user/${username}/verify-email`, {});
   },
 
-  async changeEmail(username: string, newEmail: string, accessToken: string) {
-    return axios.post(
-      `${BASE}/user/${username}/change-email`,
-      { newEmail },
-      { headers: { Authorization: `Bearer ${accessToken}` } }
-    );
+  async changeEmail(username: string, newEmail: string) {
+    return api.post(`/user/${username}/change-email`, { newEmail });
   },
 
-  async changeUsername(username: string, email: string, newUsername: string, accessToken: string) {
-    return axios.patch(
-      `${BASE}/user/${username}/change-username`,
-      { email, username: newUsername },
-      { headers: { Authorization: `Bearer ${accessToken}` } }
-    );
+  async changeUsername(username: string, email: string, newUsername: string) {
+    return api.patch(`/user/${username}/change-username`, { email, username: newUsername });
   },
 
-  async updateProfile(username: string, data: { biography?: string }, accessToken: string) {
-    return axios.patch(
-      `${BASE}/user/${username}`,
-      data,
-      { headers: { Authorization: `Bearer ${accessToken}` } }
-    );
+  async updateProfile(username: string, data: { biography?: string }) {
+    return api.patch(`/user/${username}`, data);
   },
 
   async loginWithGoogle(tokenId: string) {
@@ -118,7 +103,77 @@ export const authService = {
       profileImage: d.profileImage,
     };
   },
+
+  async getUserProfile(username: string): Promise<UserProfileData> {
+    const res = await api.get<{ success: boolean; data: UserProfileData }>(
+      `/user/${username}?fields=biography,socialAccounts,emailVerified,profileImage`
+    );
+    return res.data.data;
+  },
+
+  async updateSocialAccounts(username: string, accounts: SocialLink[]) {
+    return api.patch(`/user/${username}/social-accounts`, { accounts });
+  },
+
+  async getPublicProfile(username: string): Promise<PublicProfile> {
+    const res = await axios.get<{ success: boolean; data: PublicProfile }>(
+      `${BASE}/user/${username}?fields=userId,username,biography,profileImage,bannerImage,backgroundImage,reputation`
+    );
+    return res.data.data;
+  },
+
+  async uploadProfileImage(username: string, file: File): Promise<{ imageUrl: string }> {
+    const fd = new FormData();
+    fd.append('profileImage', file);
+    const res = await api.post<{ success: boolean; data: { imageUrl: string } }>(
+      `/user/${username}/upload-profile-image`,
+      fd
+    );
+    return res.data.data;
+  },
+
+  async uploadBannerImage(username: string, file: File): Promise<{ imageUrl: string }> {
+    const fd = new FormData();
+    fd.append('bannerImage', file);
+    const res = await api.post<{ success: boolean; data: { imageUrl: string } }>(
+      `/user/${username}/upload-banner-image`,
+      fd
+    );
+    return res.data.data;
+  },
+
+  async uploadBackgroundImage(username: string, file: File): Promise<{ imageUrl: string }> {
+    const fd = new FormData();
+    fd.append('backgroundImage', file);
+    const res = await api.post<{ success: boolean; data: { imageUrl: string } }>(
+      `/user/${username}/upload-background-image`,
+      fd
+    );
+    return res.data.data;
+  },
 };
+
+export interface SocialLink {
+  name: string;
+  url: string;
+}
+
+export interface UserProfileData {
+  biography?: string;
+  emailVerified: boolean;
+  profileImage?: string;
+  socialAccounts?: { socialAccount: { name: string }; socialUrl: string }[];
+}
+
+export interface PublicProfile {
+  userId: number;
+  username: string;
+  biography?: string;
+  profileImage?: string;
+  bannerImage?: string;
+  backgroundImage?: string;
+  reputation: number;
+}
 
 export function decodeJwtUserId(token: string): number {
   try {

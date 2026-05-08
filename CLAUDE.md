@@ -538,40 +538,68 @@ Layout especial — **sin Navbar**. Pantalla completa con 3 columnas:
 
 ### ✅ Implementado
 
-| Archivo                                 | Estado                                                              |
-| --------------------------------------- | ------------------------------------------------------------------- |
-| `tailwind.config.js`                    | Completo — tokens, gradientes, DaisyUI                              |
-| `src/index.css`                         | Font-face Gabarito cargado desde `/fonts/`                          |
-| `src/router/index.tsx`                  | Rutas completas incluyendo `/settings` y `/animedle` sin MainLayout |
-| `src/components/layout/Navbar.tsx`      | Completo — 2 filas, dividers inset, tabs amber activo               |
-| `src/components/layout/MainLayout.tsx`  | Completo                                                            |
-| `src/store/useAuthStore.ts`             | Completo                                                            |
-| `src/store/useAnimeStore.ts`            | Completo                                                            |
-| `src/store/useFeedStore.ts`             | Completo                                                            |
-| `src/components/ui/Button.tsx`          | variants: primary, pill, amber, like                                |
-| `src/components/ui/Avatar.tsx`          | sizes: sm(34px), md(55px), lg(118px)                                |
-| `src/components/ui/Badge.tsx`           | status: watching, completed, on_hold, dropped, plan_to_watch        |
-| `src/components/ui/AnimeCard.tsx`       | poster + overlay + icon row + title                                 |
-| `src/components/ui/PostCard.tsx`        | header + body + media + actions                                     |
-| `src/components/shared/AnimeCovers.tsx` | 2 small covers + optional add-to-list                               |
-| `src/pages/Login.tsx`                   | Completo con datos mock                                             |
-| `src/pages/Feed.tsx`                    | Completo con datos mock                                             |
-| `src/pages/Animes.tsx`                  | Completo con datos mock + advanced filter                           |
-| `src/pages/List.tsx`                    | Completo con datos mock                                             |
-| `src/pages/Explore.tsx`                 | Completo con datos mock                                             |
-| `src/pages/Profile.tsx`                 | Completo con datos mock                                             |
-| `src/pages/Animedle.tsx`                | Completo — layout sin Navbar, lives, input, guesses                 |
-| `src/pages/Settings.tsx`                | Completo — Account + Security sections                              |
+| Archivo                                            | Estado                                                                                    |
+| -------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `tailwind.config.js`                               | Completo — tokens, gradientes, DaisyUI                                                    |
+| `src/index.css`                                    | Font-face Gabarito cargado desde `/fonts/`                                                |
+| `src/router/index.tsx`                             | Rutas completas incluyendo `/settings` y `/animedle` sin MainLayout                       |
+| `src/components/layout/Navbar.tsx`                 | Completo — 2 filas, dividers inset, tabs amber activo, botones nav proporcionales         |
+| `src/components/layout/MainLayout.tsx`             | Completo                                                                                  |
+| `src/store/useAuthStore.ts`                        | Completo                                                                                  |
+| `src/store/useAnimeStore.ts`                       | Completo                                                                                  |
+| `src/store/useFeedStore.ts`                        | Completo                                                                                  |
+| `src/components/ui/common/Button.tsx`              | variants: primary, pill, amber, like, **nav** (nuevo — para navbar)                      |
+| `src/components/ui/common/Avatar.tsx`              | sizes: sm(34px), md(55px), lg(118px)                                                      |
+| `src/components/ui/common/Badge.tsx`               | status: watching, completed, on_hold, dropped, plan_to_watch                              |
+| `src/components/ui/anime/AnimeCard.tsx`            | poster + overlay + icon row + title                                                       |
+| `src/components/ui/feed/PostCard.tsx`              | header + body + media + actions                                                           |
+| `src/components/shared/AnimeCovers.tsx`            | 2 small covers + optional add-to-list                                                     |
+| `src/components/ui/profile/ImageUploadModal.tsx`   | Modal para subir foto de perfil o banner — conectado a Cloudinary via backend             |
+| `src/lib/api.ts`                                   | Axios client con interceptor de auth y refresh automático. URL desde env var              |
+| `src/lib/authService.ts`                           | Todos los métodos auth + getUserProfile, updateSocialAccounts, getPublicProfile, uploads  |
+| `src/lib/logger.ts`                                | Logger dev-only (`[rekko]` prefix, silenciado en prod)                                    |
+| `src/lib/apiErrors.ts`                             | `extractApiError()` — extrae mensajes del backend con fallback amigable                   |
+| `vercel.json`                                      | SPA routing rewrite para Vercel                                                           |
+| `.env.example`                                     | Template de variables de entorno                                                          |
+| `src/pages/Login.tsx`                              | Completo — usa extractApiError, logger en lugar de console.log                           |
+| `src/pages/Feed.tsx`                               | Completo con datos mock                                                                   |
+| `src/pages/Animes.tsx`                             | Completo con datos mock + advanced filter                                                 |
+| `src/pages/List.tsx`                               | Completo con datos mock                                                                   |
+| `src/pages/Explore.tsx`                            | Completo con datos mock                                                                   |
+| `src/pages/Profile.tsx`                            | Carga datos reales del backend, 404 si no existe, modal upload perfil/banner              |
+| `src/pages/Animedle.tsx`                           | Completo — layout sin Navbar, lives, input, guesses                                       |
+| `src/pages/Settings.tsx`                           | Carga bio y social accounts al montar, social links con select de plataforma, save links  |
 
 ### ⚠️ Pendiente / TODO
 
-- Conectar stores con API real (actualmente todo mock data)
-- `src/hooks/` — todos los custom hooks están pendientes (useAnimeSearch, useAnimeList, useFeed, useProfile)
-- `src/lib/api.js` — cliente API pendiente
-- Auth guard (redirect a /login si no hay token)
-- Perfil con `rekko_char_illustration.png` — en Figma aparece en la pantalla de perfil como ilustración decorativa, no está claro exactamente dónde (¿right column?) → **VER DUDA #3**
+- Conectar stores de feed/anime con API real (actualmente todo mock data)
+- `src/hooks/` — custom hooks pendientes (useAnimeSearch, useAnimeList, useFeed, useProfile)
+- Auth guard (redirect a /login si no hay token) — ProtectedRoute existe pero no hace fetch
+- Perfil con `rekko_char_illustration.png` — en Figma aparece como ilustración decorativa → **VER DUDA #3**
 - Animedle — imagen real de silhouette del anime (actualmente negro placeholder)
-- Modal "Edit Profile" (frame Figma `550:53`) — no implementado
+- Modal "Edit Profile" completo (frame Figma `550:53`) — solo imágenes implementadas
+- Change password en Settings (botón existe pero flujo no implementado)
+- Lista de anime en Profile — sigue siendo mock (no hay endpoints de anime list por usuario aún)
+
+### Variables de entorno necesarias
+
+**Desarrollo (`.env.local`):**
+```
+VITE_API_BASE_URL=http://localhost:5000
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_AUTH_DOMAIN=...
+VITE_FIREBASE_PROJECT_ID=...
+VITE_DISCORD_CLIENT_ID=...
+VITE_DISCORD_REDIRECT_URI=http://localhost:5173/oauth/discord/callback
+```
+
+**Producción (Vercel environment variables):**
+```
+VITE_API_BASE_URL=https://tu-api-production.com
+VITE_FIREBASE_*=...
+VITE_DISCORD_CLIENT_ID=...
+VITE_DISCORD_REDIRECT_URI=https://rekko.vercel.app/oauth/discord/callback
+```
 
 ---
 
