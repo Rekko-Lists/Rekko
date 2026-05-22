@@ -1,3 +1,5 @@
+import { useState, FormEvent } from 'react';
+
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
@@ -9,6 +11,10 @@ const styles = {
   btn:     'w-7 h-7 flex items-center justify-center rounded-full cursor-pointer hover:bg-border transition-colors text-text-secondary disabled:opacity-30 disabled:cursor-not-allowed',
   active:  'w-7 h-7 flex items-center justify-center rounded-full bg-primary text-white font-semibold',
   ellipsis:'w-7 h-7 flex items-center justify-center text-text-muted select-none',
+  goWrap:  'flex items-center gap-1.5 ml-3 pl-3 border-l border-border',
+  goLabel: 'text-text-muted text-xs',
+  goInput: 'w-12 h-7 border border-border rounded-[5px] px-2 text-center text-sm bg-surface focus:outline-none focus:border-primary',
+  goBtn:   'h-7 px-3 bg-primary text-white rounded-[5px] text-xs font-semibold cursor-pointer hover:bg-primary-dark transition-colors',
 };
 
 function getPages(current: number, total: number): (number | '...')[] {
@@ -30,6 +36,16 @@ function getPages(current: number, total: number): (number | '...')[] {
 
 export default function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
   const pages = getPages(currentPage, totalPages);
+  const [inputVal, setInputVal] = useState('');
+
+  function handleGoSubmit(e: FormEvent) {
+    e.preventDefault();
+    const n = parseInt(inputVal, 10);
+    if (!isNaN(n) && n >= 1 && n <= totalPages) {
+      onPageChange(n);
+    }
+    setInputVal('');
+  }
 
   return (
     <div className={styles.wrap}>
@@ -60,6 +76,20 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
       >
         {'>'}
       </button>
+
+      <form className={styles.goWrap} onSubmit={handleGoSubmit}>
+        <span className={styles.goLabel}>Go to</span>
+        <input
+          className={styles.goInput}
+          type="number"
+          min={1}
+          max={totalPages}
+          value={inputVal}
+          onChange={e => setInputVal(e.target.value)}
+          placeholder={String(currentPage)}
+        />
+        <button type="submit" className={styles.goBtn}>Go</button>
+      </form>
     </div>
   );
 }
