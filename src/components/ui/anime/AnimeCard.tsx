@@ -1,4 +1,6 @@
 import { Eye, Heart, Star, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { KeyboardEvent, MouseEvent } from 'react';
 import rekkoSword from '@/assets/rekko_sword.png';
 import { Anime } from '@/types/anime.ts';
 
@@ -10,7 +12,7 @@ interface Props {
 }
 
 const styles = {
-  card:       'flex flex-col font-gabarito cursor-pointer w-[180px] group',
+  card:       'flex flex-col font-gabarito cursor-pointer w-[180px] group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-card',
   poster:     'relative w-full aspect-[175/245] rounded-card overflow-hidden bg-gradient-to-br from-slate-600 to-slate-900',
   overlay:    'absolute bottom-0 inset-x-0 bg-black/65 flex items-center justify-between px-3 py-4 translate-y-full group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-200',
   addBtn:     'text-white text-[11px] font-medium hover:text-primary transition-colors',
@@ -21,14 +23,36 @@ const styles = {
 };
 
 export default function AnimeCard({ anime, inListCount, completedCount, onAddToList }: Props) {
+  const navigate = useNavigate();
   const score = anime.malMean > 0 ? anime.malMean : null;
 
+  const goToAnime = () => navigate(`/animes/${anime.malId}`);
+
+  function handleAddToList(e: MouseEvent<HTMLButtonElement>) {
+    e.stopPropagation();
+    onAddToList?.();
+  }
+
+  function handleKeyDown(e: KeyboardEvent<HTMLDivElement>) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      goToAnime();
+    }
+  }
+
   return (
-    <div className={styles.card}>
+    <div
+      role="link"
+      tabIndex={0}
+      aria-label={anime.name}
+      onClick={goToAnime}
+      onKeyDown={handleKeyDown}
+      className={styles.card}
+    >
       <div className={styles.poster}>
         {anime.imgMedium && <img src={anime.imgMedium} alt={anime.name} className="w-full h-full object-cover" />}
         <div className={styles.overlay}>
-          <button className={styles.addBtn} onClick={onAddToList}>Add to List</button>
+          <button className={styles.addBtn} onClick={handleAddToList}>Add to List</button>
           {score !== null && (
             <span className={styles.score}>
               {score.toFixed(2)}
