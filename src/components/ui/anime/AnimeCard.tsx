@@ -1,4 +1,5 @@
 import { Eye, Heart, Star, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import rekkoSword from '@/assets/rekko_sword.png';
 import { Anime } from '@/types/anime.ts';
 
@@ -22,13 +23,32 @@ const styles = {
 
 export default function AnimeCard({ anime, inListCount, completedCount, onAddToList }: Props) {
   const score = anime.malMean > 0 ? anime.malMean : null;
+  const navigate = useNavigate();
+
+  const goToDetail = () => navigate(`/animes/${anime.malId}`);
+
+  const handleAdd = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onAddToList?.();
+  };
 
   return (
-    <div className={styles.card}>
+    <div
+      className={styles.card}
+      onClick={goToDetail}
+      role="link"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          goToDetail();
+        }
+      }}
+    >
       <div className={styles.poster}>
         {anime.imgMedium && <img src={anime.imgMedium} alt={anime.name} className="w-full h-full object-cover" />}
         <div className={styles.overlay}>
-          <button className={styles.addBtn} onClick={onAddToList}>Add to List</button>
+          <button className={styles.addBtn} onClick={handleAdd}>Add to List</button>
           {score !== null && (
             <span className={styles.score}>
               {score.toFixed(2)}
