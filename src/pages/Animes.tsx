@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import AnimeCard from '@/components/ui/anime/AnimeCard';
 import SubNav from '@/components/ui/filter/SubNav';
@@ -29,6 +29,20 @@ const TAB_CONFIG: Record<string, Partial<GetAnimesParams>> = {
     filters: { 'status[eq]': 'currently_airing', ...DEFAULT_TYPE_FILTER },
   },
   'By Genre': {},
+};
+
+// Mapeo URL <-> nombre de tab interno
+const URL_TO_TAB: Record<string, string> = {
+  'all':       'View All',
+  'top':       'Top Anime',
+  'seasonal':  'Seasonal Anime',
+  'by-genre':  'By Genre',
+};
+const TAB_TO_URL: Record<string, string> = {
+  'View All':        'all',
+  'Top Anime':       'top',
+  'Seasonal Anime':  'seasonal',
+  'By Genre':        'by-genre',
 };
 
 // Opciones de temporada — computadas una sola vez al cargar el módulo
@@ -69,20 +83,105 @@ const styles = {
 };
 
 export default function Animes() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const recommendedForParam = searchParams.get('recommendedFor');
   const recommendedFor = recommendedForParam ? parseInt(recommendedForParam, 10) : undefined;
   const isRecommendedView = Boolean(recommendedFor && !Number.isNaN(recommendedFor));
 
-  const [activeTab,     setActiveTab]     = useState('View All');
-  const [showAdv,       setShowAdv]       = useState(false);
+  // ─── URL state ──────────────────────────────────────────────────────────
+  const urlTab     = searchParams.get('tab') ?? 'all';
+  const activeTab  = URL_TO_TAB[urlTab] ?? 'View All';
+  const advOpen    = searchParams.get('adv') === '1';
+  const urlPage    = Number(searchParams.get('page') ?? '1') || 1;
+  const urlLimit   = Number(searchParams.get('limit') ?? (advOpen ? '108' : '110')) || 110;
+  const urlGenre   = searchParams.get('genre') ?? '';
+  const urlType    = searchParams.get('type') ?? '';
+  const urlStatus  = searchParams.get('status') ?? '';
+  const urlSeason  = searchParams.get('season') ?? '';
+  const urlQ       = searchParams.get('q') ?? '';
+  const urlEpisodesMin = searchParams.get('episodesMin');
+  const urlEpisodesMax = searchParams.get('episodesMax');
+  const urlRatingMin   = searchParams.get('ratingMin');
+  const urlRatingMax   = searchParams.get('ratingMax');
+
+  const updateParams = useCallback((patch: Record<string, string | null>, opts?: { resetPage?: boolean }) => {
+    const next = new URLSearchParams(searchParams);
+    for (const [k, v] of Object.entries(patch)) {
+      if (v === null || v === '') next.delete(k);
+      else next.set(k, v);
+    }
+    if (opts?.resetPage) next.delete('page');
+    setSearchParams(next, { replace: false });
+  }, [searchParams, setSearchParams]);
+
   const [genres,        setGenres]        = useState<{ value: string; label: string }[]>(AVAILABLE_GENRES);
-  const [advValues,     setAdvValues]     = useState<AdvancedFilterValues>(INITIAL_FILTER_VALUES);
-  const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+  const [advValues,     setAdvValues]     = useState<AdvancedFilterValues>(() => ({
+    ...INITIAL_FILTER_VALUES,
+    genres:       urlGenre ? urlGenre.split(',').filter(Boolean) : [],
+    type:         urlType || undefined,
+    seasonKey:    urlSeason || undefined,
+    episodesMin:  urlEpisodesMin ? Number(urlEpisodesMin) : undefined,
+    episodesMax:  urlEpisodesMax ? Number(urlEpisodesMax) : undefined,
+    ratingMin:    urlRatingMin ? Number(urlRatingMin) : 0,
+    ratingMax:    urlRatingMax ? Number(urlRatingMax) : 10,
+  }));
+  const [selectedGenre, setSelectedGenre] = useState<string | null>(
+    activeTab === 'By Genre' && urlGenre ? urlGenre : null,
+  );
   const [recommendedPage, setRecommendedPage] = useState(1);
 
-  const { animes, pagination, loading, error, setPage, setLimit, resetParams } =
-    useAnimeCatalogue(TAB_CONFIG['View All'] as GetAnimesParams);
+  // Construir los params iniciales basados en URL (tab + quick filters + adv)
+  const buildParamsFromUrl = useCallback((): GetAnimesParams => {
+    const base: Partial<GetAnimesParams> = { ...TAB_CONFIG[activeTab] };
+    const filters: GetAnimesParams['filters'] = { ...(base.filters ?? {}) };
+
+    // By-genre selección
+    if (activeTab === 'By Genre' && urlGenre) {
+      filters['genres[eq]'] = urlGenre;
+      base.sort = [{ field: 'malMean', order: 'desc' }];
+    }
+
+    // Quick / adv: en avanzado, fusionar todo
+    if (advOpen) {
+      if (urlGenre) filters['genres[eq]'] = urlGenre;
+      if (urlRatingMin && Number(urlRatingMin) > 0) filters['malMean[gte]'] = Number(urlRatingMin);
+      if (urlRatingMax && Number(urlRatingMax) < 10) filters['malMean[lte]'] = Number(urlRatingMax);
+      if (urlEpisodesMin !== null) filters['numEpisodes[gte]'] = Number(urlEpisodesMin);
+      if (urlEpisodesMax !== null) filters['numEpisodes[lte]'] = Number(urlEpisodesMax);
+      if (urlSeason) {
+        const season = SEASON_OPTIONS.find(s => s.value === urlSeason);
+        if (season) {
+          filters['startDate[gte]'] = season.gte;
+          if (season.lt) filters['startDate[lt]'] = season.lt;
+        }
+      }
+    } else {
+      // Quick filter merge
+      if (urlGenre && activeTab !== 'By Genre') filters['genres[eq]'] = urlGenre;
+      if (urlType)   filters['mediaType[eq]'] = urlType;
+      if (urlStatus) filters['status[eq]']    = urlStatus;
+    }
+
+    return {
+      ...base,
+      filters: Object.keys(filters).length > 0 ? filters : undefined,
+      page:    urlPage,
+      limit:   urlLimit,
+      q:       urlQ || undefined,
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, advOpen, urlGenre, urlType, urlStatus, urlSeason, urlQ,
+      urlPage, urlLimit, urlEpisodesMin, urlEpisodesMax, urlRatingMin, urlRatingMax]);
+
+  const { animes, pagination, loading, error, resetParams } =
+    useAnimeCatalogue(buildParamsFromUrl());
+
+  // Resincronizar el hook cada vez que cambie la URL
+  useEffect(() => {
+    resetParams(buildParamsFromUrl());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [buildParamsFromUrl]);
 
   // Recommended-for branch — uses separate hook
   const {
@@ -100,10 +199,14 @@ export default function Animes() {
     { key: 'status',label: 'Status',options: STATIC_STATUS_OPTIONS },
   ], [genres]);
 
-  // Ajustar límite cuando se abre/cierra el panel avanzado
+  // Sincroniza el límite con el estado de adv
   useEffect(() => {
-    setLimit(showAdv ? 108 : 110);
-  }, [showAdv]);
+    const desiredLimit = advOpen ? 108 : 110;
+    if (Number(urlLimit) !== desiredLimit) {
+      updateParams({ limit: String(desiredLimit) });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [advOpen]);
 
   // Cargar géneros desde el backend al montar (reemplaza el fallback estático)
   useEffect(() => {
@@ -115,71 +218,62 @@ export default function Animes() {
   }, []);
 
   function handleTabChange(tab: string) {
-    setActiveTab(tab);
     setSelectedGenre(null);
-    resetParams({ ...TAB_CONFIG[tab], limit: showAdv ? 108 : 110 });
+    // Reset filtros al cambiar tab; mantener adv y limit
+    const next = new URLSearchParams();
+    next.set('tab', TAB_TO_URL[tab] ?? 'all');
+    if (advOpen) next.set('adv', '1');
+    setSearchParams(next, { replace: false });
   }
 
   function handleGenreCardClick(genreName: string) {
     setSelectedGenre(genreName);
-    resetParams({
-      sort: [{ field: 'malMean', order: 'desc' }],
-      filters: { 'genres[eq]': genreName },
-      limit: showAdv ? 108 : 110,
-    });
+    updateParams({ genre: genreName }, { resetPage: true });
   }
 
   function handleBackToGenres() {
     setSelectedGenre(null);
+    updateParams({ genre: null }, { resetPage: true });
   }
 
   function handleAdvancedFilter() {
-    const filters: GetAnimesParams['filters'] = {};
-
-    if (advValues.genres.length > 0) {
-      filters['genres[eq]'] = advValues.genres.join(',');
-    }
-
-    if (advValues.ratingMin > 0)  filters['malMean[gte]'] = advValues.ratingMin;
-    if (advValues.ratingMax < 10) filters['malMean[lte]'] = advValues.ratingMax;
-
-    if (advValues.episodesMin !== undefined) filters['numEpisodes[gte]'] = advValues.episodesMin;
-    if (advValues.episodesMax !== undefined) filters['numEpisodes[lte]'] = advValues.episodesMax;
-
-    if (advValues.seasonKey) {
-      const season = SEASON_OPTIONS.find(s => s.value === advValues.seasonKey);
-      if (season) {
-        filters['startDate[gte]'] = season.gte;
-        if (season.lt) filters['startDate[lt]'] = season.lt;
-      }
-    }
-
-    resetParams({
-      ...TAB_CONFIG[activeTab],
-      filters: Object.keys(filters).length > 0 ? filters : undefined,
-      limit: showAdv ? 108 : 110,
-    });
+    const patch: Record<string, string | null> = {
+      genre:       advValues.genres.length > 0 ? advValues.genres.join(',') : null,
+      ratingMin:   advValues.ratingMin > 0     ? String(advValues.ratingMin) : null,
+      ratingMax:   advValues.ratingMax < 10    ? String(advValues.ratingMax) : null,
+      episodesMin: advValues.episodesMin !== undefined ? String(advValues.episodesMin) : null,
+      episodesMax: advValues.episodesMax !== undefined ? String(advValues.episodesMax) : null,
+      season:      advValues.seasonKey ?? null,
+      type:        advValues.type ?? null,
+    };
+    updateParams(patch, { resetPage: true });
   }
 
   function handleQuickFilter(rows: { property: string; value: string }[]) {
-    const filters: GetAnimesParams['filters'] = {};
-
+    const patch: Record<string, string | null> = {
+      genre:  null,
+      type:   null,
+      status: null,
+    };
     for (const row of rows) {
       if (!row.property || !row.value) continue;
-      if (row.property === 'genre') {
-        filters['genres[eq]'] = row.value;
-      } else if (row.property === 'type') {
-        filters['mediaType[eq]'] = row.value;
-      } else if (row.property === 'status') {
-        filters['status[eq]'] = row.value;
-      }
+      if (row.property === 'genre')  patch.genre  = row.value;
+      if (row.property === 'type')   patch.type   = row.value;
+      if (row.property === 'status') patch.status = row.value;
     }
+    updateParams(patch, { resetPage: true });
+  }
 
-    resetParams({
-      ...TAB_CONFIG[activeTab],
-      filters: Object.keys(filters).length > 0 ? filters : undefined,
-      limit: showAdv ? 108 : 110,
-    });
+  function handlePageChange(page: number) {
+    updateParams({ page: String(page) });
+  }
+
+  function toggleAdv() {
+    if (advOpen) {
+      updateParams({ adv: null });
+    } else {
+      updateParams({ adv: '1' });
+    }
   }
 
   // ─── Recommended view branch ──────────────────────────────────────────
@@ -223,15 +317,16 @@ export default function Animes() {
       <SubNav
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        onToggleFilter={() => setShowAdv(v => !v)}
-        filterOpen={showAdv}
+        onToggleFilter={toggleAdv}
+        filterOpen={advOpen}
       />
 
-      {!(activeTab === 'By Genre' && !selectedGenre) && (
+      {/* Filtros mutuamente excluyentes: solo uno visible a la vez */}
+      {!advOpen && !(activeTab === 'By Genre' && !selectedGenre) && (
         <QuickFilter
           properties={filterProperties}
           onApply={handleQuickFilter}
-          onOpenAdvanced={() => setShowAdv(v => !v)}
+          onOpenAdvanced={toggleAdv}
         />
       )}
 
@@ -288,14 +383,14 @@ export default function Animes() {
           </>
         )}
 
-        {showAdv && (
+        {advOpen && (
           <AdvancedFilterPanel
             availableGenres={genres}
             seasonOptions={SEASON_OPTIONS}
             values={advValues}
             onValuesChange={setAdvValues}
             onApply={handleAdvancedFilter}
-            onClose={() => setShowAdv(false)}
+            onClose={() => updateParams({ adv: null })}
           />
         )}
       </div>
@@ -304,7 +399,7 @@ export default function Animes() {
         <Pagination
           currentPage={pagination.page}
           totalPages={pagination.pages}
-          onPageChange={setPage}
+          onPageChange={handlePageChange}
         />
       )}
     </div>

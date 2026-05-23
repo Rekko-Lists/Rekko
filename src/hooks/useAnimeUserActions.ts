@@ -3,7 +3,9 @@ import {
   likeAnime as apiLikeAnime,
   unlikeAnime as apiUnlikeAnime,
   setWatchState as apiSetWatchState,
+  removeFromList as apiRemoveFromList,
   setRating as apiSetRating,
+  removeRating as apiRemoveRating,
   setEpisodeProgress as apiSetEpisodeProgress,
 } from '@/lib/animeService';
 import { extractApiError } from '@/lib/apiErrors';
@@ -99,9 +101,9 @@ export function useAnimeUserActions(anime: Anime | null) {
 
       try {
         if (newState != null) {
-          await apiSetWatchState(anime.malId, newState, state.episodeProgress || undefined);
+          await apiSetWatchState(anime.malId, newState, state.episodeProgress || 0);
         } else {
-          // Backend doesn't have a clear "remove from list" — best effort: no-op rollback if needed
+          await apiRemoveFromList(anime.malId);
         }
       } catch (err) {
         setState((prev) => ({
@@ -121,7 +123,11 @@ export function useAnimeUserActions(anime: Anime | null) {
       const prevRating = state.rating;
       setState((prev) => ({ ...prev, rating, error: null }));
       try {
-        await apiSetRating(anime.malId, rating);
+        if (rating === 0) {
+          await apiRemoveRating(anime.malId);
+        } else {
+          await apiSetRating(anime.malId, rating);
+        }
       } catch (err) {
         setState((prev) => ({
           ...prev,

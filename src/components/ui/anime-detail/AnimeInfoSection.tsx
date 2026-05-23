@@ -33,9 +33,8 @@ function formatSeason(season?: string, year?: number): string | null {
   return year ? String(year) : null;
 }
 
-function formatDuration(seconds?: number): string | null {
-  if (!seconds || seconds <= 0) return null;
-  const minutes = Math.round(seconds / 60);
+function formatDuration(minutes?: number): string | null {
+  if (!minutes || minutes <= 0) return null;
   return `${minutes} min. per ep.`;
 }
 

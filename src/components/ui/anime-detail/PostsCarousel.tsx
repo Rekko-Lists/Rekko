@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Avatar from '@/components/ui/common/Avatar';
@@ -10,19 +10,25 @@ interface Props {
   malId: number;
 }
 
+// Sizes
+const POST_W = 240;
+const POST_H = 184;
+const POST_GAP = 16;
+
 const styles = {
   section:     'flex flex-col font-gabarito',
-  header:      'flex items-center justify-between mb-2',
+  header:      'flex items-baseline justify-between mb-2',
   label:       'text-[20px] text-text-main leading-none',
-  viewBtn:     'flex flex-col items-center justify-center w-[51px] h-[68px] bg-border-light rounded-btn text-[#788397] hover:bg-border transition-colors',
-  viewBtnPlus: 'text-[20px] leading-none',
-  viewBtnText: 'text-[13px] leading-none mt-0.5',
-  body:        'relative flex items-center gap-2',
-  navBtn:      'flex-shrink-0 w-7 h-7 rounded-full bg-white border border-border flex items-center justify-center hover:bg-app-bg transition-colors disabled:opacity-30',
-  track:       'flex-1 overflow-hidden',
-  trackMask:   'flex gap-3 items-stretch transition-transform duration-300 ease-out',
-  postCard:    'flex-shrink-0 w-[280px] h-[184px] bg-surface border border-border rounded-card p-3 flex flex-col gap-1.5 cursor-pointer hover:shadow-md transition-shadow',
-  postPeek:    'flex-shrink-0 w-[128px] h-[184px] bg-surface border border-border rounded-card opacity-60',
+  viewLink:    'text-[13px] font-medium text-primary hover:text-primary-dark hover:underline underline-offset-2 cursor-pointer bg-transparent border-0 p-0 leading-none transition-colors',
+  // Body is the visible viewport. Track inside is wider via overflow + fade mask
+  // so that siblings peek through on both sides.
+  body:        'relative h-[200px]',
+  viewport:    'absolute inset-0 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]',
+  track:       'absolute top-1/2 left-1/2 -translate-y-1/2 flex gap-4 items-stretch transition-transform duration-300 ease-out',
+  navBtn:      'absolute top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white border border-border flex items-center justify-center hover:bg-app-bg transition-colors disabled:opacity-30',
+  navLeft:     'left-0',
+  navRight:    'right-0',
+  postCard:    'flex-shrink-0 bg-surface border border-border rounded-card p-3 flex flex-col gap-1.5 cursor-pointer hover:shadow-md transition-shadow',
   postHeader:  'flex items-center gap-2',
   postUser:    'text-[10px] font-medium text-text-main flex-1 truncate',
   postTime:    'text-[10px] text-text-muted',
@@ -30,9 +36,8 @@ const styles = {
   postDivider: 'h-px bg-border',
   postBody:    'text-[11px] text-text-main leading-snug line-clamp-4 flex-1',
   postFooter:  'flex items-center gap-3 text-[10px] text-text-muted',
-  empty:       'text-text-muted text-sm py-8 text-center',
+  emptyCard:   'flex-shrink-0 bg-surface border border-dashed border-border rounded-card flex items-center justify-center text-text-muted text-[12px] text-center px-4',
   divider:     'h-px bg-border my-3',
-  fadeMask:    '[mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]',
 };
 
 export default function PostsCarousel({ posts, loading, malId }: Props) {
@@ -55,51 +60,64 @@ export default function PostsCarousel({ posts, loading, malId }: Props) {
     <section className={styles.section} aria-label="Recommendations">
       <div className={styles.header}>
         <h2 className={styles.label}>Recommendations:</h2>
-        <button type="button" className={styles.viewBtn} onClick={handleViewAll} title="View all posts">
-          <Plus size={20} strokeWidth={1.5} />
-          <span className={styles.viewBtnText}>View</span>
+        <button type="button" className={styles.viewLink} onClick={handleViewAll}>
+          Show more
         </button>
       </div>
 
-      {loading ? (
-        <div className={styles.empty}>Loading posts…</div>
-      ) : posts.length === 0 ? (
-        <div className={styles.empty}>No posts yet for this anime.</div>
-      ) : (
-        <div className={styles.body}>
-          <button
-            type="button"
-            className={styles.navBtn}
-            onClick={handlePrev}
-            aria-label="Previous post"
-          >
-            <ChevronLeft size={16} />
-          </button>
-
-          <div className={`${styles.track} ${styles.fadeMask}`}>
+      <div className={styles.body}>
+        <div className={styles.viewport}>
+          {loading || posts.length === 0 ? (
             <div
-              className={styles.trackMask}
+              className={styles.track}
               style={{
-                // Center the active post (280) with peek cards (128) and gap (12) on each side
-                transform: `translateX(calc(50% - 140px - ${index * (280 + 12)}px))`,
+                width: POST_W,
+                transform: `translate(-50%, -50%)`,
+              }}
+            >
+              <div
+                className={styles.emptyCard}
+                style={{ width: POST_W, height: POST_H }}
+              >
+                {loading ? 'Loading posts…' : 'No posts yet for this anime.'}
+              </div>
+            </div>
+          ) : (
+            <div
+              className={styles.track}
+              style={{
+                // Center the active post: its left edge sits at the center of
+                // the viewport minus half its width, then we shift by `index`
+                // slots (card width + gap) to bring the active one to center.
+                transform: `translate(calc(-${POST_W / 2}px - ${index * (POST_W + POST_GAP)}px), -50%)`,
               }}
             >
               {posts.map((post) => (
                 <PostMini key={post.id} post={post} />
               ))}
             </div>
-          </div>
-
-          <button
-            type="button"
-            className={styles.navBtn}
-            onClick={handleNext}
-            aria-label="Next post"
-          >
-            <ChevronRight size={16} />
-          </button>
+          )}
         </div>
-      )}
+
+        <button
+          type="button"
+          className={`${styles.navBtn} ${styles.navLeft}`}
+          onClick={handlePrev}
+          aria-label="Previous post"
+          disabled={posts.length === 0}
+        >
+          <ChevronLeft size={16} />
+        </button>
+        <button
+          type="button"
+          className={`${styles.navBtn} ${styles.navRight}`}
+          onClick={handleNext}
+          aria-label="Next post"
+          disabled={posts.length === 0}
+        >
+          <ChevronRight size={16} />
+        </button>
+      </div>
 
       <div className={styles.divider} />
     </section>
@@ -108,7 +126,10 @@ export default function PostsCarousel({ posts, loading, malId }: Props) {
 
 function PostMini({ post }: { post: AnimePost }) {
   return (
-    <article className={styles.postCard}>
+    <article
+      className={styles.postCard}
+      style={{ width: POST_W, height: POST_H }}
+    >
       <header className={styles.postHeader}>
         <Avatar src={post.avatar} username={post.user} size="sm" />
         <span className={styles.postUser}>{post.user}</span>
