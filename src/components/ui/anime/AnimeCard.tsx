@@ -1,6 +1,6 @@
 import { Eye, Heart, Star, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { KeyboardEvent, MouseEvent } from 'react';
+import type { KeyboardEvent, MouseEvent } from 'react';
 import rekkoSword from '@/assets/rekko_sword.png';
 import { Anime } from '@/types/anime.ts';
 
@@ -26,7 +26,7 @@ export default function AnimeCard({ anime, inListCount, completedCount, onAddToL
   const navigate = useNavigate();
   const score = anime.malMean > 0 ? anime.malMean : null;
 
-  const goToAnime = () => navigate(`/animes/${anime.malId}`);
+  const goToDetail = () => navigate(`/animes/${anime.malId}`);
 
   function handleAddToList(e: MouseEvent<HTMLButtonElement>) {
     e.stopPropagation();
@@ -36,7 +36,7 @@ export default function AnimeCard({ anime, inListCount, completedCount, onAddToL
   function handleKeyDown(e: KeyboardEvent<HTMLDivElement>) {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      goToAnime();
+      goToDetail();
     }
   }
 
@@ -45,7 +45,7 @@ export default function AnimeCard({ anime, inListCount, completedCount, onAddToL
       role="link"
       tabIndex={0}
       aria-label={anime.name}
-      onClick={goToAnime}
+      onClick={goToDetail}
       onKeyDown={handleKeyDown}
       className={styles.card}
     >

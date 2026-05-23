@@ -1,10 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import AnimeCard from '@/components/ui/anime/AnimeCard';
 import SubNav from '@/components/ui/filter/SubNav';
 import QuickFilter, { FilterProperty } from '@/components/ui/filter/QuickFilter';
 import AdvancedFilterPanel, { AdvancedFilterValues, INITIAL_FILTER_VALUES } from '@/components/ui/filter/AdvancedFilterPanel';
 import Pagination from '@/components/ui/common/Pagination';
 import { useAnimeCatalogue } from '@/hooks/useAnimeCatalogue';
+import { useRecommendedAnimes } from '@/hooks/useRecommendedAnimes';
+import { useAnimeDetail } from '@/hooks/useAnimeDetail';
 import type { GetAnimesParams } from '@/lib/animeService';
 import { getGenres } from '@/lib/animeService';
 import { computeSeasonOptions } from '@/lib/seasonUtils';
@@ -66,14 +69,30 @@ const styles = {
 };
 
 export default function Animes() {
+  const [searchParams] = useSearchParams();
+  const recommendedForParam = searchParams.get('recommendedFor');
+  const recommendedFor = recommendedForParam ? parseInt(recommendedForParam, 10) : undefined;
+  const isRecommendedView = Boolean(recommendedFor && !Number.isNaN(recommendedFor));
+
   const [activeTab,     setActiveTab]     = useState('View All');
   const [showAdv,       setShowAdv]       = useState(false);
   const [genres,        setGenres]        = useState<{ value: string; label: string }[]>(AVAILABLE_GENRES);
   const [advValues,     setAdvValues]     = useState<AdvancedFilterValues>(INITIAL_FILTER_VALUES);
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+  const [recommendedPage, setRecommendedPage] = useState(1);
 
   const { animes, pagination, loading, error, setPage, setLimit, resetParams } =
     useAnimeCatalogue(TAB_CONFIG['View All'] as GetAnimesParams);
+
+  // Recommended-for branch — uses separate hook
+  const {
+    animes: recommendedAnimes,
+    pagination: recommendedPagination,
+    loading: recommendedLoading,
+    error: recommendedError,
+  } = useRecommendedAnimes(isRecommendedView ? recommendedFor : undefined, recommendedPage, 24);
+
+  const { anime: anchorAnime } = useAnimeDetail(isRecommendedView ? recommendedFor : undefined);
 
   const filterProperties = useMemo<FilterProperty[]>(() => [
     { key: 'genre', label: 'Genre', chipGrid: true, options: genres },
@@ -161,6 +180,42 @@ export default function Animes() {
       filters: Object.keys(filters).length > 0 ? filters : undefined,
       limit: showAdv ? 108 : 110,
     });
+  }
+
+  // ─── Recommended view branch ──────────────────────────────────────────
+  if (isRecommendedView) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.body}>
+          <div className={styles.grid}>
+            <div className={styles.breadcrumb}>
+              <a href="/animes" className="text-primary hover:underline font-semibold">
+                ← Catálogo
+              </a>
+              <span className="text-text-muted">/</span>
+              <span className="font-semibold text-text-main">
+                Recommended based on {anchorAnime?.name ?? '…'}
+              </span>
+            </div>
+            {recommendedLoading && <p className={styles.loading}>Loading...</p>}
+            {recommendedError && <p className={styles.error}>{recommendedError}</p>}
+            {!recommendedLoading && !recommendedError && recommendedAnimes.length === 0 && (
+              <p className={styles.loading}>No recommendations available yet.</p>
+            )}
+            {!recommendedLoading && !recommendedError &&
+              recommendedAnimes.map((anime) => <AnimeCard key={anime.malId} anime={anime} />)
+            }
+          </div>
+        </div>
+        {recommendedPagination && recommendedPagination.pages > 1 && (
+          <Pagination
+            currentPage={recommendedPagination.page}
+            totalPages={recommendedPagination.pages}
+            onPageChange={setRecommendedPage}
+          />
+        )}
+      </div>
+    );
   }
 
   return (

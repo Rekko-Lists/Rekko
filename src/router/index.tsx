@@ -6,6 +6,8 @@ import Register      from '@/pages/Register';
 import Feed          from '@/pages/Feed';
 import Explore       from '@/pages/Explore';
 import Animes        from '@/pages/Animes';
+import AnimeDetail   from '@/pages/AnimeDetail';
+import AnimePosts    from '@/pages/AnimePosts';
 import List          from '@/pages/List';
 import Profile       from '@/pages/Profile';
 import Animedle      from '@/pages/Animedle';
@@ -32,7 +34,9 @@ export const router = createBrowserRouter([
       { index: true,  element: <Navigate to="/feed" replace /> },
       { path: 'feed',    element: <Feed /> },
       { path: 'explore', element: <Explore /> },
-      { path: 'animes',  element: <Animes /> },
+      { path: 'animes',                element: <Animes /> },
+      { path: 'animes/:malId',         element: <AnimeDetail /> },
+      { path: 'animes/:malId/posts',   element: <AnimePosts /> },
       {
         element: <ProtectedRoute />,
         children: [
