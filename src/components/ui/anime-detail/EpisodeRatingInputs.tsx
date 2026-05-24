@@ -11,7 +11,7 @@ interface Props {
 }
 
 const styles = {
-  wrap:        'flex items-center gap-2 font-gabarito',
+  wrap:        'w-[209px] mx-auto flex items-center gap-2 font-gabarito',
   pill:        'flex items-center gap-1 h-[22px] bg-white border border-border rounded-[5px] px-2 text-[12px] text-text-main',
   pillLabel:   'text-text-muted text-[11px]',
   pillInput:   'w-[28px] text-primary text-[12px] font-semibold bg-transparent text-center focus:outline-none disabled:cursor-not-allowed',

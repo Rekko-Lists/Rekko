@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { RecommendedAnimeItem } from '@/types/anime';
 
@@ -9,60 +9,97 @@ interface Props {
 }
 
 const styles = {
-  card:        'w-full bg-surface border-2 border-border rounded-bl-card rounded-br-card rounded-tl-btn rounded-tr-btn p-4 font-gabarito',
-  label:       'text-[20px] text-text-main mb-3 leading-none',
-  row:         'flex items-start gap-3',
-  list:        'flex-1 flex gap-3 overflow-x-auto pb-2',
-  miniCard:    'relative flex-shrink-0 w-[76px] h-[106px] rounded-card overflow-hidden cursor-pointer bg-gradient-to-br from-slate-500 to-slate-800 hover:opacity-90 transition-opacity',
-  miniImg:     'w-full h-full object-cover',
-  countOverlay:'absolute bottom-0 left-0 right-0 h-[21px] bg-[rgba(0,0,0,0.46)] rounded-bl-card rounded-br-card flex items-center justify-center text-white text-[12px] font-semibold',
-  viewBtn:     'flex flex-col items-center justify-center w-[51px] h-[68px] bg-border-light rounded-btn text-[#788397] hover:bg-border transition-colors flex-shrink-0',
-  viewTxt:     'text-[13px] leading-none mt-0.5',
-  empty:       'text-text-muted text-sm py-4',
+  section:  'flex flex-col font-gabarito',
+  header:   'flex items-baseline justify-between mb-3',
+  label:    'text-[20px] text-text-main leading-none',
+  viewAll:  'text-[13px] font-medium text-primary hover:text-primary-dark hover:underline',
+  list:     'flex gap-4 overflow-x-auto pb-2',
+  card:     'flex-shrink-0 w-[170px] cursor-pointer group',
+  poster:   'w-[170px] h-[240px] rounded-card overflow-hidden bg-gradient-to-br from-slate-500 to-slate-800 group-hover:opacity-90 transition-opacity',
+  img:      'w-full h-full object-cover',
+  name:     'mt-1.5 text-[13px] font-medium text-text-main line-clamp-1',
+  meta:     'flex items-center gap-2 mt-0.5 text-[11px] text-text-muted',
+  score:    'flex items-center gap-0.5 text-primary',
+  genres:   'truncate',
+  placeholder: 'w-[170px] h-[240px] rounded-card bg-border-light',
+  empty:    'mt-2 text-text-muted text-[13px]',
 };
 
 export default function RecommendedAnimesFooter({ animes, loading, malId }: Props) {
   const navigate = useNavigate();
 
-  const handleViewMore = () => navigate(`/animes?recommendedFor=${malId}`);
-  const handleClick = (id: number) => navigate(`/animes/${id}`);
-
   if (loading) {
     return (
-      <section className={styles.card} aria-label="Popular related">
-        <h2 className={styles.label}>Popular related:</h2>
-        <div className={styles.empty}>Loading…</div>
+      <section className={styles.section} aria-label="Recommended for you">
+        <div className={styles.header}>
+          <h2 className={styles.label}>Recommended for you:</h2>
+        </div>
+        <div className={styles.list}>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className={styles.placeholder} />
+          ))}
+        </div>
       </section>
     );
   }
 
-  if (animes.length === 0) return null;
-
-  return (
-    <section className={styles.card} aria-label="Popular related">
-      <h2 className={styles.label}>Popular related:</h2>
-      <div className={styles.row}>
+  if (animes.length === 0) {
+    return (
+      <section className={styles.section} aria-label="Recommended for you">
+        <div className={styles.header}>
+          <h2 className={styles.label}>Recommended for you:</h2>
+        </div>
         <div className={styles.list}>
-          {animes.map((a) => (
-            <button
-              key={a.malId}
-              type="button"
-              className={styles.miniCard}
-              onClick={() => handleClick(a.malId)}
-              title={a.name}
-              aria-label={a.name}
-            >
-              {a.imgMedium && <img src={a.imgMedium} alt={a.name} className={styles.miniImg} />}
-              {a.coAppearanceCount !== undefined && a.coAppearanceCount > 0 && (
-                <div className={styles.countOverlay}>{a.coAppearanceCount}</div>
-              )}
-            </button>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className={styles.placeholder} />
           ))}
         </div>
-        <button type="button" className={styles.viewBtn} onClick={handleViewMore} title="View more">
-          <Plus size={20} strokeWidth={1.5} />
-          <span className={styles.viewTxt}>View</span>
+        <p className={styles.empty}>No recommendations yet.</p>
+      </section>
+    );
+  }
+
+  return (
+    <section className={styles.section} aria-label="Recommended for you">
+      <div className={styles.header}>
+        <h2 className={styles.label}>Recommended for you:</h2>
+        <button
+          type="button"
+          className={styles.viewAll}
+          onClick={() => navigate(`/animes?recommendedFor=${malId}`)}
+        >
+          View all
         </button>
+      </div>
+      <div className={styles.list}>
+        {animes.map((a) => (
+          <button
+            key={a.malId}
+            type="button"
+            className={styles.card}
+            onClick={() => navigate(`/animes/${a.malId}`)}
+            title={a.name}
+            aria-label={a.name}
+          >
+            <div className={styles.poster}>
+              {a.imgLarge || a.imgMedium ? (
+                <img src={a.imgLarge || a.imgMedium} alt={a.name} className={styles.img} />
+              ) : null}
+            </div>
+            <p className={styles.name}>{a.name}</p>
+            <div className={styles.meta}>
+              {a.malMean > 0 && (
+                <span className={styles.score}>
+                  <Star size={11} fill="currentColor" />
+                  {a.malMean.toFixed(2)}
+                </span>
+              )}
+              {a.genres && a.genres.length > 0 && (
+                <span className={styles.genres}>{a.genres.slice(0, 2).join(' · ')}</span>
+              )}
+            </div>
+          </button>
+        ))}
       </div>
     </section>
   );

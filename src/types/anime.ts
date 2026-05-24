@@ -30,6 +30,8 @@ export interface Anime {
   status: AnimeStatus;
   nextUpdate: string;
   likes: number;
+  /** Aggregate count of members tracking this anime (optional — pre-Unit-1 backends may omit) */
+  members?: number;
   genres: string[];
   studios: string[];
   broadcast: {

@@ -38,6 +38,30 @@ export interface AnimePostsParams extends PaginatedListParams {
 
 // ─── Catalogue & lookups ───────────────────────────────────────────────────
 
+/**
+ * Backend sends per-user info nested as `userState: { hasLiked, rate, watchState, watchedEpisodes }`
+ * with watchState in lowercase (watching|completed|on_hold|dropped|plan_to_watch).
+ * Frontend uses flat fields with WatchState in UPPERCASE. This normalizer bridges them.
+ */
+function normalizeAnime<T extends Partial<Anime> & { userState?: unknown }>(raw: T): T {
+  if (!raw || typeof raw !== 'object') return raw;
+  const us = (raw as { userState?: Record<string, unknown> }).userState;
+  if (us && typeof us === 'object') {
+    if (typeof us.hasLiked === 'boolean') raw.liked = us.hasLiked;
+    if (typeof us.rate === 'number') raw.userRating = us.rate;
+    if (typeof us.watchedEpisodes === 'number')
+      raw.userEpisodeProgress = us.watchedEpisodes;
+    if (typeof us.watchState === 'string') {
+      raw.userWatchState = us.watchState.toUpperCase() as WatchState;
+    }
+  }
+  return raw;
+}
+
+function normalizeAnimes<T extends Partial<Anime> & { userState?: unknown }>(arr: T[]): T[] {
+  return Array.isArray(arr) ? arr.map((a) => normalizeAnime(a)) : arr;
+}
+
 export async function getGenres(): Promise<string[]> {
   const response = await api.get('/anime/genres');
   return response.data.data.genres as string[];
@@ -58,7 +82,11 @@ export async function getAnimes(
   const queryParams = { ...query, ...sortParams, ...filters };
 
   const response = await api.get('/anime', { params: queryParams, signal });
-  return response.data.data;
+  const payload = response.data.data as AnimeCatalogueResponse;
+  return {
+    ...payload,
+    animes: normalizeAnimes(payload.animes ?? []),
+  };
 }
 
 export async function getAnimeByMalId(
@@ -68,7 +96,8 @@ export async function getAnimeByMalId(
   const response = await api.get(`/anime/${malId}`, { signal });
   // Backend response shape: { success, message, data: { anime } } or { ...anime }
   const data = response.data.data;
-  return (data?.anime ?? data) as Anime;
+  const anime = (data?.anime ?? data) as Anime;
+  return normalizeAnime(anime);
 }
 
 export async function getRelatedAnimes(
@@ -148,16 +177,34 @@ export async function unlikeAnime(malId: number): Promise<void> {
   await api.delete(`/anime/${malId}/like`);
 }
 
+/** Backend expects state in lowercase (watching|completed|on_hold|dropped|plan_to_watch). */
+function watchStateForApi(state: WatchState): string {
+  return state.toLowerCase();
+}
+
 export async function setWatchState(
   malId: number,
   state: WatchState,
   numEpisodes?: number,
 ): Promise<void> {
-  await api.post('/anime/watch', { malId, state, numEpisodes });
+  // Backend schema is .strict() and requires numEpisodes >= 0 (no undefined allowed).
+  await api.post('/anime/watch', {
+    malId,
+    state: watchStateForApi(state),
+    numEpisodes: numEpisodes ?? 0,
+  });
+}
+
+export async function removeFromList(malId: number): Promise<void> {
+  await api.delete(`/anime/watch/${malId}`);
 }
 
 export async function setRating(malId: number, rating: number): Promise<void> {
   await api.post('/anime/rate', { malId, rating });
+}
+
+export async function removeRating(malId: number): Promise<void> {
+  await api.delete(`/anime/rate/${malId}`);
 }
 
 export async function setEpisodeProgress(
@@ -165,5 +212,12 @@ export async function setEpisodeProgress(
   numEpisodes: number,
   state?: WatchState,
 ): Promise<void> {
-  await api.post('/anime/watch', { malId, numEpisodes, state });
+  // Backend requires both state and numEpisodes. Default to WATCHING if user
+  // bumps episodes before picking a list state explicitly.
+  const finalState: WatchState = state ?? 'WATCHING';
+  await api.post('/anime/watch', {
+    malId,
+    numEpisodes,
+    state: watchStateForApi(finalState),
+  });
 }
