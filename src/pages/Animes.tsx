@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import AnimeCard from '@/components/ui/anime/AnimeCard';
 import SubNav from '@/components/ui/filter/SubNav';
@@ -147,8 +147,8 @@ export default function Animes() {
       if (urlGenre) filters['genres[eq]'] = urlGenre;
       if (urlRatingMin && Number(urlRatingMin) > 0) filters['malMean[gte]'] = Number(urlRatingMin);
       if (urlRatingMax && Number(urlRatingMax) < 10) filters['malMean[lte]'] = Number(urlRatingMax);
-      if (urlEpisodesMin !== null) filters['numEpisodes[gte]'] = Number(urlEpisodesMin);
-      if (urlEpisodesMax !== null) filters['numEpisodes[lte]'] = Number(urlEpisodesMax);
+      if (urlEpisodesMin) filters['numEpisodes[gte]'] = Number(urlEpisodesMin);
+      if (urlEpisodesMax) filters['numEpisodes[lte]'] = Number(urlEpisodesMax);
       if (urlSeason) {
         const season = SEASON_OPTIONS.find(s => s.value === urlSeason);
         if (season) {
@@ -177,8 +177,15 @@ export default function Animes() {
   const { animes, pagination, loading, error, resetParams } =
     useAnimeCatalogue(buildParamsFromUrl());
 
-  // Resincronizar el hook cada vez que cambie la URL
+  // Resincronizar el hook cada vez que cambie la URL.
+  // Skip primer run: el hook ya se inicializó con buildParamsFromUrl() en useState,
+  // así que el primer fetch ya está disparado — evitamos duplicarlo.
+  const isFirstSync = useRef(true);
   useEffect(() => {
+    if (isFirstSync.current) {
+      isFirstSync.current = false;
+      return;
+    }
     resetParams(buildParamsFromUrl());
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [buildParamsFromUrl]);
