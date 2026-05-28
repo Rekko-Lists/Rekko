@@ -1,26 +1,29 @@
 import { useState, useEffect } from 'react';
-import { searchAnimes, type SearchResult } from '@/lib/searchService.ts';
+import { search, type SearchResults, type UserResult, type PostResult } from '@/lib/searchService.ts';
+import type { Anime } from '@/types/anime.ts';
 import { extractApiError } from '@/lib/apiErrors';
 
 const DEBOUNCE_MS = 300;
-const MIN_QUERY_LENGTH = 2;
+const MIN_QUERY_LENGTH = 3;
 
 interface UseSearchReturn {
   query: string;
   setQuery: (q: string) => void;
-  results: SearchResult[];
+  animes: Anime[];
+  users: UserResult[];
+  posts: PostResult[];
   loading: boolean;
   error: string | null;
 }
 
 /**
- * Hook con debounce (300ms) + AbortController para la SearchBar global.
- * Mientras el usuario escribe, busca animes en /search. Si la query es
- * más corta que `MIN_QUERY_LENGTH` no dispara ninguna petición.
+ * Hook with debounce (300ms) + AbortController for the global SearchBar.
+ * While the user types it calls /search and exposes results split by category.
+ * No request is fired for queries shorter than `MIN_QUERY_LENGTH` (3 chars).
  */
 export function useSearch(): UseSearchReturn {
   const [query,   setQuery]   = useState('');
-  const [results, setResults] = useState<SearchResult[]>([]);
+  const [results, setResults] = useState<SearchResults>({ animes: [], users: [], posts: [] });
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState<string | null>(null);
 
@@ -28,7 +31,7 @@ export function useSearch(): UseSearchReturn {
     const trimmed = query.trim();
 
     if (trimmed.length < MIN_QUERY_LENGTH) {
-      setResults([]);
+      setResults({ animes: [], users: [], posts: [] });
       setLoading(false);
       setError(null);
       return;
@@ -39,7 +42,7 @@ export function useSearch(): UseSearchReturn {
     setError(null);
 
     const timer = setTimeout(() => {
-      searchAnimes(trimmed, controller.signal)
+      search(trimmed, controller.signal)
         .then((data) => {
           if (controller.signal.aborted) return;
           setResults(data);
@@ -47,10 +50,10 @@ export function useSearch(): UseSearchReturn {
         })
         .catch((err) => {
           if (controller.signal.aborted) return;
-          // axios convierte AbortController en err.code === 'ERR_CANCELED'
+          // axios converts AbortController cancellations to err.code === 'ERR_CANCELED'
           if (err?.code === 'ERR_CANCELED' || err?.name === 'CanceledError') return;
           setError(extractApiError(err));
-          setResults([]);
+          setResults({ animes: [], users: [], posts: [] });
           setLoading(false);
         });
     }, DEBOUNCE_MS);
@@ -61,5 +64,13 @@ export function useSearch(): UseSearchReturn {
     };
   }, [query]);
 
-  return { query, setQuery, results, loading, error };
+  return {
+    query,
+    setQuery,
+    animes: results.animes,
+    users:  results.users,
+    posts:  results.posts,
+    loading,
+    error,
+  };
 }

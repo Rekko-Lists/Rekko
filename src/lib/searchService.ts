@@ -1,34 +1,70 @@
 import api from '@/lib/api.ts';
 import type { Anime } from '@/types/anime.ts';
 
+export type { Anime };
+
+// ---------------------------------------------------------------------------
+// Result types
+// ---------------------------------------------------------------------------
+
+export interface UserResult {
+  userId: number;
+  username: string;
+  profileImage: string;
+}
+
+export interface PostResult {
+  postId: number;
+  title: string;
+  user?: { username: string; profileImage: string };
+}
+
+export interface SearchResults {
+  animes: Anime[];
+  users: UserResult[];
+  posts: PostResult[];
+}
+
 /**
- * Resultado individual de la búsqueda. Por ahora asumimos que el backend
- * devuelve animes con la forma definida en `types/anime.ts`. Si en el
- * futuro el endpoint devuelve resultados heterogéneos (usuarios, posts...),
- * este tipo debería convertirse en una unión discriminada.
+ * @deprecated Use `SearchResults` instead.
  */
 export type SearchResult = Anime;
 
+// ---------------------------------------------------------------------------
+// Raw envelope shape returned by GET /search
+// ---------------------------------------------------------------------------
+
 interface RawSearchEnvelope {
   data?: {
-    results?: SearchResult[];
-    animes?: SearchResult[];
-  } | SearchResult[];
+    animes?: Anime[];
+    users?: UserResult[];
+    posts?: PostResult[];
+    withMalData?: boolean;
+    // Legacy / fallback shapes
+    results?: Anime[];
+  } | Anime[];
 }
+
+const MIN_QUERY_LENGTH = 3;
+
+// ---------------------------------------------------------------------------
+// Main search function
+// ---------------------------------------------------------------------------
 
 /**
  * GET /search?q=<query>
  *
- * Devuelve una lista de resultados. Es defensivo respecto al shape exacto
- * del envelope porque el endpoint todavía está en flux: acepta
- * `data.results`, `data.animes` o `data` directamente como array.
+ * Returns all three result categories. Requires at least 3 characters
+ * (consistent with the backend minimum). Missing sections fall back to [].
  */
-export async function searchAnimes(
+export async function search(
   query: string,
   signal?: AbortSignal,
-): Promise<SearchResult[]> {
+): Promise<SearchResults> {
   const trimmed = query.trim();
-  if (!trimmed) return [];
+  if (trimmed.length < MIN_QUERY_LENGTH) {
+    return { animes: [], users: [], posts: [] };
+  }
 
   const response = await api.get<RawSearchEnvelope>('/search', {
     params: { q: trimmed },
@@ -36,8 +72,36 @@ export async function searchAnimes(
   });
 
   const payload = response.data?.data;
-  if (Array.isArray(payload)) return payload;
-  if (payload?.results) return payload.results;
-  if (payload?.animes)  return payload.animes;
-  return [];
+
+  // Legacy: backend returned a bare array of animes
+  if (Array.isArray(payload)) {
+    return { animes: payload, users: [], posts: [] };
+  }
+
+  // Legacy: data.results
+  if (payload?.results) {
+    return { animes: payload.results, users: [], posts: [] };
+  }
+
+  return {
+    animes: payload?.animes ?? [],
+    users:  payload?.users  ?? [],
+    posts:  payload?.posts  ?? [],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Deprecated alias — kept so existing code that imports `searchAnimes` keeps
+// compiling without modification.
+// ---------------------------------------------------------------------------
+
+/**
+ * @deprecated Use `search()` instead.
+ */
+export async function searchAnimes(
+  query: string,
+  signal?: AbortSignal,
+): Promise<Anime[]> {
+  const results = await search(query, signal);
+  return results.animes;
 }
