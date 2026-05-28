@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate, NavLink } from 'react-router-dom';
 import rekkoLogo  from '@/assets/rekko_logo.png';
 import rekkoSword from '@/assets/rekko_sword.png';
@@ -7,6 +8,7 @@ import Button     from '@/components/ui/common/Button';
 import { useAuthStore } from '@/store/useAuthStore';
 import { authService } from '@/lib/authService';
 import { getStoredRefreshToken } from '@/lib/tokenStorage';
+import CreatePostModal from '@/components/ui/post/CreatePostModal';
 
 const TABS = [
   { label: 'Feed',    to: '/feed'    },
@@ -18,6 +20,7 @@ const TABS = [
 export default function Navbar() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const [showPostModal, setShowPostModal] = useState(false);
 
   async function handleLogout() {
     const refreshToken = getStoredRefreshToken();
@@ -42,7 +45,10 @@ export default function Navbar() {
             <>
               {/* Post CTA pill */}
               <div className="relative inline-flex items-center">
-                <button className="bg-gradient-cta text-white font-gabarito rounded-pill h-[36px] pl-5 pr-12 text-base border-none cursor-pointer whitespace-nowrap">
+                <button
+                  className="bg-gradient-cta text-white font-gabarito rounded-pill h-[36px] pl-5 pr-12 text-base border-none cursor-pointer whitespace-nowrap"
+                  onClick={() => setShowPostModal(true)}
+                >
                   Post something!
                 </button>
                 <img src={rekkoSword} alt="" className="absolute right-2 h-[50px] pointer-events-none" />
@@ -99,6 +105,7 @@ export default function Navbar() {
       {/* Divider 2 — inset */}
       <div className="h-[1px] bg-black/15 mx-[6%]" />
 
+      <CreatePostModal isOpen={showPostModal} onClose={() => setShowPostModal(false)} />
     </nav>
   );
 }
