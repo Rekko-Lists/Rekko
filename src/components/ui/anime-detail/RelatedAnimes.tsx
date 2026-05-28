@@ -4,11 +4,14 @@ import type { AnimeRelation } from '@/types/anime';
 interface Props {
   relations: AnimeRelation[];
   loading?: boolean;
+  malId: number;
 }
 
 const styles = {
   section:    'flex flex-col font-gabarito',
-  label:      'text-[20px] text-text-main mb-3 leading-none',
+  header:     'flex items-baseline justify-between mb-3',
+  label:      'text-[20px] text-text-main leading-none',
+  viewAll:    'text-[13px] font-medium text-primary hover:text-primary-dark hover:underline',
   list:       'flex gap-3 overflow-x-auto pb-2',
   card:       'relative flex-shrink-0 w-[110px] cursor-pointer group',
   img:        'w-[110px] h-[155px] rounded-[10px] object-cover bg-gradient-to-br from-slate-500 to-slate-800 shadow-[0px_4px_8px_0px_rgba(0,0,0,0.2)] group-hover:opacity-90 transition-opacity',
@@ -30,7 +33,7 @@ function formatRelationLabel(raw: string): string {
     .join(' ');
 }
 
-export default function RelatedAnimes({ relations, loading }: Props) {
+export default function RelatedAnimes({ relations, loading, malId }: Props) {
   const navigate = useNavigate();
 
   const handleClick = (id: number) => navigate(`/animes/${id}`);
@@ -65,9 +68,20 @@ export default function RelatedAnimes({ relations, loading }: Props) {
 
   return (
     <section className={styles.section} aria-label="Related to">
-      <h2 className={styles.label}>Related to:</h2>
+      <div className={styles.header}>
+        <h2 className={styles.label}>Related to:</h2>
+        {relations.length > 8 && (
+          <button
+            type="button"
+            className={styles.viewAll}
+            onClick={() => navigate(`/animes?relatedTo=${malId}`)}
+          >
+            View all
+          </button>
+        )}
+      </div>
       <div className={styles.list}>
-        {relations.map((r) => (
+        {relations.slice(0, 8).map((r) => (
           <button
             key={`${r.relatedMalId}-${r.relationType}`}
             type="button"

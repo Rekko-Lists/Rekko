@@ -36,6 +36,33 @@ export interface AnimePostsParams extends PaginatedListParams {
   sortBy?: 'likes' | 'createdAt';
 }
 
+type RawAnimePost = Omit<Partial<AnimePost>, 'user'> & {
+  postId?: number | string;
+  title?: string | null;
+  description?: string | null;
+  photo?: string | null;
+  createdAt?: string | null;
+  created_at?: string | null;
+  hasLiked?: boolean;
+  userId?: number | string | null;
+  user?: string | { username?: string | null; profileImage?: string | null } | null;
+  commentsCount?: number;
+  commentCount?: number;
+  animes?: RawRelatedAnime[];
+};
+
+type RawRelatedAnime = {
+  id?: string | number;
+  malId?: string | number;
+  animeId?: string | number;
+  title?: string | null;
+  name?: string | null;
+  cover?: string | null;
+  imgMedium?: string | null;
+  imgLarge?: string | null;
+  anime?: RawRelatedAnime | null;
+};
+
 // ─── Catalogue & lookups ───────────────────────────────────────────────────
 
 /**
@@ -60,6 +87,68 @@ function normalizeAnime<T extends Partial<Anime> & { userState?: unknown }>(raw:
 
 function normalizeAnimes<T extends Partial<Anime> & { userState?: unknown }>(arr: T[]): T[] {
   return Array.isArray(arr) ? arr.map((a) => normalizeAnime(a)) : arr;
+}
+
+function formatPostTime(raw: RawAnimePost): string {
+  const value = raw.time ?? raw.createdAt ?? raw.created_at;
+  if (!value) return 'Recently';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+
+  return date.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+function normalizePost(raw: RawAnimePost, index: number): AnimePost {
+  const user = raw.user;
+  const username =
+    typeof user === 'string'
+      ? user
+      : user?.username ?? (raw.userId ? `User ${raw.userId}` : 'Unknown user');
+
+  const relatedAnimes = Array.isArray(raw.relatedAnimes)
+    ? raw.relatedAnimes
+    : normalizeRelatedAnimes(raw.animes);
+
+  return {
+    id: String(raw.id ?? raw.postId ?? `anime-post-${index}`),
+    user: username,
+    avatar: typeof user === 'object' && user ? user.profileImage ?? undefined : raw.avatar,
+    time: formatPostTime(raw),
+    text: raw.text ?? raw.description ?? raw.title ?? '',
+    userImage: raw.userImage ?? raw.photo ?? undefined,
+    likes: raw.likes ?? 0,
+    comments: raw.comments ?? raw.commentsCount ?? raw.commentCount ?? 0,
+    liked: raw.liked ?? raw.hasLiked ?? false,
+    relatedAnimes,
+  };
+}
+
+function normalizeRelatedAnimes(rawAnimes: RawRelatedAnime[] | undefined): AnimePost['relatedAnimes'] {
+  if (!Array.isArray(rawAnimes)) return [];
+
+  return rawAnimes.flatMap((item) => {
+    const anime = item.anime ?? item;
+    const id = anime.malId ?? anime.id ?? anime.animeId;
+    const title = anime.title ?? anime.name;
+
+    if (!id || !title) return [];
+
+    return [{
+      id: String(id),
+      title,
+      cover: anime.cover ?? anime.imgMedium ?? anime.imgLarge ?? '',
+    }];
+  });
+}
+
+function normalizePosts(rawPosts: unknown): AnimePost[] {
+  return Array.isArray(rawPosts)
+    ? rawPosts.map((post, index) => normalizePost(post as RawAnimePost, index))
+    : [];
 }
 
 export async function getGenres(): Promise<string[]> {
@@ -123,7 +212,7 @@ export async function getPostsByAnime(
   const data = response.data.data;
   // Tolerate shape variations: {posts, pagination} | {items, pagination}
   return {
-    items: (data?.items ?? data?.posts ?? data ?? []) as AnimePost[],
+    items: normalizePosts(data?.items ?? data?.posts ?? data),
     pagination: (data?.pagination ?? {
       page: params.page ?? 1,
       limit: params.limit ?? 10,

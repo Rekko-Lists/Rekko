@@ -157,8 +157,17 @@ export function useAnimeUserActions(anime: Anime | null) {
     [anime, isAuthenticated, state.episodeProgress, state.watchState],
   );
 
+  const wasInitiallyInList = anime?.userWatchState != null;
+  const isCurrentlyInList = state.watchState != null;
+  const membersDelta = !wasInitiallyInList && isCurrentlyInList
+    ? 1
+    : wasInitiallyInList && !isCurrentlyInList
+      ? -1
+      : 0;
+
   return {
     ...state,
+    members: Math.max(0, (anime?.members ?? 0) + membersDelta),
     toggleLike,
     setWatchState,
     setRating,

@@ -8,9 +8,11 @@ import Pagination from '@/components/ui/common/Pagination';
 import { useAnimeCatalogue } from '@/hooks/useAnimeCatalogue';
 import { useRecommendedAnimes } from '@/hooks/useRecommendedAnimes';
 import { useAnimeDetail } from '@/hooks/useAnimeDetail';
+import { useRelatedAnimes } from '@/hooks/useRelatedAnimes';
 import type { GetAnimesParams } from '@/lib/animeService';
 import { getGenres } from '@/lib/animeService';
 import { computeSeasonOptions } from '@/lib/seasonUtils';
+import type { Anime, AnimeRelation } from '@/types/anime';
 
 const DEFAULT_TYPE_FILTER = { 'mediaType[in]': 'tv,ova,movie' } as const;
 
@@ -44,6 +46,29 @@ const TAB_TO_URL: Record<string, string> = {
   'Seasonal Anime':  'seasonal',
   'By Genre':        'by-genre',
 };
+
+function relationToAnime(relation: AnimeRelation): Anime {
+  return {
+    malId: relation.relatedMalId,
+    name: relation.relatedTitle,
+    synopsis: '',
+    imgMedium: relation.relatedImage ?? '',
+    imgLarge: relation.relatedImage ?? '',
+    startDate: '',
+    endDate: '',
+    malMean: 0,
+    malRank: 0,
+    mean: 0,
+    rank: 0,
+    numEpisodes: 0,
+    status: 'finished_airing',
+    nextUpdate: '',
+    likes: 0,
+    genres: [],
+    studios: [],
+    broadcast: { dayOfWeek: '', startTime: '' },
+  };
+}
 
 // Opciones de temporada — computadas una sola vez al cargar el módulo
 const SEASON_OPTIONS = computeSeasonOptions();
@@ -88,6 +113,9 @@ export default function Animes() {
   const recommendedForParam = searchParams.get('recommendedFor');
   const recommendedFor = recommendedForParam ? parseInt(recommendedForParam, 10) : undefined;
   const isRecommendedView = Boolean(recommendedFor && !Number.isNaN(recommendedFor));
+  const relatedToParam = searchParams.get('relatedTo');
+  const relatedTo = relatedToParam ? parseInt(relatedToParam, 10) : undefined;
+  const isRelatedView = Boolean(relatedTo && !Number.isNaN(relatedTo));
 
   // ─── URL state ──────────────────────────────────────────────────────────
   const urlTab     = searchParams.get('tab') ?? 'all';
@@ -199,6 +227,9 @@ export default function Animes() {
   } = useRecommendedAnimes(isRecommendedView ? recommendedFor : undefined, recommendedPage, 24);
 
   const { anime: anchorAnime } = useAnimeDetail(isRecommendedView ? recommendedFor : undefined);
+  const { relations: relatedRelations, loading: relatedLoading, error: relatedError } =
+    useRelatedAnimes(isRelatedView ? relatedTo : undefined);
+  const { anime: relatedAnchorAnime } = useAnimeDetail(isRelatedView ? relatedTo : undefined);
 
   const filterProperties = useMemo<FilterProperty[]>(() => [
     { key: 'genre', label: 'Genre', chipGrid: true, options: genres },
@@ -315,6 +346,36 @@ export default function Animes() {
             onPageChange={setRecommendedPage}
           />
         )}
+      </div>
+    );
+  }
+
+  if (isRelatedView) {
+    const relatedAnimes = relatedRelations.map(relationToAnime);
+
+    return (
+      <div className={styles.page}>
+        <div className={styles.body}>
+          <div className={styles.grid}>
+            <div className={styles.breadcrumb}>
+              <a href="/animes" className="text-primary hover:underline font-semibold">
+                ← Catálogo
+              </a>
+              <span className="text-text-muted">/</span>
+              <span className="font-semibold text-text-main">
+                Related to {relatedAnchorAnime?.name ?? '…'}
+              </span>
+            </div>
+            {relatedLoading && <p className={styles.loading}>Loading...</p>}
+            {relatedError && <p className={styles.error}>{relatedError}</p>}
+            {!relatedLoading && !relatedError && relatedAnimes.length === 0 && (
+              <p className={styles.loading}>No related animes available yet.</p>
+            )}
+            {!relatedLoading && !relatedError &&
+              relatedAnimes.map((anime) => <AnimeCard key={anime.malId} anime={anime} />)
+            }
+          </div>
+        </div>
       </div>
     );
   }

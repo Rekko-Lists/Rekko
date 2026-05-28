@@ -106,7 +106,7 @@ export default function AnimeDetail() {
               likes={userActions.likes}
               liked={userActions.liked}
               inListCount={userActions.inListCount}
-              members={anime.members ?? 0}
+              members={userActions.members}
               onToggleLike={userActions.toggleLike}
               canLike={userActions.isAuthenticated}
             />
@@ -125,13 +125,24 @@ export default function AnimeDetail() {
           <div className={styles.centerCol}>
             <AnimeSynopsis title={anime.name} synopsis={anime.synopsis} />
             <div className={styles.divider}></div>
-            <RelatedAnimes relations={related} loading={relatedLoading} />
+            {malId !== undefined && (
+              <RelatedAnimes relations={related} loading={relatedLoading} malId={malId} />
+            )}
           </div>
 
           {/* Right column — posts carousel */}
           <div className={styles.rightCol}>
             {malId !== undefined && (
-                <PostsCarousel posts={posts} loading={postsLoading} malId={malId} />
+                <PostsCarousel
+                  posts={posts}
+                  loading={postsLoading}
+                  malId={malId}
+                  currentAnime={{
+                    id: anime.malId,
+                    title: anime.name,
+                    cover: anime.imgMedium || anime.imgLarge,
+                  }}
+                />
             )}
             {malId !== undefined && (
               <SimilarAnimes animes={similar} loading={similarLoading} malId={malId} />

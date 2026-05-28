@@ -97,7 +97,15 @@ export default function AnimePosts() {
 
         <div className={styles.list}>
           {posts.map((p) => (
-            <PostCard key={p.id} post={toPost(p)} />
+            <PostCard
+              key={p.id}
+              post={toPost(p)}
+              fallbackRelatedAnimes={anime ? [{
+                id: String(anime.malId),
+                title: anime.name,
+                cover: anime.imgMedium || anime.imgLarge || '',
+              }] : []}
+            />
           ))}
         </div>
 
