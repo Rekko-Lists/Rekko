@@ -1,4 +1,5 @@
 import { Heart } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const styles = {
   card:    'bg-surface border-[1.5px] border-border rounded-card p-4',
@@ -24,7 +25,7 @@ export default function PopularRecommendationsCard({ items }: Props) {
     <div className={styles.card}>
       <p className={styles.title}>Popular recommendations</p>
       {items.map(item => (
-        <div key={item.id} className={styles.item}>
+        <Link key={item.id} to={`/post/${item.id}`} className={styles.item}>
           {item.cover
             ? <img src={item.cover} alt={item.title} className={styles.cover} />
             : <div className={styles.cover} />
@@ -35,7 +36,7 @@ export default function PopularRecommendationsCard({ items }: Props) {
               <Heart size={10} fill="#FF9E00" className="text-primary" /> {item.hearts}
             </span>
           </div>
-        </div>
+        </Link>
       ))}
     </div>
   );

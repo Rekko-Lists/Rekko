@@ -5,6 +5,7 @@ interface NewsItem {
   title: string;
   date: string;
   cover?: string;
+  url?: string;
 }
 
 interface Props {
@@ -16,8 +17,8 @@ const styles = {
   card:    'w-full bg-surface border-[1.5px] border-border rounded-card p-3 font-gabarito',
   title:   'text-[14px] text-text-main mb-2 leading-none',
   row:     'flex items-start gap-4',
-  list:    'flex-1 flex gap-4 overflow-x-auto',
-  item:    'flex gap-2 flex-shrink-0 w-[200px]',
+  list:    'flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4',
+  item:    'flex gap-2 min-w-0 hover:text-primary transition-colors',
   cover:   'w-[44px] h-[69px] flex-shrink-0 bg-gradient-to-br from-slate-400 to-slate-700 rounded-[3px] object-cover',
   text:    'text-[11px] text-text-main leading-snug line-clamp-3',
   date:    'text-[10px] text-text-muted mt-1',
@@ -36,7 +37,13 @@ export default function AnimeNewsHorizontal({ items, onViewAll }: Props) {
         ) : (
           <div className={styles.list}>
             {items.map((n) => (
-              <div key={n.id} className={styles.item}>
+              <a
+                key={n.id}
+                className={styles.item}
+                href={n.url}
+                target={n.url ? '_blank' : undefined}
+                rel={n.url ? 'noreferrer' : undefined}
+              >
                 {n.cover ? (
                   <img src={n.cover} alt="" className={styles.cover} />
                 ) : (
@@ -46,7 +53,7 @@ export default function AnimeNewsHorizontal({ items, onViewAll }: Props) {
                   <p className={styles.text}>{n.title}</p>
                   <p className={styles.date}>{n.date}</p>
                 </div>
-              </div>
+              </a>
             ))}
           </div>
         )}

@@ -1,16 +1,17 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Avatar from '@/components/ui/common/Avatar';
-import AnimeCovers from '@/components/ui/anime/AnimeCovers';
-import { setWatchState } from '@/lib/animeService';
-import { useAuthStore } from '@/store/useAuthStore';
-import type { AnimePost } from '@/types/anime';
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Avatar from "@/components/ui/common/Avatar";
+import AnimeCovers from "@/components/ui/anime/AnimeCovers";
+import { setWatchState } from "@/lib/animeService";
+import { useAuthStore } from "@/store/useAuthStore";
+import type { AnimePost } from "@/types/anime";
 
 interface Props {
   posts: AnimePost[];
   loading?: boolean;
   malId: number;
+  showHeader?: boolean;
   currentAnime?: {
     id: string | number;
     title: string;
@@ -19,39 +20,51 @@ interface Props {
 }
 
 // Sizes
-const POST_W = 280;
-const POST_H = 186;
+const POST_W = 320;
+const POST_H = 213;
 const POST_GAP = 16;
 
 const styles = {
-  section:     'flex flex-col font-gabarito',
-  header:      'flex items-baseline justify-between mb-2',
-  label:       'text-[20px] text-text-main leading-none',
-  viewLink:    'text-[13px] font-medium text-primary hover:text-primary-dark hover:underline underline-offset-2 cursor-pointer bg-transparent border-0 p-0 leading-none transition-colors',
+  section: "flex h-full flex-col font-gabarito",
+  header: "flex items-baseline justify-between mb-2",
+  label: "text-[20px] text-text-main leading-none",
+  viewLink:
+    "text-[13px] font-medium text-primary hover:text-primary-dark hover:underline underline-offset-2 cursor-pointer bg-transparent border-0 p-0 leading-none transition-colors",
   // Body is the visible viewport. Track inside is wider via overflow + fade mask
   // so that siblings peek through on both sides.
-  body:        'relative h-[204px]',
-  viewport:    'absolute inset-0 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]',
-  track:       'absolute top-1/2 left-1/2 -translate-y-1/2 flex gap-4 items-stretch transition-transform ease-out',
-  navBtn:      'absolute top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white border border-border flex items-center justify-center hover:bg-app-bg transition-colors disabled:opacity-30',
-  navLeft:     'left-0',
-  navRight:    'right-0',
-  postCard:    'flex-shrink-0 bg-surface border border-border rounded-card p-3 flex flex-col gap-1.5 cursor-pointer hover:shadow-md transition-shadow',
-  postHeader:  'flex items-center gap-2',
-  postUser:    'text-[10px] font-medium text-text-main flex-1 truncate',
-  postTime:    'text-[10px] text-text-muted',
-  postMenu:    'text-text-muted text-sm leading-none px-1',
-  postDivider: 'h-px bg-border',
-  postBody:    'text-[11px] text-text-main leading-snug line-clamp-2',
-  related:     'flex flex-col gap-1.5',
-  relatedLabel:'text-[10px] text-text-muted leading-none',
-  relatedViewport: 'w-[146px] overflow-hidden [mask-image:linear-gradient(to_right,black_0%,black_84%,transparent_100%)]',
-  postFooter:  'flex items-center gap-3 text-[10px] text-text-muted',
-  emptyCard:   'flex-shrink-0 bg-surface border border-dashed border-border rounded-card flex items-center justify-center text-text-muted text-[12px] text-center px-4',
-  divider:     'h-px bg-border my-3',
+  body: "relative min-h-[232px] flex-1",
+  viewport:
+    "absolute inset-0 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]",
+  track:
+    "absolute top-1/2 left-1/2 -translate-y-1/2 flex gap-4 items-stretch transition-transform ease-out",
+  navBtn:
+    "absolute top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white border border-border flex items-center justify-center hover:bg-app-bg transition-colors disabled:opacity-30",
+  navLeft: "left-0",
+  navRight: "right-0",
+  postCard:
+    "flex-shrink-0 bg-surface border border-border rounded-card p-3 flex flex-col gap-1.5 cursor-pointer hover:shadow-md transition-shadow",
+  postHeader: "flex items-center gap-2",
+  postUser: "text-[10px] font-medium text-text-main flex-1 truncate",
+  postTime: "text-[10px] text-text-muted",
+  postMenu: "text-text-muted text-sm leading-none px-1",
+  postDivider: "h-px bg-border",
+  postBody: "text-[11px] text-text-main leading-snug line-clamp-2",
+  related: "flex flex-col gap-1.5",
+  relatedLabel: "text-[10px] text-text-muted leading-none",
+  relatedViewport:
+    "w-[146px] overflow-hidden [mask-image:linear-gradient(to_right,black_0%,black_84%,transparent_100%)]",
+  postFooter: "flex items-center gap-3 text-[10px] text-text-muted",
+  emptyCard:
+    "flex-shrink-0 bg-surface border border-dashed border-border rounded-card flex items-center justify-center text-text-muted text-[12px] text-center px-4",
 };
 
-export default function PostsCarousel({ posts, loading, malId, currentAnime }: Props) {
+export default function PostsCarousel({
+  posts,
+  loading,
+  malId,
+  showHeader = true,
+  currentAnime,
+}: Props) {
   const [visualIndex, setVisualIndex] = useState(1);
   const [withTransition, setWithTransition] = useState(true);
   const navigate = useNavigate();
@@ -68,9 +81,8 @@ export default function PostsCarousel({ posts, loading, malId, currentAnime }: P
     }
   }, [withTransition]);
 
-  const carouselPosts = posts.length > 1
-    ? [posts[posts.length - 1], ...posts, posts[0]]
-    : posts;
+  const carouselPosts =
+    posts.length > 1 ? [posts[posts.length - 1], ...posts, posts[0]] : posts;
 
   const handleViewAll = () => navigate(`/animes/${malId}/posts`);
 
@@ -100,12 +112,18 @@ export default function PostsCarousel({ posts, loading, malId, currentAnime }: P
 
   return (
     <section className={styles.section} aria-label="Recommendations">
-      <div className={styles.header}>
-        <h2 className={styles.label}>Recommendations:</h2>
-        <button type="button" className={styles.viewLink} onClick={handleViewAll}>
-          Show more
-        </button>
-      </div>
+      {showHeader && (
+        <div className={styles.header}>
+          <h2 className={styles.label}>Recommendations:</h2>
+          <button
+            type="button"
+            className={styles.viewLink}
+            onClick={handleViewAll}
+          >
+            Show more
+          </button>
+        </div>
+      )}
 
       <div className={styles.body}>
         <div className={styles.viewport}>
@@ -121,7 +139,7 @@ export default function PostsCarousel({ posts, loading, malId, currentAnime }: P
                 className={styles.emptyCard}
                 style={{ width: POST_W, height: POST_H }}
               >
-                {loading ? 'Loading posts…' : 'No posts yet for this anime.'}
+                {loading ? "Loading posts…" : "No posts yet for this anime."}
               </div>
             </div>
           ) : (
@@ -132,13 +150,13 @@ export default function PostsCarousel({ posts, loading, malId, currentAnime }: P
                 // the viewport minus half its width, then we shift by `index`
                 // slots (card width + gap) to bring the active one to center.
                 transform: `translate(calc(-${POST_W / 2}px - ${visualIndex * (POST_W + POST_GAP)}px), -50%)`,
-                transitionDuration: withTransition ? '300ms' : '0ms',
+                transitionDuration: withTransition ? "300ms" : "0ms",
               }}
               onTransitionEnd={handleTransitionEnd}
             >
               {carouselPosts.map((post, postIndex) => (
                 <PostMini
-                  key={`${post.id || 'post'}-${postIndex}`}
+                  key={`${post.id || "post"}-${postIndex}`}
                   post={post}
                   malId={malId}
                   currentAnime={currentAnime}
@@ -168,8 +186,6 @@ export default function PostsCarousel({ posts, loading, malId, currentAnime }: P
           <ChevronRight size={16} />
         </button>
       </div>
-
-      <div className={styles.divider} />
     </section>
   );
 }
@@ -181,7 +197,8 @@ function getPreviewAnimes(
 ) {
   const currentMalId = String(malId);
   const related = post.relatedAnimes ?? [];
-  const current = related.find((anime) => String(anime.id) === currentMalId) ?? currentAnime;
+  const current =
+    related.find((anime) => String(anime.id) === currentMalId) ?? currentAnime;
   const rest = related.filter((anime) => String(anime.id) !== currentMalId);
   const ordered = current ? [current, ...rest] : rest;
 
@@ -205,7 +222,7 @@ function PostMini({
     if (!isAuthenticated) return;
     const animeMalId = Number(anime.id);
     if (!Number.isFinite(animeMalId)) return;
-    void setWatchState(animeMalId, 'PLAN_TO_WATCH');
+    void setWatchState(animeMalId, "PLAN_TO_WATCH");
   };
 
   return (

@@ -1,96 +1,296 @@
-import PostCard from '@/components/ui/feed/PostCard';
-import AnimeNewsCard from '@/components/ui/feed/AnimeNewsCard';
-import ReputationLeaderboard from '@/components/ui/feed/ReputationLeaderboard';
-import PopularRecommendationsCard from '@/components/ui/feed/PopularRecommendationsCard';
-import SiteLinks from '@/components/ui/common/SiteLinks';
-import { useFeedStore, type Post } from '@/store/useFeedStore';
-import type { RecommendationItem } from '@/components/ui/feed/PopularRecommendationsCard';
-import type { SiteLinkItem } from '@/components/ui/common/SiteLinks';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import PostCard from "@/components/ui/feed/PostCard";
+import AnimeNewsCard from "@/components/ui/feed/AnimeNewsCard";
+import ReputationLeaderboard from "@/components/ui/feed/ReputationLeaderboard";
+import PopularRecommendationsCard from "@/components/ui/feed/PopularRecommendationsCard";
+import SiteLinks from "@/components/ui/common/SiteLinks";
+import { useFeedStore } from "@/store/useFeedStore";
+import type { RecommendationItem } from "@/components/ui/feed/PopularRecommendationsCard";
+import type { SiteLinkItem } from "@/components/ui/common/SiteLinks";
+import { useAuthStore } from "@/store/useAuthStore";
+import { extractApiError } from "@/lib/apiErrors";
+import { getLatestAnimeNews, type AnimeNewsItem } from "@/lib/animeNewsService";
+import {
+  getPopularPosts,
+  getPosts,
+  likePost,
+  toFeedPost,
+  unlikePost,
+} from "@/lib/postService";
+import { getTopReputationUsers } from "@/lib/userService";
+import AnimeListWidget from "@/components/ui/feed/widgets/AnimeListWidget";
+import {
+  getAiringTodayAnimes,
+  getPopularAnimes,
+  getPopularUpcomingAnimes,
+  getTopAiringAnimes,
+  getTopSeasonalAnimes,
+  getTopUpcomingAnimes,
+} from "@/lib/animeService";
 
-const MOCK_POSTS: Post[] = [
-  {
-    id: '1',
-    user: 'Username',
-    time: '10 hours ago',
-    text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam non diam nulla. Sed lectus orci, iaculis nec justo in, placerat interdum risus. Nunc eu venenatis nunc, vitae sollicitudin tortor. Integer ipsum',
-    relatedAnimes: [
-      { id: 'a1', title: 'Frieren', cover: '' },
-      { id: 'a2', title: 'Frieren S2', cover: '' },
-    ],
-    userImage: '',
-    likes: 50,
-    comments: 5,
-    liked: false,
-  },
-  {
-    id: '2',
-    user: 'Username',
-    time: '10 hours ago',
-    text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam non diam nulla. Sed lectus orci, iaculis nec justo in, placerat interdum risus. Nunc eu venenatis nunc, vitae sollicitudin tortor. Integer ipsum',
-    relatedAnimes: [
-      { id: 'a3', title: 'Steins;Gate', cover: '' },
-      { id: 'a4', title: 'JJK', cover: '' },
-    ],
-    userImage: '',
-    likes: 32,
-    comments: 2,
-    liked: false,
-  },
-];
-
-const MOCK_NEWS = [
-  { id: 'n1', title: "Sixth Season of 'Dungeon ni Deai wo Motomeru' Announced", date: 'Feb 7, 5:45 AM' },
-  { id: 'n2', title: "'Alya-san Season 2' Postpones Broadcast to 2027", date: 'Feb 12, 2:39 PM' },
-];
-
-const MOCK_LEADERBOARD = [
-  { rank: 1, user: 'username', hearts: 1233 },
-  { rank: 2, user: 'username', hearts: 987 },
-  { rank: 3, user: 'username', hearts: 741 },
-  { rank: 4, user: 'username', hearts: 523 },
-];
-
-const MOCK_RECOMMENDATIONS: RecommendationItem[] = [
-  { id: 'r1', title: 'Anime title', hearts: 50 },
-  { id: 'r2', title: 'Anime title', hearts: 38 },
-];
+const FEED_LIMIT = 10;
+const NEWS_FALLBACK_MAL_IDS = [52991, 5114, 9253, 30276];
 
 const SITE_LINKS: SiteLinkItem[] = [
-  { label: 'Rules of the site', icon: 'Book', href: '#' },
-  { label: 'About', icon: 'Book', href: '#' },
-  { label: 'FAQ', icon: 'Question', href: '#' },
+  { label: "Rules of the site", icon: "Book", href: "#" },
+  { label: "About", icon: "Book", href: "#" },
+  { label: "FAQ", icon: "Question", href: "#" },
 ];
 
 const styles = {
-  page:     'flex px-[6%] font-gabarito min-h-full',
-  sidebar:  'w-[231px] flex-shrink-0 flex flex-col gap-4 py-6',
-  center:   'flex-1 flex flex-col gap-4 min-w-0 py-6',
-  divider:  'w-[1.5px] bg-black/15 self-stretch mx-5',
+  page: "flex flex-col px-4 font-gabarito min-h-full items-stretch lg:flex-row lg:items-start lg:px-[6%]",
+  sidebar: "flex w-full flex-col gap-4 py-4 lg:sticky lg:top-[136px] lg:max-h-[calc(100vh-148px)] lg:w-[231px] lg:flex-shrink-0 lg:overflow-y-auto lg:py-6",
+  center: "flex-1 flex flex-col gap-4 min-w-0 py-6",
+  divider: "hidden w-[1.5px] bg-black/15 self-stretch mx-5 lg:block",
+  state: "rounded-card border border-border bg-surface px-4 py-6 text-center text-sm text-text-muted",
+  error: "rounded-card border border-status-red/30 bg-surface px-4 py-6 text-center text-sm text-status-red",
 };
 
 export default function Feed() {
-  const toggleLike = useFeedStore(s => s.toggleLike);
+  const navigate = useNavigate();
+  const posts = useFeedStore((s) => s.posts);
+  const loading = useFeedStore((s) => s.loading);
+  const hasMore = useFeedStore((s) => s.hasMore);
+  const setPosts = useFeedStore((s) => s.setPosts);
+  const appendPosts = useFeedStore((s) => s.appendPosts);
+  const setLoading = useFeedStore((s) => s.setLoading);
+  const setHasMore = useFeedStore((s) => s.setHasMore);
+  const toggleLike = useFeedStore((s) => s.toggleLike);
+  const updatePost = useFeedStore((s) => s.updatePost);
+  const isAuthenticated = useAuthStore((s) => Boolean(s.user));
+  const [page, setPage] = useState(1);
+  const [error, setError] = useState<string | null>(null);
+  const [news, setNews] = useState<AnimeNewsItem[]>([]);
+  const [leaderboard, setLeaderboard] = useState<
+    { rank: number; user: string; hearts: number; avatar?: string }[]
+  >([]);
+  const [recommendations, setRecommendations] = useState<RecommendationItem[]>([]);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const loadingPagesRef = useRef(new Set<number>());
+  const likingPostsRef = useRef(new Set<string>());
+  const newsMalIdsKey = useMemo(() => {
+    const ids = posts.flatMap((post) => post.relatedAnimes.map((anime) => Number(anime.id)));
+    return [...new Set(ids.filter(Number.isFinite))].slice(0, 4).join(",");
+  }, [posts]);
+  const randomWidgetLoaders = useMemo(
+    () => [
+      {
+        key: "seasonal",
+        title: "Seasonal animes",
+        load: (signal?: AbortSignal) => getTopSeasonalAnimes(5, signal),
+        onViewMore: () => navigate("/animes?season=current"),
+      },
+      {
+        key: "popular",
+        title: "Popular animes",
+        load: (signal?: AbortSignal) => getPopularAnimes(5, signal),
+      },
+      {
+        key: "airing-today",
+        title: "Airing today",
+        load: (signal?: AbortSignal) => getAiringTodayAnimes(5, signal),
+        showBroadcastTime: true,
+      },
+      {
+        key: "top-upcoming",
+        title: "Top upcoming",
+        load: (signal?: AbortSignal) => getTopUpcomingAnimes(5, signal),
+      },
+      {
+        key: "popular-upcoming",
+        title: "Popular upcoming",
+        load: (signal?: AbortSignal) => getPopularUpcomingAnimes(5, signal),
+      },
+      {
+        key: "top-airing",
+        title: "Top airing",
+        load: (signal?: AbortSignal) => getTopAiringAnimes(5, signal),
+      },
+    ],
+    [navigate],
+  );
+  const randomWidgets = useMemo(() => {
+    const shuffled = [...randomWidgetLoaders].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 2);
+  }, [randomWidgetLoaders]);
+
+  const loadPosts = useCallback(
+    async (targetPage: number, signal?: AbortSignal) => {
+      if (loadingPagesRef.current.has(targetPage)) return;
+      loadingPagesRef.current.add(targetPage);
+      setLoading(true);
+      setError(null);
+
+      try {
+        const result = await getPosts(
+          {
+            page: targetPage,
+            limit: FEED_LIMIT,
+            sortField: "createdAt",
+            sortOrder: "desc",
+          },
+          signal,
+        );
+        const normalized = result.posts.map(toFeedPost);
+
+        if (targetPage === 1) setPosts(normalized);
+        else appendPosts(normalized);
+
+        setPage(result.pagination.page);
+        setHasMore(result.pagination.page < result.pagination.pages);
+      } catch (err: unknown) {
+        if (signal?.aborted) return;
+        setError(extractApiError(err));
+        setHasMore(false);
+      } finally {
+        loadingPagesRef.current.delete(targetPage);
+        if (!signal?.aborted) setLoading(false);
+      }
+    },
+    [appendPosts, setHasMore, setLoading, setPosts],
+  );
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void loadPosts(1, controller.signal);
+    return () => {
+      controller.abort();
+      loadingPagesRef.current.delete(1);
+    };
+  }, [loadPosts]);
+
+  useEffect(() => {
+    const element = sentinelRef.current;
+    if (!element) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      const [entry] = entries;
+      if (entry.isIntersecting && hasMore && !loading) {
+        void loadPosts(page + 1);
+      }
+    }, { rootMargin: "500px" });
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [hasMore, loadPosts, loading, page]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    getTopReputationUsers(4, controller.signal)
+      .then((users) => {
+        if (controller.signal.aborted) return;
+        setLeaderboard(
+          users.map((user, index) => ({
+            rank: index + 1,
+            user: user.username,
+            hearts: user.reputation,
+            avatar: user.profileImage ?? undefined,
+          })),
+        );
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setLeaderboard([]);
+      });
+
+    getPopularPosts(5, controller.signal)
+      .then((result) => {
+        if (controller.signal.aborted) return;
+        setRecommendations(
+          result.map((post) => ({
+            id: String(post.postId),
+            title: post.title,
+            cover: post.photo ?? post.animes[0]?.imgMedium,
+            hearts: post.likes,
+          })),
+        );
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setRecommendations([]);
+      });
+
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const malIds = newsMalIdsKey
+      ? newsMalIdsKey.split(",").map((id) => Number(id))
+      : [];
+    void getLatestAnimeNews(
+      malIds.length > 0 ? malIds : NEWS_FALLBACK_MAL_IDS,
+      5,
+      controller.signal,
+    ).then((items) => {
+      if (!controller.signal.aborted) setNews(items);
+    }).catch(() => {
+      if (!controller.signal.aborted) setNews([]);
+    });
+
+    return () => controller.abort();
+  }, [newsMalIdsKey]);
+
+  async function handleLike(id: string) {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+
+    if (likingPostsRef.current.has(id)) return;
+
+    const current = posts.find((post) => post.id === id);
+    const postId = Number(id);
+    if (!current || !Number.isFinite(postId)) return;
+
+    likingPostsRef.current.add(id);
+    toggleLike(id);
+
+    try {
+      const updated = current.liked ? await unlikePost(postId) : await likePost(postId);
+      if (updated) updatePost(toFeedPost(updated));
+    } catch {
+      toggleLike(id);
+    } finally {
+      likingPostsRef.current.delete(id);
+    }
+  }
 
   return (
     <div className={styles.page}>
       <aside className={styles.sidebar}>
-        <AnimeNewsCard items={MOCK_NEWS} />
+        <AnimeNewsCard items={news} />
+        {randomWidgets[0] && (
+          <AnimeListWidget {...randomWidgets[0]} />
+        )}
         <SiteLinks items={SITE_LINKS} />
       </aside>
 
       <div className={styles.divider} />
 
       <main className={styles.center}>
-        {MOCK_POSTS.map(post => (
-          <PostCard key={post.id} post={post} onLike={toggleLike} />
+        {error && <p className={styles.error}>{error}</p>}
+        {posts.map((post) => (
+          <PostCard key={post.id} post={post} onLike={handleLike} />
         ))}
+        {loading && <p className={styles.state}>Loading posts...</p>}
+        {!loading && posts.length === 0 && !error && (
+          <p className={styles.state}>No posts yet.</p>
+        )}
+        {!error && <div ref={sentinelRef} />}
       </main>
 
       <div className={styles.divider} />
 
       <aside className={styles.sidebar}>
-        <ReputationLeaderboard entries={MOCK_LEADERBOARD} />
-        <PopularRecommendationsCard items={MOCK_RECOMMENDATIONS} />
+        <ReputationLeaderboard
+          entries={leaderboard}
+          onViewMore={() => navigate("/leaderboard")}
+        />
+        <PopularRecommendationsCard items={recommendations} />
+        {randomWidgets[1] && (
+          <AnimeListWidget {...randomWidgets[1]} />
+        )}
       </aside>
     </div>
   );

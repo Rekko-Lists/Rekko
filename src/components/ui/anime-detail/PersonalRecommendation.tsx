@@ -5,15 +5,18 @@ const styles = {
   label:    'font-gabarito font-bold text-[20px] text-text-secondary text-center px-6',
   overlay:  'absolute inset-0 bg-[rgba(244,244,244,0.7)] flex items-center justify-center pointer-events-none',
   badge:    'px-3 py-1 rounded-pill bg-primary text-white text-[12px] font-semibold uppercase tracking-wide',
-  illus:    'h-48 w-auto object-contain flex-shrink-0',
+  illus:    'h-48 w-auto overflow-hidden flex-shrink-0 rotate-45 relative translate-x-[-100px] -z-10',
+  textLogoWrapper: 'flex flex-col text-center'
 };
 
 export default function PersonalRecommendation() {
   return (
     <div className={styles.wrapper}>
-      <img src="/rekko_logo.png" alt="Rekko" className={styles.logo} />
-      <section className={styles.card} aria-label="Personal Recommendation">
+      <div className={styles.textLogoWrapper}>
+        <img src="/rekko_logo.png" alt="Rekko" className={styles.logo} />
         <p className={styles.label}>Personal Recommendation:</p>
+      </div>
+      <section className={styles.card} aria-label="Personal Recommendation">
         <div className={styles.overlay}>
           <span className={styles.badge}>Coming soon</span>
         </div>

@@ -8,6 +8,7 @@ export interface AuthUser {
   username: string;
   emailVerified: boolean;
   profileImage?: string;
+  role?: 'USER' | 'MODERATOR' | 'ADMIN';
 }
 
 interface AuthState {

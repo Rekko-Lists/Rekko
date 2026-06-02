@@ -1,5 +1,5 @@
-import api from '@/lib/api.ts';
-import type { Anime } from '@/types/anime.ts';
+import api from "@/lib/api.ts";
+import type { Anime } from "@/types/anime.ts";
 
 export type { Anime };
 
@@ -16,7 +16,14 @@ export interface UserResult {
 export interface PostResult {
   postId: number;
   title: string;
-  user?: { username: string; profileImage: string };
+  description?: string | null;
+  user?: { username: string; profileImage: string } | null;
+  animes?: Array<{
+    malId: number;
+    name: string;
+    imgMedium: string;
+    imgLarge: string;
+  }>;
 }
 
 export interface SearchResults {
@@ -35,14 +42,16 @@ export type SearchResult = Anime;
 // ---------------------------------------------------------------------------
 
 interface RawSearchEnvelope {
-  data?: {
-    animes?: Anime[];
-    users?: UserResult[];
-    posts?: PostResult[];
-    withMalData?: boolean;
-    // Legacy / fallback shapes
-    results?: Anime[];
-  } | Anime[];
+  data?:
+    | {
+        animes?: Anime[];
+        users?: UserResult[];
+        posts?: PostResult[];
+        withMalData?: boolean;
+        // Legacy / fallback shapes
+        results?: Anime[];
+      }
+    | Anime[];
 }
 
 const MIN_QUERY_LENGTH = 3;
@@ -66,7 +75,7 @@ export async function search(
     return { animes: [], users: [], posts: [] };
   }
 
-  const response = await api.get<RawSearchEnvelope>('/search', {
+  const response = await api.get<RawSearchEnvelope>("/search", {
     params: { q: trimmed },
     signal,
   });
@@ -85,8 +94,8 @@ export async function search(
 
   return {
     animes: payload?.animes ?? [],
-    users:  payload?.users  ?? [],
-    posts:  payload?.posts  ?? [],
+    users: payload?.users ?? [],
+    posts: payload?.posts ?? [],
   };
 }
 

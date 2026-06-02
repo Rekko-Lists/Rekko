@@ -7,7 +7,7 @@ const BASE = import.meta.env.VITE_API_BASE_URL;
 interface LoginResponse {
   accessToken: string;
   refreshToken: string;
-  user: { userId: number; email: string; username: string };
+  user: AuthUser;
 }
 
 interface RefreshResponse {
@@ -78,29 +78,31 @@ export const authService = {
 
   async getUserByUsername(username: string): Promise<AuthUser> {
     const res = await axios.get<{ success: boolean; data: Record<string, unknown> }>(
-      `${BASE}/user/${username}?fields=userId,email,username,emailVerified,profileImage`
+      `${BASE}/user/${username}?fields=userId,email,username,emailVerified,profileImage,role`
     );
-    const d = res.data.data as { userId: number; email: string; username: string; emailVerified: boolean; profileImage?: string };
+    const d = res.data.data as unknown as AuthUser;
     return {
       userId: d.userId,
       email: d.email,
       username: d.username,
       emailVerified: d.emailVerified,
       profileImage: d.profileImage,
+      role: d.role,
     };
   },
 
   async getUserById(userId: number): Promise<AuthUser> {
     const res = await axios.get<{ success: boolean; data: Record<string, unknown> }>(
-      `${BASE}/user/${userId}?fields=userId,email,username,emailVerified,profileImage`
+      `${BASE}/user/${userId}?fields=userId,email,username,emailVerified,profileImage,role`
     );
-    const d = res.data.data as { userId: number; email: string; username: string; emailVerified: boolean; profileImage?: string };
+    const d = res.data.data as unknown as AuthUser;
     return {
       userId: d.userId,
       email: d.email,
       username: d.username,
       emailVerified: d.emailVerified,
       profileImage: d.profileImage,
+      role: d.role,
     };
   },
 

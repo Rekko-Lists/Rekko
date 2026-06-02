@@ -256,6 +256,39 @@ export async function getRecommendedAnimes(
   };
 }
 
+async function getAnimeWidget(endpoint: string, limit: number, signal?: AbortSignal): Promise<Anime[]> {
+  const response = await api.get(endpoint, { params: { limit }, signal });
+  return normalizeAnimes((response.data.data?.animes ?? []) as Anime[]);
+}
+
+export async function getTopSeasonalAnimes(limit = 5, signal?: AbortSignal): Promise<Anime[]> {
+  return getAnimeWidget('/anime/seasonal/top', limit, signal);
+}
+
+export async function getPopularAnimes(limit = 5, signal?: AbortSignal): Promise<Anime[]> {
+  return getAnimeWidget('/anime/popular', limit, signal);
+}
+
+export async function getAiringTodayAnimes(limit = 5, signal?: AbortSignal): Promise<Anime[]> {
+  return getAnimeWidget('/anime/airing-today', limit, signal);
+}
+
+export async function getTopUpcomingAnimes(limit = 5, signal?: AbortSignal): Promise<Anime[]> {
+  return getAnimeWidget('/anime/top-upcoming', limit, signal);
+}
+
+export async function getPopularUpcomingAnimes(limit = 5, signal?: AbortSignal): Promise<Anime[]> {
+  return getAnimeWidget('/anime/popular-upcoming', limit, signal);
+}
+
+export async function getTopAiringAnimes(limit = 5, signal?: AbortSignal): Promise<Anime[]> {
+  return getAnimeWidget('/anime/top-airing', limit, signal);
+}
+
+export async function getWeeklyAiringAnimes(limit = 110, signal?: AbortSignal): Promise<Anime[]> {
+  return getAnimeWidget('/anime/weekly-airing', limit, signal);
+}
+
 // ─── User actions ──────────────────────────────────────────────────────────
 
 export async function likeAnime(malId: number): Promise<void> {

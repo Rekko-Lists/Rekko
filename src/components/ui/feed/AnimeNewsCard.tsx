@@ -21,6 +21,7 @@ interface NewsItem {
   title: string;
   date: string;
   cover?: string;
+  url?: string;
 }
 
 interface Props {
@@ -35,7 +36,13 @@ export default function AnimeNewsCard({ items, orientation = 'vertical' }: Props
         <p className={styles.title}>Anime News</p>
         <div className={styles.rowList}>
           {items.map(n => (
-            <div key={n.id} className={styles.rowItem}>
+            <a
+              key={n.id}
+              className={styles.rowItem}
+              href={n.url}
+              target={n.url ? '_blank' : undefined}
+              rel={n.url ? 'noreferrer' : undefined}
+            >
               {n.cover
                 ? <img src={n.cover} alt="" className={styles.rowCover} />
                 : <div className={styles.rowCover} />
@@ -44,7 +51,7 @@ export default function AnimeNewsCard({ items, orientation = 'vertical' }: Props
                 <p className={styles.rowText}>{n.title}</p>
                 <p className={styles.rowDate}>{n.date}</p>
               </div>
-            </div>
+            </a>
           ))}
         </div>
       </div>
@@ -56,7 +63,13 @@ export default function AnimeNewsCard({ items, orientation = 'vertical' }: Props
     <div className={styles.card}>
       <p className={styles.title}>Anime News</p>
       {items.map(n => (
-        <div key={n.id} className={styles.item}>
+          <a
+            key={n.id}
+            className={styles.item}
+            href={n.url}
+            target={n.url ? '_blank' : undefined}
+            rel={n.url ? 'noreferrer' : undefined}
+          >
           {n.cover
             ? <img src={n.cover} alt="" className={styles.cover} />
             : <div className={styles.cover} />
@@ -65,8 +78,8 @@ export default function AnimeNewsCard({ items, orientation = 'vertical' }: Props
             <p className={styles.text}>{n.title}</p>
             <p className={styles.date}>{n.date}</p>
           </div>
-        </div>
-      ))}
+          </a>
+        ))}
     </div>
   );
 }
