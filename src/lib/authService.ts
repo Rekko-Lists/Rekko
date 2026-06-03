@@ -153,6 +153,11 @@ export const authService = {
     );
     return res.data.data;
   },
+
+  async forgotPassword(username: string): Promise<void> {
+    // Backend redirects after sending the email — manual prevents fetch from following it.
+    await fetch(`${BASE}/user/${username}/forgot-password`, { method: 'POST', redirect: 'manual' });
+  },
 };
 
 export interface SocialLink {
@@ -165,6 +170,7 @@ export interface UserProfileData {
   emailVerified: boolean;
   profileImage?: string;
   socialAccounts?: { socialAccount: { name: string }; socialUrl: string }[];
+  userSocialAccount?: { socialAccount: { name: string }; socialUrl: string }[];
 }
 
 export interface PublicProfile {

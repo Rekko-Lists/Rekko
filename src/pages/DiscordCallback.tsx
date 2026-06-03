@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authService, decodeJwtUserId } from '@/lib/authService';
 import { useAuthStore } from '@/store/useAuthStore';
+import Spinner from '@/components/ui/common/Spinner';
 
 export default function DiscordCallback() {
   const [searchParams] = useSearchParams();
@@ -37,7 +38,7 @@ export default function DiscordCallback() {
   return (
     <div className="min-h-screen bg-app-bg flex items-center justify-center font-gabarito">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <Spinner />
         <p className="text-sm text-text-muted">Connecting with Discord...</p>
       </div>
     </div>

@@ -3,7 +3,7 @@ import AnimeNewsCard from "@/components/ui/feed/AnimeNewsCard";
 import PopularRecommendationsCard, { type RecommendationItem } from "@/components/ui/feed/PopularRecommendationsCard";
 import LeaderboardPodium from "@/components/ui/leaderboard/LeaderboardPodium";
 import LeaderboardList from "@/components/ui/leaderboard/LeaderboardList";
-import CloudFooterBackground from "@/components/ui/leaderboard/CloudFooterBackground";
+import MovingCloudBackground from "@/components/ui/explore/MovingCloudBackground";
 import { getTopReputationUsers, type ReputationUser } from "@/lib/userService";
 import { getLatestAnimeNews, type AnimeNewsItem } from "@/lib/animeNewsService";
 import { getPopularPosts } from "@/lib/postService";
@@ -13,8 +13,8 @@ const NEWS_FALLBACK_MAL_IDS = [52991, 5114, 9253, 30276];
 const styles = {
   page: "relative mx-auto grid min-h-[calc(100vh-136px)] w-full max-w-[1608px] grid-cols-1 gap-6 overflow-hidden px-4 py-0 font-gabarito lg:grid-cols-[260px_minmax(0,1040px)_260px]",
   side: "relative z-10 flex flex-col justify-start gap-4 py-6 lg:sticky lg:top-[136px] lg:h-[calc(100vh-136px)] lg:overflow-y-auto",
-  main: "relative z-10 flex min-h-[calc(100vh-136px)] min-w-0 items-center justify-center py-0",
-  card: "flex min-h-[calc(100vh-136px)] w-full flex-col justify-center overflow-hidden border-x border-border bg-surface/85 px-6 py-10 shadow-[0_20px_80px_rgba(0,0,0,0.06)]",
+  main: "relative z-10 flex min-w-0 items-start py-8",
+  card: "flex w-full flex-col overflow-hidden border-x border-border bg-surface/85 px-6 py-10 shadow-[0_20px_80px_rgba(0,0,0,0.06)]",
   eyebrow: "text-center text-xs font-semibold uppercase tracking-[0.32em] text-primary",
   title: "leaderboard-title mt-2 text-center text-[42px] font-black leading-none text-text-main",
   subtitle: "mx-auto mt-3 max-w-[560px] text-center text-sm text-text-muted",
@@ -53,7 +53,7 @@ export default function Leaderboard() {
         @keyframes leaderboard-title { from { opacity: 0; letter-spacing: .18em; transform: translateY(12px); } to { opacity: 1; letter-spacing: 0; transform: translateY(0); } }
         .leaderboard-title { animation: leaderboard-title .7s ease-out both; }
       `}</style>
-      <CloudFooterBackground />
+      <MovingCloudBackground enabled />
       <aside className={styles.side}>
         <AnimeNewsCard items={news} />
       </aside>

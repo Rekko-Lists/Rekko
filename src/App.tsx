@@ -4,6 +4,7 @@ import { router } from './router';
 import { useAuthStore } from './store/useAuthStore';
 import { getStoredRefreshToken } from './lib/tokenStorage';
 import { authService } from './lib/authService';
+import Spinner from './components/ui/common/Spinner';
 
 export default function App() {
   const { accessToken, setAccessToken, logout } = useAuthStore();
@@ -28,7 +29,7 @@ export default function App() {
   if (!ready) {
     return (
       <div className="min-h-screen bg-app-bg flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <Spinner />
       </div>
     );
   }
