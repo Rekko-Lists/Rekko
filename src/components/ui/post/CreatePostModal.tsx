@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { X, ImageIcon } from 'lucide-react';
 import { createPost } from '@/lib/postService';
 import { searchAnimes } from '@/lib/searchService';
@@ -19,6 +20,7 @@ interface Props {
 
 export default function CreatePostModal({ isOpen, onClose }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const animeInputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -306,43 +308,55 @@ export default function CreatePostModal({ isOpen, onClose }: Props) {
               </div>
             )}
 
-            {/* Search input + dropdown */}
+            {/* Search input + dropdown (dropdown rendered in portal to escape modal scroll clipping) */}
             {selectedAnimes.length < MAX_ANIMES && (
               <div className="relative">
                 <input
+                  ref={animeInputRef}
                   type="text"
                   value={animeQuery}
                   onChange={handleAnimeQueryChange}
                   placeholder="Buscar anime... (mín. 3 caracteres)"
                   className="w-full rounded-[8px] border border-border bg-app-bg text-text-main text-sm px-3 py-2.5 placeholder:text-text-muted focus:outline-none focus:border-primary transition-colors"
                 />
-
-                {/* Dropdown */}
-                {(animeResults.length > 0 || searchLoading) && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-surface border border-border rounded-[8px] shadow-card z-10 max-h-48 overflow-y-auto">
-                    {searchLoading && (
-                      <div className="px-3 py-2 text-sm text-text-muted">Buscando...</div>
-                    )}
-                    {!searchLoading && animeResults.map((anime) => (
-                      <button
-                        key={anime.malId}
-                        className="w-full flex items-center gap-3 px-3 py-2 hover:bg-app-bg transition-colors text-left"
-                        onClick={() => addAnime(anime)}
-                      >
-                        {anime.imgMedium && (
-                          <img
-                            src={anime.imgMedium}
-                            alt={anime.name}
-                            className="w-8 h-10 object-cover rounded-[4px] flex-shrink-0"
-                          />
-                        )}
-                        <span className="text-sm text-text-main line-clamp-2">{anime.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
             )}
+            {(animeResults.length > 0 || searchLoading) && animeInputRef.current && (() => {
+              const rect = animeInputRef.current!.getBoundingClientRect();
+              return createPortal(
+              <div
+                style={{
+                  position: 'fixed',
+                  top: rect.bottom + 4,
+                  left: rect.left,
+                  width: rect.width,
+                  zIndex: 9999,
+                }}
+                className="bg-surface border border-border rounded-[8px] shadow-card max-h-48 overflow-y-auto"
+              >
+                {searchLoading && (
+                  <div className="px-3 py-2 text-sm text-text-muted">Buscando...</div>
+                )}
+                {!searchLoading && animeResults.map((anime) => (
+                  <button
+                    key={anime.malId}
+                    className="w-full flex items-center gap-3 px-3 py-2 hover:bg-app-bg transition-colors text-left"
+                    onMouseDown={(e) => { e.preventDefault(); addAnime(anime); }}
+                  >
+                    {anime.imgMedium && (
+                      <img
+                        src={anime.imgMedium}
+                        alt={anime.name}
+                        className="w-8 h-10 object-cover rounded-[4px] flex-shrink-0"
+                      />
+                    )}
+                    <span className="text-sm text-text-main line-clamp-2">{anime.name}</span>
+                  </button>
+                ))}
+              </div>,
+              document.body
+            );
+            })()}
           </div>
         </div>
 

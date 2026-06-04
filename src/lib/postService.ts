@@ -155,23 +155,12 @@ export function toFeedPost(post: PostDetailData): Post {
   };
 }
 
-export async function getPosts(
-  params: ListPostsParams = {},
-  signal?: AbortSignal,
-): Promise<PostsPage> {
+async function fetchPostsPage(url: string, params: ListPostsParams = {}, signal?: AbortSignal): Promise<PostsPage> {
   const { filters, ...rest } = params;
-  const response = await api.get<RawPostsEnvelope>("/post", {
-    params: {
-      page: 1,
-      limit: 10,
-      sortField: "createdAt",
-      sortOrder: "desc",
-      ...rest,
-      ...filters,
-    },
+  const response = await api.get<RawPostsEnvelope>(url, {
+    params: { page: 1, limit: 10, sortField: "createdAt", sortOrder: "desc", ...rest, ...filters },
     signal,
   });
-
   return {
     posts: response.data.data?.posts ?? [],
     pagination: response.data.data?.pagination ?? {
@@ -181,6 +170,10 @@ export async function getPosts(
       pages: 0,
     },
   };
+}
+
+export function getPosts(params: ListPostsParams = {}, signal?: AbortSignal): Promise<PostsPage> {
+  return fetchPostsPage("/post", params, signal);
 }
 
 export async function getPopularPosts(
@@ -252,6 +245,10 @@ export async function createComment(params: {
   parentCommentId?: number | null;
 }): Promise<void> {
   await api.post("/comment", params);
+}
+
+export function getPostsByUsername(username: string, params: ListPostsParams = {}, signal?: AbortSignal): Promise<PostsPage> {
+  return fetchPostsPage(`/post/by-user/${username}`, params, signal);
 }
 
 export async function likePost(postId: number): Promise<PostDetailData | null> {

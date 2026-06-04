@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Edit, Star, Settings as SettingsIcon, Image } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Avatar from '@/components/ui/common/Avatar';
 import Button from '@/components/ui/common/Button';
+import Spinner from '@/components/ui/common/Spinner';
 import PostCard from '@/components/ui/feed/PostCard';
 import ImageUploadModal, { type UploadImageType } from '@/components/ui/profile/ImageUploadModal';
 import rekkoSword from '@/assets/rekko_sword.png';
@@ -13,6 +14,7 @@ import { logger } from '@/lib/logger';
 import type { Post } from '@/store/useFeedStore';
 import Seo from '@/components/seo/Seo';
 import { absoluteUrl, pageJsonLd } from '@/components/seo/jsonLd';
+import { getPostsByUsername, toFeedPost } from '@/lib/postService';
 
 const MOCK_POST: Post = {
   id: '1',
@@ -55,8 +57,20 @@ export default function Profile() {
   const [loadError,   setLoadError]   = useState(false);
   const [uploadModal, setUploadModal] = useState<UploadImageType | null>(null);
 
+  // Posts infinite scroll
+  const [posts, setPosts]               = useState<Post[]>([]);
+  const [postsLoading, setPostsLoading] = useState(false);
+  const [postsHasMore, setPostsHasMore] = useState(true);
+  const sentinelRef      = useRef<HTMLDivElement>(null);
+  const postsPageRef     = useRef(0);
+  const postsLoadingRef  = useRef(false);
+  const postsHasMoreRef  = useRef(true);
+  const activeUsername   = useRef<string | undefined>(undefined);
+  const abortPostsRef    = useRef<AbortController | null>(null);
+
   const isOwnProfile = !!user && user.username === username;
 
+  // Load profile info
   useEffect(() => {
     if (!username) return;
     setLoading(true);
@@ -73,6 +87,59 @@ export default function Profile() {
       .finally(() => setLoading(false));
   }, [username]);
 
+  function loadPostsPage(targetUsername: string, page: number, signal?: AbortSignal) {
+    if (postsLoadingRef.current) return;
+    postsLoadingRef.current = true;
+    setPostsLoading(true);
+    getPostsByUsername(targetUsername, { page, limit: 10 }, signal)
+      .then(result => {
+        if (activeUsername.current !== targetUsername) return;
+        const mapped = result.posts.map(toFeedPost);
+        const hasMore = page < result.pagination.pages;
+        setPosts(prev => page === 1 ? mapped : [...prev, ...mapped]);
+        postsHasMoreRef.current = hasMore;
+        setPostsHasMore(hasMore);
+        postsPageRef.current = page;
+      })
+      .catch((err: unknown) => { logger.error('Failed to load posts', err); postsHasMoreRef.current = false; setPostsHasMore(false); })
+      .finally(() => {
+        postsLoadingRef.current = false;
+        setPostsLoading(false);
+      });
+  }
+
+  // Reset + initial load when username changes
+  useEffect(() => {
+    if (!username) return;
+    abortPostsRef.current?.abort();
+    abortPostsRef.current = new AbortController();
+    activeUsername.current   = username;
+    postsPageRef.current     = 0;
+    postsLoadingRef.current  = false;
+    postsHasMoreRef.current  = true;
+    setPosts([]);
+    setPostsHasMore(true);
+    loadPostsPage(username, 1, abortPostsRef.current.signal);
+    return () => abortPostsRef.current?.abort();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [username]);
+
+  // IntersectionObserver for infinite scroll — uses refs so it never needs to re-create
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(entries => {
+      if (!entries[0].isIntersecting) return;
+      if (postsLoadingRef.current || !postsHasMoreRef.current) return;
+      const u = activeUsername.current;
+      if (!u) return;
+      loadPostsPage(u, postsPageRef.current + 1, abortPostsRef.current?.signal);
+    }, { threshold: 0.5 });
+    observer.observe(el);
+    return () => observer.disconnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   function handleUploadSuccess(imageUrl: string) {
     setProfileUser(prev => {
       if (!prev) return prev;
@@ -83,8 +150,6 @@ export default function Profile() {
                                           { backgroundImage: imageUrl }),
       };
     });
-    // Keep navbar avatar in sync when own profile image changes.
-    // Read current user from store directly to avoid stale closure.
     if (uploadModal === 'profile') {
       const currentUser = useAuthStore.getState().user;
       if (currentUser) setUser({ ...currentUser, profileImage: imageUrl });
@@ -94,7 +159,7 @@ export default function Profile() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[60vh] font-gabarito">
-        <p className="text-text-muted text-sm">Loading profile...</p>
+        <Spinner />
       </div>
     );
   }
@@ -149,6 +214,14 @@ export default function Profile() {
         className="absolute inset-0 bg-app-bg bg-cover bg-center"
         style={profileUser?.backgroundImage ? { backgroundImage: `url(${profileUser.backgroundImage})` } : {}}
       />
+    <div
+      className="relative font-gabarito overflow-x-hidden min-h-full bg-app-bg bg-cover bg-center"
+      style={
+        profileUser?.backgroundImage
+          ? { backgroundImage: `url(${profileUser.backgroundImage})`, backgroundAttachment: 'fixed' }
+          : {}
+      }
+    >
 
       {/* Background change button (own profile only) */}
       {isOwnProfile && (
@@ -168,7 +241,7 @@ export default function Profile() {
       />
 
       {/* Profile card — centered */}
-      <div className="relative max-w-[760px] mx-auto bg-surface border-[1.5px] border-border border-top-none" style={{ minHeight: '100%' }}>
+      <div className="relative max-w-[760px] mx-auto bg-surface border-[1.5px] border-border border-top-none min-h-screen">
 
         {/* Banner area */}
         <div className="relative h-[153px] bg-gradient-banner overflow-hidden">
@@ -251,8 +324,25 @@ export default function Profile() {
             ))}
           </div>
 
-          {/* Posts */}
-          <PostCard post={{ ...MOCK_POST, user: profileUser?.username ?? 'Username' }} />
+          {/* Real posts */}
+          <div className="flex flex-col gap-4">
+            {posts.map(post => (
+              <PostCard key={post.id} post={post} />
+            ))}
+
+            {postsLoading && (
+              <div className="flex justify-center py-4">
+                <Spinner size="sm" />
+              </div>
+            )}
+
+            {!postsLoading && !postsHasMore && posts.length === 0 && (
+              <p className="text-center text-sm text-text-muted py-4">No posts yet.</p>
+            )}
+
+            {/* Sentinel below spinner so it's not in view while loading */}
+            <div ref={sentinelRef} className="h-4" />
+          </div>
         </div>
       </div>
 

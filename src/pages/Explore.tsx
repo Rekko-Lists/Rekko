@@ -17,6 +17,7 @@ import { useEffect, useState } from 'react';
 import Seo from '@/components/seo/Seo';
 import { itemListJsonLd, pageJsonLd } from '@/components/seo/jsonLd';
 import { seoPages } from '@/components/seo/pages';
+import Spinner from '@/components/ui/common/Spinner';
 
 interface ExploreData {
   seasonal: Anime[];
@@ -73,7 +74,7 @@ async function loadExploreData(signal: AbortSignal): Promise<ExploreData> {
     getPopularAnimes(6, signal),
     getTopAiringAnimes(2, signal),
     getTopUpcomingAnimes(2, signal),
-    getWeeklyAiringAnimes(110, signal),
+    getWeeklyAiringAnimes(70, signal),
     getPosts({ page: 1, limit: 3, sortField: 'createdAt', sortOrder: 'desc' }, signal).then((page) => page.posts),
     getPopularPosts(3, signal),
   ]);
@@ -111,16 +112,29 @@ async function loadExploreData(signal: AbortSignal): Promise<ExploreData> {
 export default function Explore() {
   const [cloudsEnabled, setCloudsEnabled] = useState(true);
   const [data, setData] = useState<ExploreData>(EMPTY_DATA);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const controller = new AbortController();
 
-    loadExploreData(controller.signal).then((nextData) => {
-      if (!controller.signal.aborted) setData(nextData);
-    });
+    loadExploreData(controller.signal)
+      .then((nextData) => {
+        if (!controller.signal.aborted) setData(nextData);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
 
     return () => controller.abort();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-138px)]">
+        <Spinner />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>
