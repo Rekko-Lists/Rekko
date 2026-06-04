@@ -29,6 +29,8 @@ import PostDetailArticle from "@/components/ui/post-detail/PostDetailArticle";
 import CommentComposer from "@/components/ui/post-detail/CommentComposer";
 import CommentsVirtualList from "@/components/ui/post-detail/CommentsVirtualList";
 import PostDetailSidebar from "@/components/ui/post-detail/PostDetailSidebar";
+import Seo from "@/components/seo/Seo";
+import { absoluteUrl, pageJsonLd } from "@/components/seo/jsonLd";
 
 const COMMENTS_LIMIT = 30;
 const COMMENT_ROW_HEIGHT = 112;
@@ -311,9 +313,52 @@ export default function PostDetail() {
   if (!post) return <p className={styles.state}>Post not found.</p>;
 
   const relatedAnimes = normalizeRelated(post);
+  const postTitle = post.title || `Post by ${post.user?.username ?? "Rekko user"}`;
+  const postDescription =
+    post.description?.slice(0, 155) ||
+    `Read this anime recommendation and discussion on Rekko.`;
 
   return (
     <div className={styles.page}>
+      <Seo
+        title={postTitle}
+        description={postDescription}
+        canonicalPath={`/post/${post.postId}`}
+        image={post.photo || post.animes[0]?.imgMedium || "/rekko_logo.png"}
+        jsonLd={[
+          pageJsonLd({
+            type: "DiscussionForumPosting",
+            path: `/post/${post.postId}`,
+            name: postTitle,
+            description: postDescription,
+            image: post.photo || post.animes[0]?.imgMedium,
+          }),
+          {
+            "@context": "https://schema.org",
+            "@type": "SocialMediaPosting",
+            headline: postTitle,
+            text: post.description,
+            image: post.photo ? absoluteUrl(post.photo) : undefined,
+            url: absoluteUrl(`/post/${post.postId}`),
+            author: {
+              "@type": "Person",
+              name: post.user?.username ?? "Rekko user",
+            },
+            interactionStatistic: [
+              {
+                "@type": "InteractionCounter",
+                interactionType: "https://schema.org/LikeAction",
+                userInteractionCount: post.likes,
+              },
+              {
+                "@type": "InteractionCounter",
+                interactionType: "https://schema.org/CommentAction",
+                userInteractionCount: commentsTotal,
+              },
+            ],
+          },
+        ]}
+      />
       <div className={styles.shell}>
         <PostDetailSidebar side="left" news={news} />
         <main className={styles.main}>

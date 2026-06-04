@@ -7,6 +7,8 @@ import type { SocialLink } from '@/lib/authService';
 import { extractApiError } from '@/lib/apiErrors';
 import { logger } from '@/lib/logger';
 import ImageUploadModal from '@/components/ui/profile/ImageUploadModal';
+import Seo from '@/components/seo/Seo';
+import { seoPages } from '@/components/seo/pages';
 
 const PLATFORMS = ['twitter', 'instagram', 'github', 'youtube', 'twitch', 'linkedin', 'discord', 'tiktok'];
 
@@ -142,6 +144,12 @@ export default function Settings() {
 
   return (
     <div className={styles.page}>
+      <Seo
+        title={seoPages.settings.title}
+        description={seoPages.settings.description}
+        canonicalPath={seoPages.settings.path}
+        noindex={seoPages.settings.noindex}
+      />
       {/* Sidebar */}
       <aside className={styles.sidebar}>
         <button className={section === 'general' ? styles.sideActive : styles.sideItem} onClick={() => setSection('general')}>

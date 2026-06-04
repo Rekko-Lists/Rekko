@@ -11,6 +11,8 @@ import type { PublicProfile } from '@/lib/authService';
 import { useAuthStore } from '@/store/useAuthStore';
 import { logger } from '@/lib/logger';
 import type { Post } from '@/store/useFeedStore';
+import Seo from '@/components/seo/Seo';
+import { absoluteUrl, pageJsonLd } from '@/components/seo/jsonLd';
 
 const MOCK_POST: Post = {
   id: '1',
@@ -118,6 +120,29 @@ export default function Profile() {
 
   return (
     <div className="relative font-gabarito overflow-x-hidden" style={{ minHeight: '100%' }}>
+      <Seo
+        title={`${profileUser?.username ?? username}`}
+        description={profileUser?.biography || `View ${profileUser?.username ?? username}'s anime profile, list, and posts on Rekko.`}
+        canonicalPath={`/profile/${username}`}
+        image={profileUser?.profileImage || '/rekko_logo.png'}
+        jsonLd={[
+          pageJsonLd({
+            type: 'ProfilePage',
+            path: `/profile/${username}`,
+            name: `${profileUser?.username ?? username}`,
+            description: profileUser?.biography || `Anime profile for ${profileUser?.username ?? username} on Rekko.`,
+            image: profileUser?.profileImage,
+          }),
+          {
+            '@context': 'https://schema.org',
+            '@type': 'Person',
+            name: profileUser?.username ?? username,
+            url: absoluteUrl(`/profile/${username}`),
+            image: profileUser?.profileImage ? absoluteUrl(profileUser.profileImage) : undefined,
+            description: profileUser?.biography,
+          },
+        ]}
+      />
 
       {/* Full-page background */}
       <div

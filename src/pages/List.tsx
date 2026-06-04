@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { Check, Clock, Edit, Eye, X, Star, type LucideIcon } from 'lucide-react';
+import Seo from '@/components/seo/Seo';
+import { itemListJsonLd, pageJsonLd } from '@/components/seo/jsonLd';
+import { seoPages } from '@/components/seo/pages';
 
 interface ListEntry {
   id: string;
@@ -69,6 +72,28 @@ export default function List() {
 
   return (
     <div className={styles.page}>
+      <Seo
+        title={seoPages.list.title}
+        description={seoPages.list.description}
+        canonicalPath={seoPages.list.path}
+        noindex={seoPages.list.noindex}
+        jsonLd={[
+          pageJsonLd({
+            type: seoPages.list.schemaType,
+            path: seoPages.list.path,
+            name: seoPages.list.title,
+            description: seoPages.list.description,
+          }),
+          itemListJsonLd(
+            "My Rekko anime list",
+            seoPages.list.path,
+            filtered.map((entry) => ({
+              name: entry.title,
+              url: "/list",
+            })),
+          ),
+        ]}
+      />
       <div className={styles.topRow}>
         <h1 className={styles.title}>My List -</h1>
         <div className={styles.tabRow}>

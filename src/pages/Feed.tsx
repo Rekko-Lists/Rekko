@@ -20,6 +20,14 @@ import {
 } from "@/lib/postService";
 import { getTopReputationUsers } from "@/lib/userService";
 import AnimeListWidget from "@/components/ui/feed/widgets/AnimeListWidget";
+import Seo from "@/components/seo/Seo";
+import {
+  itemListJsonLd,
+  organizationJsonLd,
+  pageJsonLd,
+  websiteJsonLd,
+} from "@/components/seo/jsonLd";
+import { seoPages } from "@/components/seo/pages";
 import {
   getAiringTodayAnimes,
   getPopularAnimes,
@@ -258,6 +266,30 @@ export default function Feed() {
 
   return (
     <div className={styles.page}>
+      <Seo
+        title={seoPages.feed.title}
+        description={seoPages.feed.description}
+        canonicalPath={seoPages.feed.path}
+        jsonLd={[
+          websiteJsonLd(),
+          organizationJsonLd(),
+          pageJsonLd({
+            type: seoPages.feed.schemaType,
+            path: seoPages.feed.path,
+            name: seoPages.feed.title,
+            description: seoPages.feed.description,
+          }),
+          itemListJsonLd(
+            "Latest Rekko posts",
+            seoPages.feed.path,
+            posts.slice(0, 10).map((post) => ({
+              name: post.text.slice(0, 90) || "Rekko post",
+              url: `/post/${post.id}`,
+              image: post.userImage,
+            })),
+          ),
+        ]}
+      />
       <aside className={styles.sidebar}>
         <AnimeNewsCard items={news} />
         {randomWidgets[0] && (

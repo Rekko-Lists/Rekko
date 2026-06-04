@@ -18,6 +18,8 @@ import AnimeNewsHorizontal from "@/components/ui/anime-detail/AnimeNewsHorizonta
 import PersonalRecommendation from "@/components/ui/anime-detail/PersonalRecommendation";
 import RecommendedAnimesFooter from "@/components/ui/anime-detail/RecommendedAnimesFooter";
 import { getAnimeNews, type AnimeNewsItem } from "@/lib/animeNewsService";
+import Seo from "@/components/seo/Seo";
+import { absoluteUrl, pageJsonLd } from "@/components/seo/jsonLd";
 
 const styles = {
   page: "min-h-full bg-app-bg font-gabarito relative overflow-x-hidden",
@@ -134,6 +136,43 @@ export default function AnimeDetail() {
 
   return (
     <div className={styles.page}>
+      <Seo
+        title={anime.name}
+        description={
+          anime.synopsis?.slice(0, 155) ||
+          `View ${anime.name} details, synopsis, stats, recommendations, related anime, and community posts on Rekko.`
+        }
+        canonicalPath={`/animes/${anime.malId}`}
+        image={anime.imgLarge || anime.imgMedium || "/rekko_logo.png"}
+        jsonLd={[
+          pageJsonLd({
+            type: "ProfilePage",
+            path: `/animes/${anime.malId}`,
+            name: anime.name,
+            description:
+              anime.synopsis ||
+              `Anime details, stats, recommendations, and community posts for ${anime.name}.`,
+            image: anime.imgLarge || anime.imgMedium,
+          }),
+          {
+            "@context": "https://schema.org",
+            "@type": "TVSeries",
+            name: anime.name,
+            description: anime.synopsis,
+            image: absoluteUrl(anime.imgLarge || anime.imgMedium || "/rekko_logo.png"),
+            url: absoluteUrl(`/animes/${anime.malId}`),
+            numberOfEpisodes: anime.numEpisodes || undefined,
+            aggregateRating:
+              (anime.mean ?? anime.malMean ?? 0) > 0
+                ? {
+                    "@type": "AggregateRating",
+                    ratingValue: anime.mean ?? anime.malMean,
+                    bestRating: 10,
+                  }
+                : undefined,
+          },
+        ]}
+      />
       <div
         className={styles.bgClouds}
         style={{

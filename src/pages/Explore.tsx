@@ -14,6 +14,9 @@ import {
 import { getPopularPosts, getPosts, type PostDetailData } from '@/lib/postService';
 import type { Anime } from '@/types/anime';
 import { useEffect, useState } from 'react';
+import Seo from '@/components/seo/Seo';
+import { itemListJsonLd, pageJsonLd } from '@/components/seo/jsonLd';
+import { seoPages } from '@/components/seo/pages';
 
 interface ExploreData {
   seasonal: Anime[];
@@ -121,6 +124,28 @@ export default function Explore() {
 
   return (
     <div className={styles.page}>
+      <Seo
+        title={seoPages.explore.title}
+        description={seoPages.explore.description}
+        canonicalPath={seoPages.explore.path}
+        jsonLd={[
+          pageJsonLd({
+            type: seoPages.explore.schemaType,
+            path: seoPages.explore.path,
+            name: seoPages.explore.title,
+            description: seoPages.explore.description,
+          }),
+          itemListJsonLd(
+            "Featured anime on Rekko",
+            seoPages.explore.path,
+            [...data.seasonal, ...data.popular].slice(0, 10).map((anime) => ({
+              name: anime.name,
+              url: `/animes/${anime.malId}`,
+              image: anime.imgMedium || anime.imgLarge,
+            })),
+          ),
+        ]}
+      />
       <MovingCloudBackground enabled={cloudsEnabled} />
       <ExploreCloudToggle enabled={cloudsEnabled} onToggle={() => setCloudsEnabled((value) => !value)} />
 
