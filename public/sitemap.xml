@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+>
+  <url>
+    <loc>https://rekko-one.vercel.app/feed</loc>
+    <changefreq>hourly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://rekko-one.vercel.app/rekko_logo.png</image:loc>
+      <image:title>Rekko anime community</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://rekko-one.vercel.app/explore</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://rekko-one.vercel.app/rekko_clouds_fullhd.png</image:loc>
+      <image:title>Explore anime on Rekko</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://rekko-one.vercel.app/animes</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://rekko-one.vercel.app/animes?tab=top</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://rekko-one.vercel.app/animes?tab=seasonal</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://rekko-one.vercel.app/leaderboard</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://rekko-one.vercel.app/animedle</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://rekko-one.vercel.app/rekko_mascot.png</image:loc>
+      <image:title>Animedle anime guessing game</image:title>
+    </image:image>
+  </url>
+</urlset>
