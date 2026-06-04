@@ -18,6 +18,9 @@ import type { GetAnimesParams } from "@/lib/animeService";
 import { getGenres } from "@/lib/animeService";
 import { computeSeasonOptions } from "@/lib/seasonUtils";
 import type { Anime, AnimeRelation } from "@/types/anime";
+import Seo from "@/components/seo/Seo";
+import { itemListJsonLd, pageJsonLd } from "@/components/seo/jsonLd";
+import { seoPages } from "@/components/seo/pages";
 
 const DEFAULT_TYPE_FILTER = { "mediaType[in]": "tv,ova,movie" } as const;
 const CARD_WIDTH = 180;
@@ -312,6 +315,23 @@ export default function Animes() {
   const { anime: relatedAnchorAnime } = useAnimeDetail(
     isRelatedView ? relatedTo : undefined,
   );
+  const seoTitle = isRecommendedView
+    ? `Anime recommended from ${anchorAnime?.name ?? "Rekko"}`
+    : isRelatedView
+      ? `Anime related to ${relatedAnchorAnime?.name ?? "Rekko"}`
+      : selectedGenre
+        ? `${selectedGenre} anime`
+        : activeTab === "View All"
+          ? seoPages.animes.title
+          : `${activeTab} catalogue`;
+  const seoDescription = isRecommendedView
+    ? `Discover anime recommendations based on ${anchorAnime?.name ?? "a selected anime"} on Rekko.`
+    : isRelatedView
+      ? `Browse anime related to ${relatedAnchorAnime?.name ?? "a selected anime"} on Rekko.`
+      : selectedGenre
+        ? `Browse ${selectedGenre} anime in the Rekko catalogue.`
+        : seoPages.animes.description;
+  const seoPath = `/animes${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
 
   const filterProperties = useMemo<FilterProperty[]>(
     () => [
@@ -413,6 +433,28 @@ export default function Animes() {
   if (isRecommendedView) {
     return (
       <div className={styles.page}>
+        <Seo
+          title={seoTitle}
+          description={seoDescription}
+          canonicalPath={seoPath}
+          jsonLd={[
+            pageJsonLd({
+              type: "CollectionPage",
+              path: seoPath,
+              name: seoTitle,
+              description: seoDescription,
+            }),
+            itemListJsonLd(
+              seoTitle,
+              seoPath,
+              recommendedAnimes.slice(0, 24).map((anime) => ({
+                name: anime.name,
+                url: `/animes/${anime.malId}`,
+                image: anime.imgMedium || anime.imgLarge,
+              })),
+            ),
+          ]}
+        />
         <div className={styles.body}>
           <div className={styles.grid}>
             <div className={styles.breadcrumb}>
@@ -461,6 +503,28 @@ export default function Animes() {
 
     return (
       <div className={styles.page}>
+        <Seo
+          title={seoTitle}
+          description={seoDescription}
+          canonicalPath={seoPath}
+          jsonLd={[
+            pageJsonLd({
+              type: "CollectionPage",
+              path: seoPath,
+              name: seoTitle,
+              description: seoDescription,
+            }),
+            itemListJsonLd(
+              seoTitle,
+              seoPath,
+              relatedAnimes.slice(0, 24).map((anime) => ({
+                name: anime.name,
+                url: `/animes/${anime.malId}`,
+                image: anime.imgMedium || anime.imgLarge,
+              })),
+            ),
+          ]}
+        />
         <div className={styles.body}>
           <div className={styles.grid}>
             <div className={styles.breadcrumb}>
@@ -493,6 +557,28 @@ export default function Animes() {
 
   return (
     <div className={styles.page}>
+      <Seo
+        title={seoTitle}
+        description={seoDescription}
+        canonicalPath={seoPath}
+        jsonLd={[
+          pageJsonLd({
+            type: "CollectionPage",
+            path: seoPath,
+            name: seoTitle,
+            description: seoDescription,
+          }),
+          itemListJsonLd(
+            seoTitle,
+            seoPath,
+            animes.slice(0, 24).map((anime) => ({
+              name: anime.name,
+              url: `/animes/${anime.malId}`,
+              image: anime.imgMedium || anime.imgLarge,
+            })),
+          ),
+        ]}
+      />
       <SubNav
         activeTab={activeTab}
         onTabChange={handleTabChange}

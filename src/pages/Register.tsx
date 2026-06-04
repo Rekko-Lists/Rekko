@@ -4,6 +4,8 @@ import Button from '@/components/ui/common/Button';
 import { authService, decodeJwtUserId } from '@/lib/authService';
 import { signInWithGoogle } from '@/lib/firebase';
 import { useAuthStore } from '@/store/useAuthStore';
+import Seo from '@/components/seo/Seo';
+import { seoPages } from '@/components/seo/pages';
 
 const styles = {
   page:      'min-h-screen bg-app-bg flex items-center justify-center font-gabarito',
@@ -102,6 +104,12 @@ export default function Register() {
 
   return (
     <div className={styles.page}>
+      <Seo
+        title={seoPages.register.title}
+        description={seoPages.register.description}
+        canonicalPath={seoPages.register.path}
+        noindex={seoPages.register.noindex}
+      />
       <form className={styles.card} onSubmit={handleSubmit}>
         <h1 className={styles.title}>Sign Up</h1>
 

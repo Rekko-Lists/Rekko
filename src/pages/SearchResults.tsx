@@ -5,6 +5,9 @@ import {
   type SearchResults as SearchResultsData,
 } from "@/lib/searchService";
 import { extractApiError } from "@/lib/apiErrors";
+import Seo from "@/components/seo/Seo";
+import { itemListJsonLd, pageJsonLd } from "@/components/seo/jsonLd";
+import { seoPages } from "@/components/seo/pages";
 
 const MIN_QUERY_LENGTH = 3;
 
@@ -74,9 +77,48 @@ export default function SearchResults() {
     results.animes.length > 0 ||
     results.users.length > 0 ||
     results.posts.length > 0;
+  const seoPath = query ? `${seoPages.search.path}?q=${encodeURIComponent(query)}` : seoPages.search.path;
+  const seoTitle = query ? `Search results for "${query}"` : seoPages.search.title;
+  const seoDescription = query
+    ? `Search Rekko for anime, users, and posts matching "${query}".`
+    : seoPages.search.description;
 
   return (
     <div className={styles.page}>
+      <Seo
+        title={seoTitle}
+        description={seoDescription}
+        canonicalPath={seoPath}
+        noindex={query.length < MIN_QUERY_LENGTH}
+        jsonLd={[
+          pageJsonLd({
+            type: seoPages.search.schemaType,
+            path: seoPath,
+            name: seoTitle,
+            description: seoDescription,
+          }),
+          itemListJsonLd(
+            query ? `Search results for ${query}` : "Rekko search results",
+            seoPath,
+            [
+              ...results.animes.map((anime) => ({
+                name: anime.name,
+                url: `/animes/${anime.malId}`,
+                image: anime.imgMedium,
+              })),
+              ...results.users.map((user) => ({
+                name: user.username,
+                url: `/profile/${user.username}`,
+                image: user.profileImage,
+              })),
+              ...results.posts.map((post) => ({
+                name: post.title,
+                url: `/post/${post.postId}`,
+              })),
+            ].slice(0, 20),
+          ),
+        ]}
+      />
       <div className={styles.container}>
         <h1 className={styles.title}>Search</h1>
         <p className={styles.subtitle}>

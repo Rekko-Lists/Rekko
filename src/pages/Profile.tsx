@@ -12,7 +12,24 @@ import type { PublicProfile } from '@/lib/authService';
 import { useAuthStore } from '@/store/useAuthStore';
 import { logger } from '@/lib/logger';
 import type { Post } from '@/store/useFeedStore';
+import Seo from '@/components/seo/Seo';
+import { absoluteUrl, pageJsonLd } from '@/components/seo/jsonLd';
 import { getPostsByUsername, toFeedPost } from '@/lib/postService';
+
+const MOCK_POST: Post = {
+  id: '1',
+  user: 'Username',
+  time: '10 hours ago',
+  text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam non diam nulla. Sed lectus orci, iaculis nec justo in, placerat interdum risus.',
+  relatedAnimes: [
+    { id: 'a1', title: 'Frieren', cover: '' },
+    { id: 'a2', title: 'Frieren S2', cover: '' },
+  ],
+  userImage: '',
+  likes: 50,
+  comments: 5,
+  liked: false,
+};
 
 const MOCK_LIST = [
   { id: '1', title: 'Steins;Gate', situation: 'Finished Airing', progress: '24/24', score: 9 },
@@ -167,6 +184,36 @@ export default function Profile() {
   }
 
   return (
+    <div className="relative font-gabarito overflow-x-hidden" style={{ minHeight: '100%' }}>
+      <Seo
+        title={`${profileUser?.username ?? username}`}
+        description={profileUser?.biography || `View ${profileUser?.username ?? username}'s anime profile, list, and posts on Rekko.`}
+        canonicalPath={`/profile/${username}`}
+        image={profileUser?.profileImage || '/rekko_logo.png'}
+        jsonLd={[
+          pageJsonLd({
+            type: 'ProfilePage',
+            path: `/profile/${username}`,
+            name: `${profileUser?.username ?? username}`,
+            description: profileUser?.biography || `Anime profile for ${profileUser?.username ?? username} on Rekko.`,
+            image: profileUser?.profileImage,
+          }),
+          {
+            '@context': 'https://schema.org',
+            '@type': 'Person',
+            name: profileUser?.username ?? username,
+            url: absoluteUrl(`/profile/${username}`),
+            image: profileUser?.profileImage ? absoluteUrl(profileUser.profileImage) : undefined,
+            description: profileUser?.biography,
+          },
+        ]}
+      />
+
+      {/* Full-page background */}
+      <div
+        className="absolute inset-0 bg-app-bg bg-cover bg-center"
+        style={profileUser?.backgroundImage ? { backgroundImage: `url(${profileUser.backgroundImage})` } : {}}
+      />
     <div
       className="relative font-gabarito overflow-x-hidden min-h-full bg-app-bg bg-cover bg-center"
       style={

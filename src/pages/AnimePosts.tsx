@@ -6,6 +6,8 @@ import { useAnimeDetail } from '@/hooks/useAnimeDetail';
 import { useAnimePosts } from '@/hooks/useAnimePosts';
 import type { Post } from '@/store/useFeedStore';
 import type { AnimePost } from '@/types/anime';
+import Seo from '@/components/seo/Seo';
+import { itemListJsonLd, pageJsonLd } from '@/components/seo/jsonLd';
 
 const styles = {
   page:      'min-h-full bg-app-bg font-gabarito',
@@ -72,6 +74,30 @@ export default function AnimePosts() {
 
   return (
     <div className={styles.page}>
+      <Seo
+        title={`Posts about ${anime?.name ?? 'anime'}`}
+        description={`Read Rekko community posts and recommendations about ${anime?.name ?? 'this anime'}.`}
+        canonicalPath={malId !== undefined ? `/animes/${malId}/posts` : '/animes'}
+        image={anime?.imgMedium || anime?.imgLarge || '/rekko_logo.png'}
+        jsonLd={[
+          pageJsonLd({
+            type: 'CollectionPage',
+            path: malId !== undefined ? `/animes/${malId}/posts` : '/animes',
+            name: `Posts about ${anime?.name ?? 'anime'}`,
+            description: `Community posts and recommendations about ${anime?.name ?? 'this anime'} on Rekko.`,
+            image: anime?.imgMedium || anime?.imgLarge,
+          }),
+          itemListJsonLd(
+            `Posts about ${anime?.name ?? 'anime'}`,
+            malId !== undefined ? `/animes/${malId}/posts` : '/animes',
+            posts.slice(0, 10).map((post) => ({
+              name: post.text.slice(0, 90) || `Post about ${anime?.name ?? 'anime'}`,
+              url: `/post/${post.id}`,
+              image: post.userImage,
+            })),
+          ),
+        ]}
+      />
       <div className={styles.container}>
         {malId !== undefined && (
           <Link to={`/animes/${malId}`} className={styles.backLink}>

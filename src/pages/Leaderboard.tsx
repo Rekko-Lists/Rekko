@@ -7,6 +7,9 @@ import MovingCloudBackground from "@/components/ui/explore/MovingCloudBackground
 import { getTopReputationUsers, type ReputationUser } from "@/lib/userService";
 import { getLatestAnimeNews, type AnimeNewsItem } from "@/lib/animeNewsService";
 import { getPopularPosts } from "@/lib/postService";
+import Seo from "@/components/seo/Seo";
+import { itemListJsonLd, pageJsonLd } from "@/components/seo/jsonLd";
+import { seoPages } from "@/components/seo/pages";
 
 const NEWS_FALLBACK_MAL_IDS = [52991, 5114, 9253, 30276];
 
@@ -49,6 +52,28 @@ export default function Leaderboard() {
 
   return (
     <div className={styles.page}>
+      <Seo
+        title={seoPages.leaderboard.title}
+        description={seoPages.leaderboard.description}
+        canonicalPath={seoPages.leaderboard.path}
+        jsonLd={[
+          pageJsonLd({
+            type: seoPages.leaderboard.schemaType,
+            path: seoPages.leaderboard.path,
+            name: seoPages.leaderboard.title,
+            description: seoPages.leaderboard.description,
+          }),
+          itemListJsonLd(
+            "Rekko reputation leaderboard",
+            seoPages.leaderboard.path,
+            users.slice(0, 20).map((user) => ({
+              name: user.username,
+              url: `/profile/${user.username}`,
+              image: user.profileImage ?? undefined,
+            })),
+          ),
+        ]}
+      />
       <style>{`
         @keyframes leaderboard-title { from { opacity: 0; letter-spacing: .18em; transform: translateY(12px); } to { opacity: 1; letter-spacing: 0; transform: translateY(0); } }
         .leaderboard-title { animation: leaderboard-title .7s ease-out both; }

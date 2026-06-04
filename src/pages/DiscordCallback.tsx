@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authService, decodeJwtUserId } from '@/lib/authService';
 import { useAuthStore } from '@/store/useAuthStore';
+import Seo from '@/components/seo/Seo';
+import { seoPages } from '@/components/seo/pages';
 import Spinner from '@/components/ui/common/Spinner';
 
 export default function DiscordCallback() {
@@ -37,6 +39,12 @@ export default function DiscordCallback() {
 
   return (
     <div className="min-h-screen bg-app-bg flex items-center justify-center font-gabarito">
+      <Seo
+        title={seoPages.discordCallback.title}
+        description={seoPages.discordCallback.description}
+        canonicalPath={seoPages.discordCallback.path}
+        noindex={seoPages.discordCallback.noindex}
+      />
       <div className="flex flex-col items-center gap-4">
         <Spinner />
         <p className="text-sm text-text-muted">Connecting with Discord...</p>

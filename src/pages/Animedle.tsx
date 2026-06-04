@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { Check, X } from 'lucide-react';
 import rekkoLogo from '@/assets/rekko_logo.png';
 import rekkoSword from '@/assets/rekko_sword.png';
+import Seo from '@/components/seo/Seo';
+import { pageJsonLd } from '@/components/seo/jsonLd';
+import { seoPages } from '@/components/seo/pages';
 
 interface Guess {
   text: string;
@@ -53,6 +56,18 @@ export default function Animedle() {
 
   return (
     <div className={styles.page}>
+      <Seo
+        title={seoPages.animedle.title}
+        description={seoPages.animedle.description}
+        canonicalPath={seoPages.animedle.path}
+        jsonLd={pageJsonLd({
+          type: seoPages.animedle.schemaType,
+          path: seoPages.animedle.path,
+          name: seoPages.animedle.title,
+          description: seoPages.animedle.description,
+          image: seoPages.animedle.image ?? "/rekko_logo.png",
+        })}
+      />
       {/* Side cloud backgrounds */}
       <div className={styles.leftBg}  style={{ backgroundImage: 'url(/bg_clouds.png)' }} />
 
