@@ -1,10 +1,8 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Avatar from "@/components/ui/common/Avatar";
 import AnimeCovers from "@/components/ui/anime/AnimeCovers";
-import { setWatchState } from "@/lib/animeService";
-import { useAuthStore } from "@/store/useAuthStore";
 import type { AnimePost } from "@/types/anime";
 
 interface Props {
@@ -30,8 +28,6 @@ const styles = {
   label: "text-[20px] text-text-main leading-none",
   viewLink:
     "text-[13px] font-medium text-primary hover:text-primary-dark hover:underline underline-offset-2 cursor-pointer bg-transparent border-0 p-0 leading-none transition-colors",
-  // Body is the visible viewport. Track inside is wider via overflow + fade mask
-  // so that siblings peek through on both sides.
   body: "relative min-h-[232px] flex-1",
   viewport:
     "absolute inset-0 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]",
@@ -146,9 +142,6 @@ export default function PostsCarousel({
             <div
               className={styles.track}
               style={{
-                // Center the active post: its left edge sits at the center of
-                // the viewport minus half its width, then we shift by `index`
-                // slots (card width + gap) to bring the active one to center.
                 transform: `translate(calc(-${POST_W / 2}px - ${visualIndex * (POST_W + POST_GAP)}px), -50%)`,
                 transitionDuration: withTransition ? "300ms" : "0ms",
               }}
@@ -216,37 +209,34 @@ function PostMini({
   currentAnime?: { id: string | number; title: string; cover?: string };
   onAnimeClick: (animeId: string | number) => void;
 }) {
+  const navigate = useNavigate();
   const previewAnimes = getPreviewAnimes(post, malId, currentAnime);
-  const isAuthenticated = useAuthStore((s) => Boolean(s.user));
-  const handleAddAnime = (anime: { id: string | number }) => {
-    if (!isAuthenticated) return;
-    const animeMalId = Number(anime.id);
-    if (!Number.isFinite(animeMalId)) return;
-    void setWatchState(animeMalId, "PLAN_TO_WATCH");
-  };
 
   return (
     <article
       className={styles.postCard}
       style={{ width: POST_W, height: POST_H }}
+      onClick={() => {
+        if (post.id && Number.isFinite(Number(post.id))) {
+          navigate(`/post/${post.id}`);
+        }
+      }}
     >
-      <header className={styles.postHeader}>
+      <header className={styles.postHeader} onClick={(e) => e.stopPropagation()}>
         <Avatar src={post.avatar} username={post.user} size="sm" />
         <span className={styles.postUser}>{post.user}</span>
         <span className={styles.postTime}>{post.time}</span>
-        <span className={styles.postMenu}>···</span>
       </header>
       <div className={styles.postDivider} />
       <p className={styles.postBody}>{post.text}</p>
       {previewAnimes.length > 0 && (
-        <div className={styles.related}>
+        <div className={styles.related} onClick={(e) => e.stopPropagation()}>
           <span className={styles.relatedLabel}>Related to:</span>
           <div className={styles.relatedViewport}>
             <AnimeCovers
               animes={previewAnimes}
-              showAddBtn={isAuthenticated}
+              showAddBtn={false}
               variant="mini"
-              onAddAnime={handleAddAnime}
               onAnimeClick={(anime) => {
                 if (!Number.isFinite(Number(anime.id))) return;
                 onAnimeClick(anime.id);
@@ -256,8 +246,8 @@ function PostMini({
         </div>
       )}
       <footer className={styles.postFooter}>
-        <span>♥ {post.likes}</span>
-        <span>💬 {post.comments}</span>
+        <span className="flex items-center gap-1"><Heart size={10} /> {post.likes}</span>
+        <span className="flex items-center gap-1"><MessageCircle size={10} /> {post.comments}</span>
       </footer>
     </article>
   );

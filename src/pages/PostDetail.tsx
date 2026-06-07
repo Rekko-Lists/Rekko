@@ -2,7 +2,6 @@ import {
   FormEvent,
   UIEvent,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -10,6 +9,8 @@ import { ArrowUp } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   createComment,
+  deletePost,
+  getCommentReplies,
   getCommentsByPostId,
   getPostById,
   getPopularPosts,
@@ -20,7 +21,6 @@ import {
   type CommentData,
   type PostDetailData,
 } from "@/lib/postService";
-import { setWatchState } from "@/lib/animeService";
 import { extractApiError } from "@/lib/apiErrors";
 import { useAuthStore } from "@/store/useAuthStore";
 import { getLatestAnimeNews, type AnimeNewsItem } from "@/lib/animeNewsService";
@@ -33,8 +33,6 @@ import Seo from "@/components/seo/Seo";
 import { absoluteUrl, pageJsonLd } from "@/components/seo/jsonLd";
 
 const COMMENTS_LIMIT = 30;
-const COMMENT_ROW_HEIGHT = 112;
-const COMMENT_OVERSCAN = 6;
 
 const styles = {
   page: "min-h-full bg-app-bg font-gabarito",
@@ -72,10 +70,11 @@ export default function PostDetail() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [scrollTop, setScrollTop] = useState(0);
   const [showBackTop, setShowBackTop] = useState(false);
   const [news, setNews] = useState<AnimeNewsItem[]>([]);
   const [recommendations, setRecommendations] = useState<RecommendationItem[]>([]);
+  const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
+  const [repliesMap, setRepliesMap] = useState<Record<number, CommentData[]>>({});
   const viewportRef = useRef<HTMLDivElement>(null);
   const likingPostRef = useRef(false);
   const likingCommentsRef = useRef(new Set<number>());
@@ -168,7 +167,6 @@ export default function PostDetail() {
 
   function handleCommentsScroll(event: UIEvent<HTMLDivElement>) {
     const element = event.currentTarget;
-    setScrollTop(element.scrollTop);
     setShowBackTop(window.scrollY > 240 || element.scrollTop > 240);
 
     if (element.scrollHeight - element.scrollTop - element.clientHeight < 420) {
@@ -188,21 +186,59 @@ export default function PostDetail() {
 
     setSubmitting(true);
     try {
-      await createComment({ postId, message: trimmed });
+      const newComment = await createComment({ postId, message: trimmed });
       setMessage("");
-      const data = await getCommentsByPostId(postId, {
-        page: 1,
-        limit: COMMENTS_LIMIT,
-      });
-      setComments(data.comments);
-      setCommentsTotal(data.pagination.total);
-      setPage(data.pagination.page);
-      setPages(data.pagination.pages);
-      viewportRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+      if (newComment) {
+        setComments((prev) => [...prev, newComment]);
+        setCommentsTotal((prev) => prev + 1);
+        setTimeout(() => {
+          if (viewportRef.current) {
+            viewportRef.current.scrollTop = viewportRef.current.scrollHeight;
+          }
+        }, 50);
+      }
     } catch (err: unknown) {
       setError(extractApiError(err));
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleSubmitReply(parentCommentId: number, replyMessage: string) {
+    const trimmed = replyMessage.trim();
+    if (!trimmed || !Number.isFinite(postId)) return;
+
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      await createComment({ postId, message: trimmed, parentCommentId });
+      setActiveReplyId(null);
+      // Refresh replies for this parent
+      const replies = await getCommentReplies(parentCommentId);
+      setRepliesMap((prev) => ({ ...prev, [parentCommentId]: replies }));
+    } catch (err: unknown) {
+      setError(extractApiError(err));
+    }
+  }
+
+  async function handleShowReplies(commentId: number) {
+    if (repliesMap[commentId]) {
+      // Toggle off
+      setRepliesMap((prev) => {
+        const next = { ...prev };
+        delete next[commentId];
+        return next;
+      });
+      return;
+    }
+    try {
+      const replies = await getCommentReplies(commentId);
+      setRepliesMap((prev) => ({ ...prev, [commentId]: replies }));
+    } catch (err: unknown) {
+      setError(extractApiError(err));
     }
   }
 
@@ -236,6 +272,16 @@ export default function PostDetail() {
     }
   }
 
+  async function handlePostDelete() {
+    if (!post) return;
+    try {
+      await deletePost(post.postId);
+      navigate(-1);
+    } catch (err: unknown) {
+      setError(extractApiError(err));
+    }
+  }
+
   async function handleCommentLike(commentId: number) {
     if (likingCommentsRef.current.has(commentId)) return;
 
@@ -244,8 +290,49 @@ export default function PostDetail() {
       return;
     }
 
-    const current = comments.find((comment) => comment.commentId === commentId);
-    if (!current) return;
+    const current = comments.find((c) => c.commentId === commentId);
+
+    // Check if it's a reply inside repliesMap
+    if (!current) {
+      let parentId: number | null = null;
+      let replyComment: CommentData | undefined;
+      for (const [pid, replies] of Object.entries(repliesMap)) {
+        const found = replies.find((r) => r.commentId === commentId);
+        if (found) { parentId = Number(pid); replyComment = found; break; }
+      }
+      if (!replyComment || parentId === null) return;
+
+      likingCommentsRef.current.add(commentId);
+      const optimistic = {
+        ...replyComment,
+        hasLiked: !replyComment.hasLiked,
+        likes: replyComment.hasLiked ? Math.max(0, replyComment.likes - 1) : replyComment.likes + 1,
+      };
+      setRepliesMap((prev) => ({
+        ...prev,
+        [parentId!]: prev[parentId!].map((r) => r.commentId === commentId ? optimistic : r),
+      }));
+      try {
+        const updated = replyComment.hasLiked ? await unlikeComment(commentId) : await likeComment(commentId);
+        if (updated) {
+          setRepliesMap((prev) => ({
+            ...prev,
+            [parentId!]: prev[parentId!].map((r) =>
+              r.commentId === commentId ? { ...r, likes: updated.likes ?? optimistic.likes, hasLiked: optimistic.hasLiked } : r,
+            ),
+          }));
+        }
+      } catch (err: unknown) {
+        setRepliesMap((prev) => ({
+          ...prev,
+          [parentId!]: prev[parentId!].map((r) => r.commentId === commentId ? replyComment! : r),
+        }));
+        setError(extractApiError(err));
+      } finally {
+        likingCommentsRef.current.delete(commentId);
+      }
+      return;
+    }
 
     likingCommentsRef.current.add(commentId);
     const optimistic = {
@@ -293,21 +380,6 @@ export default function PostDetail() {
     }
   }
 
-  const virtual = useMemo(() => {
-    const viewportHeight = viewportRef.current?.clientHeight ?? 620;
-    const startIndex = Math.max(
-      0,
-      Math.floor(scrollTop / COMMENT_ROW_HEIGHT) - COMMENT_OVERSCAN,
-    );
-    const visibleCount =
-      Math.ceil(viewportHeight / COMMENT_ROW_HEIGHT) + COMMENT_OVERSCAN * 2;
-    const endIndex = Math.min(comments.length, startIndex + visibleCount);
-    return comments.slice(startIndex, endIndex).map((comment, index) => ({
-      comment,
-      index: startIndex + index,
-    }));
-  }, [comments, scrollTop]);
-
   if (loading) return <p className={styles.state}>Loading post...</p>;
   if (error && !post) return <p className={styles.error}>{error}</p>;
   if (!post) return <p className={styles.state}>Post not found.</p>;
@@ -317,6 +389,10 @@ export default function PostDetail() {
   const postDescription =
     post.description?.slice(0, 155) ||
     `Read this anime recommendation and discussion on Rekko.`;
+
+  const isOwner = Boolean(
+    currentUser && post.user?.username === currentUser.username,
+  );
 
   return (
     <div className={styles.page}>
@@ -367,12 +443,10 @@ export default function PostDetail() {
             commentsTotal={commentsTotal}
             relatedAnimes={relatedAnimes}
             isAuthenticated={isAuthenticated}
+            isOwner={isOwner}
             onLike={handlePostLike}
             onShare={handleSharePost}
-            onAddAnime={(anime) => {
-              const malId = Number(anime.id);
-              if (Number.isFinite(malId)) void setWatchState(malId, "PLAN_TO_WATCH");
-            }}
+            onDelete={handlePostDelete}
             onAnimeClick={(anime) => navigate(`/animes/${anime.id}`)}
           />
 
@@ -387,13 +461,17 @@ export default function PostDetail() {
 
           <CommentsVirtualList
             comments={comments}
-            virtualComments={virtual}
-            rowHeight={COMMENT_ROW_HEIGHT}
             loadingMore={loadingMore}
             error={error}
             viewportRef={viewportRef}
             onScroll={handleCommentsScroll}
             onLike={handleCommentLike}
+            activeReplyId={activeReplyId}
+            onReply={(id) => setActiveReplyId((prev) => (prev === id ? null : id))}
+            onSubmitReply={handleSubmitReply}
+            repliesMap={repliesMap}
+            onShowReplies={handleShowReplies}
+            isAuthenticated={isAuthenticated}
           />
         </main>
 

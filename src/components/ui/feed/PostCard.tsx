@@ -1,15 +1,15 @@
 import { Heart, MessageCircle, Share2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Post } from "@/store/useFeedStore";
 import Avatar from "@/components/ui/common/Avatar";
 import AnimeCovers from "@/components/ui/anime/AnimeCovers";
-import { setWatchState } from "@/lib/animeService";
 import { useAuthStore } from "@/store/useAuthStore";
 
 interface Props {
   post: Post;
   onLike?: (id: string) => void;
+  onDelete?: (id: string) => void;
   fallbackRelatedAnimes?: Post["relatedAnimes"];
 }
 
@@ -23,6 +23,7 @@ const styles = {
   menuWrap: "relative",
   menuPanel: "absolute right-0 top-7 z-20 w-28 rounded-card border border-border bg-surface p-1 shadow-card",
   menuItem: "w-full rounded-btn px-3 py-2 text-left text-xs text-text-main hover:bg-border-light",
+  menuItemDanger: "w-full rounded-btn px-3 py-2 text-left text-xs text-status-red hover:bg-border-light",
   divider: "h-px bg-border mx-0",
   body: "px-4 py-3 text-sm text-text-main leading-relaxed",
   media: "px-4 py-4 flex flex-col items-start gap-4 md:flex-row md:justify-between md:gap-6",
@@ -42,22 +43,21 @@ const styles = {
 export default function PostCard({
   post,
   onLike,
+  onDelete,
   fallbackRelatedAnimes = [],
 }: Props) {
   const navigate = useNavigate();
   const currentUser = useAuthStore((s) => s.user);
-  const isAuthenticated = Boolean(currentUser);
   const [menuOpen, setMenuOpen] = useState(false);
   const [imageOpen, setImageOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const isOwner = Boolean(currentUser && post.user === currentUser.username);
+
   const relatedAnimes =
     post.relatedAnimes.length > 0 ? post.relatedAnimes : fallbackRelatedAnimes;
   const visibleAnimes = relatedAnimes.slice(0, 5);
-  const handleAddAnime = (anime: { id: string | number }) => {
-    if (!isAuthenticated) return;
-    const malId = Number(anime.id);
-    if (!Number.isFinite(malId)) return;
-    void setWatchState(malId, "PLAN_TO_WATCH");
-  };
+
   const handleAnimeClick = (anime: { id: string | number }) => {
     if (!Number.isFinite(Number(anime.id))) return;
     navigate(`/animes/${anime.id}`);
@@ -74,6 +74,17 @@ export default function PostCard({
       window.prompt("Copy post link", url);
     }
   };
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [menuOpen]);
 
   return (
     <div className={styles.card}>
@@ -92,7 +103,7 @@ export default function PostCard({
           </button>
           <span className={styles.time}>{post.time}</span>
         </div>
-        <div className={styles.menuWrap}>
+        <div className={styles.menuWrap} ref={menuRef}>
           <button
             type="button"
             className={styles.menu}
@@ -103,9 +114,22 @@ export default function PostCard({
           </button>
           {menuOpen && (
             <div className={styles.menuPanel}>
-              <button type="button" className={styles.menuItem}>
-                {currentUser?.role === "ADMIN" ? "Delete" : "Report"}
-              </button>
+              {isOwner ? (
+                <button
+                  type="button"
+                  className={styles.menuItemDanger}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onDelete?.(post.id);
+                  }}
+                >
+                  Delete
+                </button>
+              ) : (
+                <button type="button" className={styles.menuItem}>
+                  Report
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -128,9 +152,8 @@ export default function PostCard({
             </div>
             <AnimeCovers
               animes={visibleAnimes}
-              showAddBtn={isAuthenticated}
+              showAddBtn={false}
               className="flex-wrap"
-              onAddAnime={handleAddAnime}
               onAnimeClick={handleAnimeClick}
             />
           </div>

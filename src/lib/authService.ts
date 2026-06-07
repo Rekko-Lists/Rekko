@@ -119,7 +119,7 @@ export const authService = {
 
   async getPublicProfile(username: string): Promise<PublicProfile> {
     const res = await axios.get<{ success: boolean; data: PublicProfile }>(
-      `${BASE}/user/${username}?fields=userId,username,biography,profileImage,bannerImage,backgroundImage,reputation`
+      `${BASE}/user/${username}?fields=userId,username,biography,profileImage,bannerImage,backgroundImage,reputation,socialAccounts`
     );
     return res.data.data;
   },
@@ -169,8 +169,8 @@ export interface UserProfileData {
   biography?: string;
   emailVerified: boolean;
   profileImage?: string;
-  socialAccounts?: { socialAccount: { name: string }; socialUrl: string }[];
-  userSocialAccount?: { socialAccount: { name: string }; socialUrl: string }[];
+  socialAccounts?: { name: string; url: string }[];
+  userSocialAccount?: { name: string; url: string }[];
 }
 
 export interface PublicProfile {
@@ -181,6 +181,7 @@ export interface PublicProfile {
   bannerImage?: string;
   backgroundImage?: string;
   reputation: number;
+  socialAccounts?: { name: string; url: string }[];
 }
 
 export function decodeJwtUserId(token: string): number {

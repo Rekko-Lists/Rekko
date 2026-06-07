@@ -1,12 +1,11 @@
 import { Flame } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { PostDetailData, PostAnimeSummary } from '@/lib/postService';
-import type { RecommendedAnimeItem } from '@/types/anime';
 
 export interface ExploreRecommendationItem {
   post: PostDetailData;
   sourceAnime?: PostAnimeSummary;
-  relatedAnimes: RecommendedAnimeItem[];
+  relatedAnimes: PostAnimeSummary[];
 }
 
 interface Props {
@@ -32,11 +31,11 @@ const styles = {
   handle: 'text-[12px] text-text-muted',
 };
 
-function animeCover(anime?: PostAnimeSummary | RecommendedAnimeItem) {
+function animeCover(anime?: PostAnimeSummary) {
   return anime ? anime.imgMedium || anime.imgLarge : '';
 }
 
-function animeName(anime?: PostAnimeSummary | RecommendedAnimeItem) {
+function animeName(anime?: PostAnimeSummary) {
   return anime?.name ?? 'Recommendation';
 }
 

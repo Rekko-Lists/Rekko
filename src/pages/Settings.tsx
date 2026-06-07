@@ -80,7 +80,7 @@ export default function Settings() {
         setBio(data.biography ?? '');
         const accounts = data.socialAccounts ?? data.userSocialAccount;
         if (accounts?.length) {
-          setLinks(accounts.map(sa => ({ name: sa.socialAccount.name, url: sa.socialUrl })));
+          setLinks(accounts.map(sa => ({ name: sa.name, url: sa.url })));
         }
         // Refresh emailVerified and profileImage from the server
         setUser({ ...user, emailVerified: data.emailVerified, profileImage: data.profileImage ?? user.profileImage });

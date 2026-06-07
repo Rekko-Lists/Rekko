@@ -141,7 +141,7 @@ const AVAILABLE_GENRES = [
 const styles = {
   page: "flex flex-col font-gabarito min-h-full pt-4",
   body: "flex gap-2 px-[6%] pb-8",
-  grid: "flex-1 flex flex-wrap gap-4 pt-4 content-start",
+  grid: "flex-1 grid gap-4 pt-4 content-start grid-cols-[repeat(auto-fill,minmax(180px,1fr))]",
   loading: "flex-1 flex items-center justify-center text-text-muted py-20",
   error: "flex-1 flex items-center justify-center text-status-red py-20",
   letterGrid: "flex-1 pt-4 grid grid-cols-3 gap-5",
