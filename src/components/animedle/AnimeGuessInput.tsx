@@ -58,7 +58,10 @@ export default function AnimeGuessInput({ onGuess, disabled = false }: Props) {
         (err as { name?: string })?.name === 'AbortError' ||
         (err as { code?: string })?.code === 'ERR_CANCELED' ||
         (err as { name?: string })?.name === 'CanceledError';
-      if (!isAbort) setResults([]);
+      if (!isAbort) {
+        setResults([]);
+        setShowDropdown(false);
+      }
     } finally {
       setLoading(false);
     }

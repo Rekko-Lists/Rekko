@@ -40,6 +40,7 @@ interface ChallengeState {
   solved: boolean;
   skipped: boolean;
   currentPhotoIndex: number;
+  solvedAtPhotoIndex: number;
   showConfetti: boolean;
 }
 
@@ -117,6 +118,7 @@ export default function Animedle() {
             solved: false,
             skipped: false,
             currentPhotoIndex: 0,
+            solvedAtPhotoIndex: 0,
             showConfetti: false,
           }))
         );
@@ -141,14 +143,22 @@ export default function Animedle() {
         if (i !== activeChallenge) return s;
         const newGuesses = [...s.guesses, newGuess];
         const newWrongCount = newGuesses.filter((g) => !g.correct).length;
-        const newPhotoIndex =
-          challenge.type === 'anime' ? Math.min(newWrongCount, 3) : s.currentPhotoIndex;
+        // On a correct guess keep the current index (that's the difficulty the user solved at);
+        // on a wrong guess auto-advance to the next photo (up to 3).
+        const newPhotoIndex = isCorrect
+          ? s.currentPhotoIndex
+          : challenge.type === 'anime'
+            ? Math.min(newWrongCount, 3)
+            : s.currentPhotoIndex;
+        // Record which photo index the user was viewing when they guessed correctly.
+        const solvedAtPhotoIndex = isCorrect ? s.currentPhotoIndex : s.solvedAtPhotoIndex;
         return {
           ...s,
           guesses: newGuesses,
           solved: isCorrect,
           showConfetti: isCorrect,
           currentPhotoIndex: newPhotoIndex,
+          solvedAtPhotoIndex,
         };
       })
     );
@@ -162,11 +172,17 @@ export default function Animedle() {
     );
   }
 
-  function clearConfetti(index: number) {
-    setStates((prev) =>
-      prev.map((s, i) => (i === index ? { ...s, showConfetti: false } : s))
-    );
-  }
+  // Clear confetti 3 seconds after a challenge is solved (Bug 2 fix: useEffect instead of inline ref callback)
+  useEffect(() => {
+    const state = states[activeChallenge];
+    if (!state?.solved) return;
+    const timer = setTimeout(() => {
+      setStates((prev) =>
+        prev.map((s, i) => (i === activeChallenge ? { ...s, showConfetti: false } : s))
+      );
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [states[activeChallenge]?.solved, activeChallenge]);
 
   // Compute tab state for ChallengeTabBar
   function getTabState(
@@ -256,15 +272,6 @@ export default function Animedle() {
         {state.showConfetti && (
           <ConfettiEffect key={`confetti-${activeChallenge}`} />
         )}
-        {/* Clear confetti after short delay */}
-        {state.showConfetti && (
-          <span
-            style={{ display: 'none' }}
-            ref={() => {
-              setTimeout(() => clearConfetti(activeChallenge), 3500);
-            }}
-          />
-        )}
 
         {/* Top bar */}
         <div className={styles.topBar}>
@@ -343,7 +350,7 @@ export default function Animedle() {
                 {challenge.type === 'anime' && (
                   <p className="text-xs text-text-muted">
                     Resuelto en dificultad:{' '}
-                    <strong>{getDifficultyAtIndex(state.currentPhotoIndex)}</strong>
+                    <strong>{getDifficultyAtIndex(state.solvedAtPhotoIndex)}</strong>
                   </p>
                 )}
               </>
@@ -365,13 +372,17 @@ export default function Animedle() {
               />
             )}
 
-            {/* Navigate to next unsolved challenge */}
+            {/* Navigate to next unsolved challenge (Bug 3 fix: wrap-around search) */}
             {(() => {
-              const nextIdx = challenges.findIndex((_, i) => {
-                if (i <= activeChallenge) return false;
-                const s = states[i];
-                return s && !s.solved && !s.skipped;
-              });
+              let nextIdx = -1;
+              for (let i = 1; i <= challenges.length; i++) {
+                const idx = (activeChallenge + i) % challenges.length;
+                const s = states[idx];
+                if (s && !s.solved && !s.skipped) {
+                  nextIdx = idx;
+                  break;
+                }
+              }
               if (nextIdx === -1) return null;
               return (
                 <button

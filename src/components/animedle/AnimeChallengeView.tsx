@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { getUrl } from '@/types/challenge';
 
 interface Props {
   data: {
@@ -20,12 +21,6 @@ const DIFFICULTY_COLORS = [
   'bg-status-green text-white',
   'bg-status-blue text-white',
 ];
-
-function getUrl(field: { url: string; publicId: string } | string | undefined): string {
-  if (!field) return '';
-  if (typeof field === 'string') return field;
-  return field.url;
-}
 
 export default function AnimeChallengeView({
   data,
