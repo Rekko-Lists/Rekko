@@ -21,6 +21,9 @@ const DiscordCallback = lazy(() => import("@/pages/DiscordCallback"));
 const EmailStatusPage = lazy(() => import("@/pages/EmailStatusPage"));
 const ResetPasswordPage = lazy(() => import("@/pages/ResetPasswordPage"));
 const PasswordChangedPage = lazy(() => import("@/pages/PasswordChangedPage"));
+const About = lazy(() => import("@/pages/About"));
+const Rules = lazy(() => import("@/pages/Rules"));
+const Faq = lazy(() => import("@/pages/Faq"));
 
 function page(element: ReactNode) {
   return (
@@ -59,6 +62,9 @@ export const router = createBrowserRouter([
       { path: "animes/:malId/posts", element: page(<AnimePosts />) },
       { path: "post/:postId", element: page(<PostDetail />) },
       { path: "profile/:username", element: page(<Profile />) },
+      { path: "/about", element: page(<About />) },
+      { path: "/rules", element: page(<Rules />) },
+      { path: "/faq", element: page(<Faq /> )},
       {
         element: <ProtectedRoute />,
         children: [
