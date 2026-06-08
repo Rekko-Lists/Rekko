@@ -43,6 +43,14 @@ export default function Navbar() {
         <div className="flex items-center gap-3 justify-end">
           {user ? (
             <>
+              {/* Animedle shortcut */}
+              <button
+                onClick={() => navigate('/animedle')}
+                className="font-gabarito text-sm text-text-main hover:text-primary transition-colors border border-border rounded-pill px-4 h-[36px] whitespace-nowrap cursor-pointer"
+              >
+                Animedle
+              </button>
+
               {/* Post CTA pill */}
               <div className="relative inline-flex items-center">
                 <button

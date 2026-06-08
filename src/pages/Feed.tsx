@@ -59,6 +59,12 @@ const SITE_LINKS: SiteLinkItem[] = [
   },
 ];
 
+const ADMIN_LINK: SiteLinkItem = {
+  label: "Admin Panel",
+  icon: "Settings",
+  href: "/admin",
+};
+
 const styles = {
   page: "flex flex-col px-4 font-gabarito min-h-full items-stretch lg:flex-row lg:items-start lg:px-[6%]",
   sidebar: "flex w-full flex-col gap-4 py-4 lg:sticky lg:top-[136px] lg:max-h-[calc(100vh-148px)] lg:w-[231px] lg:flex-shrink-0 lg:overflow-y-auto lg:py-6",
@@ -79,7 +85,8 @@ export default function Feed() {
   const setHasMore = useFeedStore((s) => s.setHasMore);
   const toggleLike = useFeedStore((s) => s.toggleLike);
   const updatePost = useFeedStore((s) => s.updatePost);
-  const isAuthenticated = useAuthStore((s) => Boolean(s.user));
+  const user = useAuthStore((s) => s.user);
+  const isAuthenticated = Boolean(user);
   const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [news, setNews] = useState<AnimeNewsItem[]>([]);
@@ -320,7 +327,7 @@ export default function Feed() {
           const { key, ...props } = randomWidgets[0];
           return <AnimeListWidget key={key} {...props} />;
         })()}
-        <SiteLinks items={SITE_LINKS} />
+        <SiteLinks items={user?.role === 'ADMIN' ? [...SITE_LINKS, ADMIN_LINK] : SITE_LINKS} />
       </aside>
 
       <div className={styles.divider} />
