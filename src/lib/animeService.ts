@@ -329,6 +329,73 @@ export async function removeRating(malId: number): Promise<void> {
   await api.delete(`/anime/rate/${malId}`);
 }
 
+// ─── User list (watch + rate) ──────────────────────────────────────────────
+
+export interface WatchListItem {
+  userWatchAnimeId: number;
+  userId: number;
+  animeId: number;
+  numEpisodes: number;
+  state: string;
+  anime: {
+    malId: number;
+    name: string;
+    imgMedium: string;
+    imgLarge: string;
+    malMean: number;
+    malRank: number;
+    mean: number;
+    numEpisodes: number;
+    status: string;
+    mediaType: string;
+    likes: number;
+    broadcast: { dayOfWeek: string; startTime: string };
+  };
+}
+
+export interface RateListItem {
+  userRateAnimeId: number;
+  userId: number;
+  animeId: number;
+  rate: number;
+  anime: {
+    malId: number;
+    name: string;
+    imgMedium: string;
+    imgLarge: string;
+    malMean: number;
+    malRank: number;
+    mean: number;
+    status: string;
+    mediaType: string;
+    likes: number;
+  };
+}
+
+export async function getUserWatchList(
+  userId: number,
+  params: PaginatedListParams = {},
+  signal?: AbortSignal,
+): Promise<{ watchList: WatchListItem[]; pagination: AnimePagination }> {
+  const response = await api.get(`/anime/watch/user/${userId}`, {
+    params: { page: 1, limit: 110, ...params },
+    signal,
+  });
+  return response.data.data;
+}
+
+export async function getUserRateList(
+  userId: number,
+  params: PaginatedListParams = {},
+  signal?: AbortSignal,
+): Promise<{ ratingList: RateListItem[]; pagination: AnimePagination }> {
+  const response = await api.get(`/anime/rate/user/${userId}`, {
+    params: { page: 1, limit: 110, ...params },
+    signal,
+  });
+  return response.data.data;
+}
+
 export async function setEpisodeProgress(
   malId: number,
   numEpisodes: number,

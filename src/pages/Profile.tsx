@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Edit, Star, Settings as SettingsIcon, Image } from 'lucide-react';
+import { Edit, Settings as SettingsIcon, Image } from 'lucide-react';
 import {
   FaTwitter, FaInstagram, FaGithub, FaYoutube, FaTwitch,
   FaLinkedin, FaDiscord, FaTiktok,
@@ -10,6 +10,7 @@ import Button from '@/components/ui/common/Button';
 import Spinner from '@/components/ui/common/Spinner';
 import PostCard from '@/components/ui/feed/PostCard';
 import ImageUploadModal, { type UploadImageType } from '@/components/ui/profile/ImageUploadModal';
+import ProfileAnimeList from '@/components/ui/profile/ProfileAnimeList';
 import rekkoSword from '@/assets/rekko_sword.png';
 import { authService } from '@/lib/authService';
 import type { PublicProfile } from '@/lib/authService';
@@ -33,20 +34,6 @@ const SOCIAL_ICONS: Record<string, IconComponent> = {
   tiktok: FaTiktok,
 };
 
-const MOCK_LIST = [
-  { id: '1', title: 'Steins;Gate', situation: 'Finished Airing', progress: '24/24', score: 9 },
-];
-
-const styles = {
-  tableHead: 'flex',
-  thImg:     'bg-primary text-white text-xs font-semibold px-3 py-1.5 w-[86px] flex-shrink-0',
-  th:        'text-xs font-semibold text-text-secondary px-3 py-1.5',
-  tableRow:  'flex items-center border-t border-border',
-  tdImg:     'w-[86px] px-3 py-2 flex-shrink-0',
-  imgCircle: 'w-[55px] h-[55px] rounded-full bg-gradient-to-br from-slate-400 to-slate-700',
-  tdText:    'flex-1 px-3 py-2 text-sm text-text-main',
-  tdScore:   'px-3 py-2 flex items-center gap-1 text-sm font-semibold',
-};
 
 export default function Profile() {
   const { username } = useParams<{ username: string }>();
@@ -349,7 +336,7 @@ export default function Profile() {
               )}
             </div>
             <h1 className="text-[28px] font-semibold text-text-main leading-tight">
-              {profileUser?.username ?? username} List -
+              {profileUser?.username ?? username}
             </h1>
             {profileUser?.biography && (
               <p className="text-sm text-text-secondary mt-1">{profileUser.biography}</p>
@@ -379,27 +366,13 @@ export default function Profile() {
             )}
           </div>
 
-          {/* Anime list — mock until anime API is integrated */}
-          <div className="bg-surface border border-border rounded-card shadow-card overflow-hidden">
-            <div className={styles.tableHead}>
-              <span className={styles.thImg}>Image</span>
-              <span className={styles.th}>Status</span>
-              <span className={styles.th}>Situation</span>
-              <span className={styles.th}>Progress</span>
-              <span className={styles.th}>Score</span>
-            </div>
-            {MOCK_LIST.map(e => (
-              <div key={e.id} className={styles.tableRow}>
-                <div className={styles.tdImg}><div className={styles.imgCircle} /></div>
-                <div className={styles.tdText}>{e.title}</div>
-                <div className={styles.tdText}>{e.situation}</div>
-                <div className={styles.tdText}>{e.progress}</div>
-                <div className={styles.tdScore}>
-                  {e.score} <Star size={15} fill="#FF9E00" className="text-primary" />
-                </div>
-              </div>
-            ))}
-          </div>
+          {/* Anime list */}
+          {profileUser?.userId && (
+            <ProfileAnimeList
+              userId={profileUser.userId}
+              username={profileUser.username ?? username ?? ''}
+            />
+          )}
 
           {/* Real posts */}
           <div className="flex flex-col gap-4">

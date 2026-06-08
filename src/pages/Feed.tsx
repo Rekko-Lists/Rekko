@@ -304,9 +304,10 @@ export default function Feed() {
       />
       <aside className={styles.sidebar}>
         <AnimeNewsCard items={news} />
-        {randomWidgets[0] && (
-          <AnimeListWidget {...randomWidgets[0]} />
-        )}
+        {randomWidgets[0] && (() => {
+          const { key, ...props } = randomWidgets[0];
+          return <AnimeListWidget key={key} {...props} />;
+        })()}
         <SiteLinks items={SITE_LINKS} />
       </aside>
 
@@ -332,9 +333,10 @@ export default function Feed() {
           onViewMore={() => navigate("/leaderboard")}
         />
         <PopularRecommendationsCard items={recommendations} />
-        {randomWidgets[1] && (
-          <AnimeListWidget {...randomWidgets[1]} />
-        )}
+        {randomWidgets[1] && (() => {
+          const { key, ...props } = randomWidgets[1];
+          return <AnimeListWidget key={key} {...props} />;
+        })()}
       </aside>
     </div>
   );
