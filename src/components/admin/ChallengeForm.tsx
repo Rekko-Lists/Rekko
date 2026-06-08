@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import api from '@/lib/api';
+import { extractApiError } from '@/lib/apiErrors';
 
 type ChallengeType = 'anime' | 'character' | 'opening' | 'emoji';
 
@@ -109,18 +110,7 @@ export default function ChallengeForm({
 
       onSuccess();
     } catch (e: unknown) {
-      if (
-        e &&
-        typeof e === 'object' &&
-        'response' in e &&
-        (e as { response?: { data?: { error?: { message?: string } } } }).response?.data?.error?.message
-      ) {
-        setError((e as { response: { data: { error: { message: string } } } }).response.data.error.message);
-      } else if (e instanceof Error) {
-        setError(e.message);
-      } else {
-        setError('Error desconocido');
-      }
+      setError(extractApiError(e));
     } finally {
       setLoading(false);
     }

@@ -14,12 +14,16 @@ interface ChallengeResponseDTO {
 
 const BASE = import.meta.env.VITE_API_BASE_URL as string;
 
-function todayISODate(): string {
-  return new Date().toISOString().slice(0, 10);
+function getLocalDateString(): string {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 export default function ChallengesPanel() {
-  const [selectedDate, setSelectedDate] = useState<string>(todayISODate());
+  const [selectedDate, setSelectedDate] = useState<string>(getLocalDateString());
   const [challenges, setChallenges] = useState<ChallengeResponseDTO[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loadDone, setLoadDone] = useState(false);
@@ -170,7 +174,9 @@ export default function ChallengesPanel() {
                           {typeLabels[ch.type]}
                         </span>
                         <span className="text-text-main text-sm font-medium">
-                          {ch.anime?.name ?? `MAL ID: ${ch.anime?.malId}`}
+                          {ch.anime
+                            ? (ch.anime.name ?? `MAL ID: ${ch.anime.malId}`)
+                            : 'Sin anime'}
                         </span>
                       </div>
                       <button
@@ -195,7 +201,7 @@ export default function ChallengesPanel() {
 
           {/* Actions */}
           <div className="flex gap-3 mb-6 flex-wrap">
-            {challenges.length < 4 && !addingNew && (
+            {!addingNew && editingId === null && challenges.length < 4 && (
               <button
                 className="btn btn-outline btn-primary"
                 onClick={() => {
