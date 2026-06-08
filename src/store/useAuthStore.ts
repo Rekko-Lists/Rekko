@@ -9,6 +9,7 @@ export interface AuthUser {
   emailVerified: boolean;
   profileImage?: string;
   role?: 'USER' | 'MODERATOR' | 'ADMIN';
+  streak?: number;
 }
 
 interface AuthState {

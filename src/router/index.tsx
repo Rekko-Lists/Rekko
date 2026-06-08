@@ -24,6 +24,7 @@ const PasswordChangedPage = lazy(() => import("@/pages/PasswordChangedPage"));
 const About = lazy(() => import("@/pages/About"));
 const Rules = lazy(() => import("@/pages/Rules"));
 const Faq = lazy(() => import("@/pages/Faq"));
+const AdminPanel = lazy(() => import("@/pages/AdminPanel"));
 
 function page(element: ReactNode) {
   return (
@@ -36,6 +37,13 @@ function page(element: ReactNode) {
 function ProtectedRoute() {
   const user = useAuthStore((s) => s.user);
   return user ? <Outlet /> : <Navigate to="/login" replace />;
+}
+
+function AdminProtectedRoute() {
+  const user = useAuthStore((s) => s.user);
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role !== 'ADMIN') return <Navigate to="/feed" replace />;
+  return <Outlet />;
 }
 
 export const router = createBrowserRouter([
@@ -70,6 +78,12 @@ export const router = createBrowserRouter([
         children: [
           { path: "list", element: page(<List />) },
           { path: "settings", element: page(<Settings />) },
+        ],
+      },
+      {
+        element: <AdminProtectedRoute />,
+        children: [
+          { path: "admin", element: page(<AdminPanel />) },
         ],
       },
     ],
