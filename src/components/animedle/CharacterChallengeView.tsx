@@ -1,14 +1,10 @@
+import { getUrl } from '@/types/challenge';
+
 interface Props {
   data: {
     character?: { url: string; publicId: string } | string;
   };
   wrongGuesses: number;
-}
-
-function getUrl(field: { url: string; publicId: string } | string | undefined): string {
-  if (!field) return '';
-  if (typeof field === 'string') return field;
-  return field.url;
 }
 
 export default function CharacterChallengeView({ data, wrongGuesses }: Props) {

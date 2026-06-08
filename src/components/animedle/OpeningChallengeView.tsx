@@ -1,16 +1,11 @@
 import { Music } from 'lucide-react';
+import { getUrl } from '@/types/challenge';
 
 interface Props {
   data: {
     mediaType?: 'opening' | 'ending';
     opening?: { url: string; publicId: string } | string;
   };
-}
-
-function getUrl(field: { url: string; publicId: string } | string | undefined): string {
-  if (!field) return '';
-  if (typeof field === 'string') return field;
-  return field.url;
 }
 
 export default function OpeningChallengeView({ data }: Props) {
