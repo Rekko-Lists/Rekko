@@ -143,7 +143,7 @@ export default function ExploreShowcase({
           </>
         ) : null}
 
-        <p className={styles.more}>View More +</p>
+        <Link to="/animes" className={styles.more}>View More +</Link>
       </div>
     </section>
   );

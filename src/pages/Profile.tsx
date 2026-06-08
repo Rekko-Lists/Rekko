@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { Edit, Star, Settings as SettingsIcon, Image } from 'lucide-react';
+import {
+  FaTwitter, FaInstagram, FaGithub, FaYoutube, FaTwitch,
+  FaLinkedin, FaDiscord, FaTiktok,
+} from 'react-icons/fa';
 import { useParams, useNavigate } from 'react-router-dom';
 import Avatar from '@/components/ui/common/Avatar';
 import Button from '@/components/ui/common/Button';
@@ -14,21 +18,19 @@ import { logger } from '@/lib/logger';
 import type { Post } from '@/store/useFeedStore';
 import Seo from '@/components/seo/Seo';
 import { absoluteUrl, pageJsonLd } from '@/components/seo/jsonLd';
-import { getPostsByUsername, toFeedPost } from '@/lib/postService';
+import { deletePost, getPostsByUsername, likePost, toFeedPost, unlikePost } from '@/lib/postService';
 
-const MOCK_POST: Post = {
-  id: '1',
-  user: 'Username',
-  time: '10 hours ago',
-  text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam non diam nulla. Sed lectus orci, iaculis nec justo in, placerat interdum risus.',
-  relatedAnimes: [
-    { id: 'a1', title: 'Frieren', cover: '' },
-    { id: 'a2', title: 'Frieren S2', cover: '' },
-  ],
-  userImage: '',
-  likes: 50,
-  comments: 5,
-  liked: false,
+type IconComponent = React.ComponentType<{ size?: number; className?: string }>;
+
+const SOCIAL_ICONS: Record<string, IconComponent> = {
+  twitter: FaTwitter,
+  instagram: FaInstagram,
+  github: FaGithub,
+  youtube: FaYoutube,
+  twitch: FaTwitch,
+  linkedin: FaLinkedin,
+  discord: FaDiscord,
+  tiktok: FaTiktok,
 };
 
 const MOCK_LIST = [
@@ -67,6 +69,7 @@ export default function Profile() {
   const postsHasMoreRef  = useRef(true);
   const activeUsername   = useRef<string | undefined>(undefined);
   const abortPostsRef    = useRef<AbortController | null>(null);
+  const likingPostsRef   = useRef(new Set<string>());
 
   const isOwnProfile = !!user && user.username === username;
 
@@ -124,7 +127,7 @@ export default function Profile() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [username]);
 
-  // IntersectionObserver for infinite scroll — uses refs so it never needs to re-create
+  // IntersectionObserver for infinite scroll
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el) return;
@@ -139,6 +142,55 @@ export default function Profile() {
     return () => observer.disconnect();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  async function handlePostLike(id: string) {
+    if (likingPostsRef.current.has(id)) return;
+    const postId = Number(id);
+    if (!Number.isFinite(postId)) return;
+
+    const current = posts.find((p) => p.id === id);
+    if (!current) return;
+
+    likingPostsRef.current.add(id);
+    // Optimistic update
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === id
+          ? { ...p, liked: !p.liked, likes: p.liked ? Math.max(0, p.likes - 1) : p.likes + 1 }
+          : p,
+      ),
+    );
+
+    try {
+      if (current.liked) {
+        await unlikePost(postId);
+      } else {
+        await likePost(postId);
+      }
+    } catch {
+      // Revert on error
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === id
+            ? { ...p, liked: current.liked, likes: current.likes }
+            : p,
+        ),
+      );
+    } finally {
+      likingPostsRef.current.delete(id);
+    }
+  }
+
+  async function handlePostDelete(id: string) {
+    const postId = Number(id);
+    if (!Number.isFinite(postId)) return;
+    try {
+      await deletePost(postId);
+      setPosts((prev) => prev.filter((p) => p.id !== id));
+    } catch (err: unknown) {
+      logger.error('Failed to delete post', err);
+    }
+  }
 
   function handleUploadSuccess(imageUrl: string) {
     setProfileUser(prev => {
@@ -182,6 +234,8 @@ export default function Profile() {
       </div>
     );
   }
+
+  const socialAccounts = profileUser?.socialAccounts ?? [];
 
   return (
     <div className="relative font-gabarito overflow-x-hidden" style={{ minHeight: '100%' }}>
@@ -233,14 +287,14 @@ export default function Profile() {
         </button>
       )}
 
-      {/* Sword decoration — outside card, floating right */}
+      {/* Sword decoration */}
       <img
         src={rekkoSword}
         alt=""
         className="absolute right-2 top-[60px] h-[220px] object-contain rotate-[-20deg] opacity-75 pointer-events-none z-10"
       />
 
-      {/* Profile card — centered */}
+      {/* Profile card */}
       <div className="relative max-w-[760px] mx-auto bg-surface border-[1.5px] border-border border-top-none min-h-screen">
 
         {/* Banner area */}
@@ -300,6 +354,29 @@ export default function Profile() {
             {profileUser?.biography && (
               <p className="text-sm text-text-secondary mt-1">{profileUser.biography}</p>
             )}
+
+            {/* Social links */}
+            {socialAccounts.length > 0 && (
+              <div className="flex items-center gap-3 mt-2">
+                {socialAccounts.map((sa) => {
+                  const platformName = sa.name.toLowerCase();
+                  const IconComp = SOCIAL_ICONS[platformName];
+                  if (!IconComp) return null;
+                  return (
+                    <a
+                      key={platformName}
+                      href={sa.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${platformName}: ${sa.url}`}
+                      className="text-text-muted hover:text-primary transition-colors"
+                    >
+                      <IconComp size={18} />
+                    </a>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Anime list — mock until anime API is integrated */}
@@ -327,7 +404,12 @@ export default function Profile() {
           {/* Real posts */}
           <div className="flex flex-col gap-4">
             {posts.map(post => (
-              <PostCard key={post.id} post={post} />
+              <PostCard
+                key={post.id}
+                post={post}
+                onLike={handlePostLike}
+                onDelete={handlePostDelete}
+              />
             ))}
 
             {postsLoading && (
@@ -340,7 +422,6 @@ export default function Profile() {
               <p className="text-center text-sm text-text-muted py-4">No posts yet.</p>
             )}
 
-            {/* Sentinel below spinner so it's not in view while loading */}
             <div ref={sentinelRef} className="h-4" />
           </div>
         </div>

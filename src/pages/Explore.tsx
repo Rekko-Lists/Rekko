@@ -5,7 +5,6 @@ import TopRankedList, { type RankedAnimeItem } from '@/components/ui/anime/TopRa
 import type { ExploreRecommendationItem } from '@/components/ui/explore/ExploreRecommendationCard';
 import {
   getPopularAnimes,
-  getRecommendedAnimes,
   getTopAiringAnimes,
   getTopSeasonalAnimes,
   getTopUpcomingAnimes,
@@ -80,23 +79,11 @@ async function loadExploreData(signal: AbortSignal): Promise<ExploreData> {
   ]);
 
   const popularPostItems = popularPosts.status === 'fulfilled' ? popularPosts.value : [];
-  const popularRecommendations = await Promise.all(
-    popularPostItems.map(async (post) => {
-      const sourceAnime = post.animes[0];
-      if (!sourceAnime) return { post, sourceAnime: undefined, relatedAnimes: [] };
-
-      try {
-        const recommended = await getRecommendedAnimes(sourceAnime.malId, { page: 1, limit: 4 }, signal);
-        return {
-          post,
-          sourceAnime,
-          relatedAnimes: recommended.items.filter((anime) => anime.malId !== sourceAnime.malId).slice(0, 3),
-        };
-      } catch {
-        return { post, sourceAnime, relatedAnimes: [] };
-      }
-    }),
-  );
+  const popularRecommendations = popularPostItems.map((post) => ({
+    post,
+    sourceAnime: post.animes[0],
+    relatedAnimes: post.animes.slice(0, 3),
+  }));
 
   return {
     seasonal: seasonal.status === 'fulfilled' ? seasonal.value : [],
@@ -164,8 +151,8 @@ export default function Explore() {
       <ExploreCloudToggle enabled={cloudsEnabled} onToggle={() => setCloudsEnabled((value) => !value)} />
 
       <div className={styles.layout}>
-        <aside className={`${styles.sideRank} ${styles.sideDown}`}>
-          <TopRankedList title="Top Upcoming" items={toRankedItems(data.topUpcoming)} />
+        <aside className={`${styles.sideRank} ${styles.sideUp}`}>
+          <TopRankedList title="Top Upcoming" items={toRankedItems(data.topUpcoming)} moreLink="/animes?tab=all&status=not_yet_aired" />
         </aside>
 
         <main className={styles.centerCol}>
@@ -179,7 +166,7 @@ export default function Explore() {
         </main>
 
         <aside className={`${styles.sideRank} ${styles.sideUp}`}>
-          <TopRankedList title="Top Airing" items={toRankedItems(data.topAiring)} />
+          <TopRankedList title="Top Airing" items={toRankedItems(data.topAiring)} moreLink="/animes?tab=seasonal&status=currently_airing" />
         </aside>
       </div>
     </div>

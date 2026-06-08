@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 interface RankedAnimeItem {
   id: string;
   rank: number;
@@ -8,6 +10,7 @@ interface RankedAnimeItem {
 interface Props {
   title: string;
   items: RankedAnimeItem[];
+  moreLink?: string;
 }
 
 const styles = {
@@ -27,17 +30,21 @@ const styles = {
 
 export type { RankedAnimeItem };
 
-export default function TopRankedList({ title, items }: Props) {
+export default function TopRankedList({ title, items, moreLink }: Props) {
   return (
     <aside className={styles.card}>
       <div className={styles.header}>
         <h2 className={styles.title}>{title}</h2>
-        <button type="button" className={styles.more}>More +</button>
+        {moreLink ? (
+          <Link to={moreLink} className={styles.more}>More +</Link>
+        ) : (
+          <button type="button" className={styles.more}>More +</button>
+        )}
       </div>
 
       <div>
         {items.map((item) => (
-          <div key={item.id} className={styles.item}>
+          <Link key={item.id} to={`/animes/${item.id}`} className={styles.item} style={{ display: 'flex' }}>
             <span className={styles.rank}>{item.rank}</span>
 
             <div className={styles.coverWrap}>
@@ -52,7 +59,7 @@ export default function TopRankedList({ title, items }: Props) {
             </div>
 
             <p className={styles.text}>{item.title}</p>
-          </div>
+          </Link>
         ))}
       </div>
     </aside>

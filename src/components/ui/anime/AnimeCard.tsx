@@ -1,7 +1,6 @@
 import { Heart, Star, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, type KeyboardEvent, type MouseEvent } from 'react';
-import rekkoSword from '@/assets/rekko_sword.png';
 import { Anime, WatchState } from '@/types/anime.ts';
 import { setWatchState } from '@/lib/animeService';
 import { formatCompactNumber } from '@/utils/formatNumber';
@@ -25,10 +24,9 @@ const styles = {
   iconBtnActive: 'flex items-center gap-1 text-primary text-xs',
   title:      'mt-1.5 text-[13px] font-medium text-text-main',
   inListBadge:'absolute top-2 right-2 bg-primary text-white text-[10px] font-medium px-1.5 py-0.5 rounded-full',
-  postsBtn:   'mt-2 mx-auto w-9 h-9 rounded-full bg-primary flex items-center justify-center hover:bg-primary-dark transition-colors',
 };
 
-export default function AnimeCard({ anime, completedCount, onAddToList, onListUpdated }: Props) {
+export default function AnimeCard({ anime, onAddToList, onListUpdated }: Props) {
   const navigate = useNavigate();
   const score = anime.malMean > 0 ? anime.malMean : null;
   const members = (anime as unknown as { members?: number }).members ?? 0;
@@ -90,35 +88,17 @@ export default function AnimeCard({ anime, completedCount, onAddToList, onListUp
           )}
         </div>
       </div>
+      <p className={styles.title}>{anime.name}</p>
       <div className={styles.iconRow}>
-        <span className={styles.iconBtn}>
-          <img src={rekkoSword} alt="" className="w-4 h-4 object-contain rotate-[-35deg]" />
-        </span>
         <span className={localWatchState ? styles.iconBtnActive : styles.iconBtn}>
           <Users size={14} />
           <span>{formatCompactNumber(members)}</span>
         </span>
-        {completedCount !== undefined && (
-          <span className={styles.iconBtn}>
-            <Users size={14} />
-            <span>{formatCompactNumber(completedCount)}</span>
-          </span>
-        )}
         <span className={anime.liked ? styles.iconBtnActive : styles.iconBtn}>
           <Heart size={14} fill={anime.liked ? 'currentColor' : 'none'} />
           {anime.likes > 0 && <span>{formatCompactNumber(anime.likes)}</span>}
         </span>
       </div>
-      <p className={styles.title}>{anime.name}</p>
-      <button
-        type="button"
-        className={styles.postsBtn}
-        title="Open posts"
-        onClick={(e) => { e.stopPropagation(); /* TODO: abrir modal de posts */ }}
-        aria-label="Open posts modal"
-      >
-        <img src={rekkoSword} className="w-4 h-4" style={{ filter: 'brightness(0) invert(1)' }} alt="" />
-      </button>
     </div>
   );
 }

@@ -87,13 +87,14 @@ export default function EpisodeRatingInputs({
         <select
           value={rating || ''}
           onChange={(e) => {
-            const n = parseInt(e.target.value, 10);
-            if (Number.isFinite(n)) onRatingChange(n);
+            const n = Number(e.target.value);
+            onRatingChange(n);
           }}
           className={styles.ratingSel}
           disabled={disabled}
         >
-          <option value="" disabled>Select</option>
+          <option value="" disabled>–</option>
+          <option value="0">✕ Remove</option>
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
             <option key={n} value={n}>{n}</option>
           ))}

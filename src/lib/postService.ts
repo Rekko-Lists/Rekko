@@ -243,8 +243,9 @@ export async function createComment(params: {
   postId: number;
   message: string;
   parentCommentId?: number | null;
-}): Promise<void> {
-  await api.post("/comment", params);
+}): Promise<CommentData | null> {
+  const response = await api.post<{ success: boolean; data?: { comment?: CommentData } }>("/comment", params);
+  return response.data.data?.comment ?? null;
 }
 
 export function getPostsByUsername(username: string, params: ListPostsParams = {}, signal?: AbortSignal): Promise<PostsPage> {
@@ -269,4 +270,17 @@ export async function likeComment(commentId: number): Promise<CommentData | null
 export async function unlikeComment(commentId: number): Promise<CommentData | null> {
   const response = await api.delete<RawLikeCommentEnvelope>(`/comment/${commentId}/like`);
   return response.data.data?.comment ?? null;
+}
+
+export async function deletePost(postId: number): Promise<void> {
+  await api.delete(`/post/${postId}`);
+}
+
+export async function deleteComment(commentId: number): Promise<void> {
+  await api.delete(`/comment/${commentId}`);
+}
+
+export async function getCommentReplies(parentId: number): Promise<CommentData[]> {
+  const response = await api.get<{ success: boolean; data: { replies?: CommentData[] } }>(`/comment/by-parent/${parentId}`);
+  return response.data.data?.replies ?? [];
 }

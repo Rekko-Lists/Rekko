@@ -12,6 +12,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { extractApiError } from "@/lib/apiErrors";
 import { getLatestAnimeNews, type AnimeNewsItem } from "@/lib/animeNewsService";
 import {
+  deletePost,
   getPopularPosts,
   getPosts,
   likePost,
@@ -251,6 +252,17 @@ export default function Feed() {
     return () => controller.abort();
   }, [newsMalIdsKey]);
 
+  async function handleDelete(id: string) {
+    const postId = Number(id);
+    if (!Number.isFinite(postId)) return;
+    try {
+      await deletePost(postId);
+      setPosts(posts.filter((p) => p.id !== id));
+    } catch {
+      // silently ignore
+    }
+  }
+
   async function handleLike(id: string) {
     if (!isAuthenticated) {
       navigate("/login");
@@ -315,7 +327,7 @@ export default function Feed() {
       <main className={styles.center}>
         {error && <p className={styles.error}>{error}</p>}
         {posts.map((post) => (
-          <PostCard key={post.id} post={post} onLike={handleLike} />
+          <PostCard key={post.id} post={post} onLike={handleLike} onDelete={handleDelete} />
         ))}
         {loading && <p className={styles.state}>Loading posts...</p>}
         {!loading && posts.length === 0 && !error && (
