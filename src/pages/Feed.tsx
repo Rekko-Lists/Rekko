@@ -41,9 +41,21 @@ const FEED_LIMIT = 10;
 const NEWS_FALLBACK_MAL_IDS = [52991, 5114, 9253, 30276];
 
 const SITE_LINKS: SiteLinkItem[] = [
-  { label: "Rules of the site", icon: "Book", href: "#" },
-  { label: "About", icon: "Book", href: "#" },
-  { label: "FAQ", icon: "Question", href: "#" },
+  {
+    label: "Rules of the site",
+    icon: "Book",
+    href: "/rules",
+  },
+  {
+    label: "About",
+    icon: "Book",
+    href: "/about",
+  },
+  {
+    label: "FAQ",
+    icon: "Question",
+    href: "/faq",
+  },
 ];
 
 const styles = {
