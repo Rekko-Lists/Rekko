@@ -78,7 +78,7 @@ export const authService = {
 
   async getUserByUsername(username: string): Promise<AuthUser> {
     const res = await axios.get<{ success: boolean; data: Record<string, unknown> }>(
-      `${BASE}/user/${username}?fields=userId,email,username,emailVerified,profileImage,role`
+      `${BASE}/user/${username}?fields=userId,email,username,emailVerified,profileImage,role,streak`
     );
     const d = res.data.data as unknown as AuthUser;
     return {
@@ -88,12 +88,13 @@ export const authService = {
       emailVerified: d.emailVerified,
       profileImage: d.profileImage,
       role: d.role,
+      streak: (d as { streak?: number }).streak,
     };
   },
 
   async getUserById(userId: number): Promise<AuthUser> {
     const res = await axios.get<{ success: boolean; data: Record<string, unknown> }>(
-      `${BASE}/user/${userId}?fields=userId,email,username,emailVerified,profileImage,role`
+      `${BASE}/user/${userId}?fields=userId,email,username,emailVerified,profileImage,role,streak`
     );
     const d = res.data.data as unknown as AuthUser;
     return {
@@ -103,6 +104,7 @@ export const authService = {
       emailVerified: d.emailVerified,
       profileImage: d.profileImage,
       role: d.role,
+      streak: (d as { streak?: number }).streak,
     };
   },
 
