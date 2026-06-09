@@ -12,6 +12,17 @@ import OpeningChallengeView from '@/components/animedle/OpeningChallengeView';
 import EmojiChallengeView from '@/components/animedle/EmojiChallengeView';
 import ChallengeTabBar from '@/components/animedle/ChallengeTabBar';
 import ConfettiEffect from '@/components/animedle/ConfettiEffect';
+import {
+  type ChallengeResponseDTO,
+  type AnimeData,
+  type CharacterData,
+  type OpeningData,
+  type EmojiData,
+  isAnimeData,
+  isCharacterData,
+  isOpeningData,
+  isEmojiData,
+} from '@/types/challenge';
 
 const BASE = import.meta.env.VITE_API_BASE_URL as string;
 const MAX_WRONG_GUESSES = 4;
@@ -20,21 +31,6 @@ const MAX_WRONG_GUESSES = 4;
 // Types
 // ---------------------------------------------------------------------------
 
-type ChallengeType = 'anime' | 'character' | 'opening' | 'emoji';
-
-interface AnimeInfo {
-  malId: number;
-  name: string;
-  imgMedium?: string;
-  imgLarge?: string;
-}
-
-interface ChallengeResponseDTO {
-  type: ChallengeType;
-  anime: AnimeInfo;
-  data: Record<string, unknown>;
-}
-
 interface ChallengeState {
   guesses: { text: string; correct: boolean }[];
   solved: boolean;
@@ -42,16 +38,6 @@ interface ChallengeState {
   currentPhotoIndex: number;
   solvedAtPhotoIndex: number;
   showConfetti: boolean;
-}
-
-// ---------------------------------------------------------------------------
-// Difficulty helper (for "anime" type)
-// ---------------------------------------------------------------------------
-
-const PHOTO_DIFFICULTY_LABELS = ['DIFÍCIL', 'MEDIA', 'FÁCIL', 'MUY FÁCIL'];
-
-function getDifficultyAtIndex(index: number): string {
-  return PHOTO_DIFFICULTY_LABELS[index] ?? 'DESCONOCIDA';
 }
 
 // ---------------------------------------------------------------------------
@@ -152,6 +138,9 @@ export default function Animedle() {
       )
       .then((res) => {
         const { challenges: fetchedChallenges } = res.data.data;
+        if (import.meta.env.DEV) {
+          console.log('[Animedle] challenges from /daily:', JSON.stringify(fetchedChallenges, null, 2));
+        }
         setChallenges(fetchedChallenges);
         setStates(
           fetchedChallenges.map(() => ({
@@ -333,9 +322,9 @@ export default function Animedle() {
         {/* Challenge content area — dark gradient background */}
         <div className={styles.imageArea}>
           <div className={styles.imageAreaBg} />
-          {challenge.type === 'anime' && (
+          {isAnimeData(challenge.data, challenge.type) && (
             <AnimeChallengeView
-              data={challenge.data as Parameters<typeof AnimeChallengeView>[0]['data']}
+              data={challenge.data as AnimeData}
               wrongGuesses={wrongGuessCount}
               currentPhotoIndex={state.currentPhotoIndex}
               onPhotoIndexChange={(idx) =>
@@ -348,22 +337,22 @@ export default function Animedle() {
             />
           )}
 
-          {challenge.type === 'character' && (
+          {isCharacterData(challenge.data, challenge.type) && (
             <CharacterChallengeView
-              data={challenge.data as Parameters<typeof CharacterChallengeView>[0]['data']}
+              data={challenge.data as CharacterData}
               wrongGuesses={wrongGuessCount}
             />
           )}
 
-          {challenge.type === 'opening' && (
+          {isOpeningData(challenge.data, challenge.type) && (
             <OpeningChallengeView
-              data={challenge.data as Parameters<typeof OpeningChallengeView>[0]['data']}
+              data={challenge.data as OpeningData}
             />
           )}
 
-          {challenge.type === 'emoji' && (
+          {isEmojiData(challenge.data, challenge.type) && (
             <EmojiChallengeView
-              data={challenge.data as Parameters<typeof EmojiChallengeView>[0]['data']}
+              data={challenge.data as EmojiData}
             />
           )}
         </div>
@@ -380,8 +369,7 @@ export default function Animedle() {
                 </p>
                 {challenge.type === 'anime' && (
                   <p className="text-xs text-text-muted">
-                    Resuelto en dificultad:{' '}
-                    <strong>{getDifficultyAtIndex(state.solvedAtPhotoIndex)}</strong>
+                    Resuelto en foto {state.solvedAtPhotoIndex + 1} de 4
                   </p>
                 )}
               </>

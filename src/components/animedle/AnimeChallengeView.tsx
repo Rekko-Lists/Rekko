@@ -86,7 +86,7 @@ export default function AnimeChallengeView({
           <div className={styles.noImage}>
             <ImageOff size={28} className="opacity-60" />
             <span>{imgError ? 'Error al cargar imagen' : 'Sin imagen'}</span>
-            {process.env.NODE_ENV !== 'production' && !imageUrl && (
+            {import.meta.env.DEV && !imageUrl && (
               <span className="text-[10px] opacity-50 px-2 text-center break-all">
                 key: {currentKey} | url: {String(imageUrl || 'vacío')}
               </span>
