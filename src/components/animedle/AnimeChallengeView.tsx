@@ -1,4 +1,5 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 import { getUrl } from '@/types/challenge';
 
 interface Props {
@@ -14,25 +15,27 @@ interface Props {
 }
 
 const PHOTO_ORDER = ['hard', 'medium', 'easy', 'veryEasy'] as const;
+
 const DIFFICULTY_LABELS = ['DIFÍCIL', 'MEDIA', 'FÁCIL', 'MUY FÁCIL'];
+
 const DIFFICULTY_COLORS = [
-  'bg-status-red text-white',
-  'bg-primary text-white',
-  'bg-status-green text-white',
-  'bg-status-blue text-white',
+  'bg-status-red/90 text-white',
+  'bg-primary/90 text-white',
+  'bg-status-green/90 text-white',
+  'bg-status-blue/90 text-white',
 ];
 
 const styles = {
-  wrapper: 'flex flex-col items-center justify-center h-full gap-3 relative z-10',
-  topRow: 'flex items-center justify-between w-full px-3',
-  difficultyBadge: 'text-xs font-bold px-3 py-1 rounded-pill',
-  photoCounter: 'text-xs text-white/70 font-medium',
-  imageBox: 'w-full flex-1 overflow-hidden flex items-center justify-center min-h-0',
-  image: 'w-full h-full object-cover transition-opacity duration-300',
-  noImage: 'w-full h-full flex items-center justify-center text-white/50 text-sm',
-  navRow: 'flex items-center gap-4 pb-1',
-  navBtn: 'flex items-center gap-1 px-4 py-1.5 rounded-btn bg-gradient-cta text-white text-sm disabled:opacity-30 hover:opacity-90 transition-opacity',
-  navCounter: 'text-xs text-white/60',
+  wrapper:    'flex flex-col h-full relative z-10',
+  imageBox:   'flex-1 overflow-hidden relative min-h-0',
+  image:      'absolute inset-0 w-full h-full object-cover transition-opacity duration-300',
+  noImage:    'absolute inset-0 flex flex-col items-center justify-center gap-2 text-white/70 text-sm bg-black/20',
+  // Nav bar at the bottom — stays in the dark area
+  navBar:     'flex items-center justify-between px-4 py-2.5 bg-black/50 backdrop-blur-sm flex-shrink-0',
+  navBtn:     'flex items-center gap-1.5 px-4 py-1.5 rounded-btn bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition-colors disabled:opacity-30 disabled:cursor-not-allowed select-none',
+  navCenter:  'flex flex-col items-center gap-0.5',
+  diffBadge:  'text-xs font-bold px-3 py-0.5 rounded-pill',
+  photoCount: 'text-[11px] text-white/55',
 };
 
 export default function AnimeChallengeView({
@@ -41,71 +44,86 @@ export default function AnimeChallengeView({
   currentPhotoIndex,
   onPhotoIndexChange,
 }: Props) {
-  // How many photos are unlocked: at least 1 (the hard one), plus one per wrong guess
+  const [imgError, setImgError] = useState(false);
+
+  // Photos unlocked by wrong guesses: at least 1, +1 per wrong guess, max 4
   const unlockedCount = Math.min(wrongGuesses + 1, 4);
   const safeIndex = Math.min(currentPhotoIndex, unlockedCount - 1);
 
   const currentKey = PHOTO_ORDER[safeIndex];
   const imageUrl = getUrl(data[currentKey]);
 
+  // Reset error state when the photo changes
+  function handleIndexChange(idx: number) {
+    setImgError(false);
+    onPhotoIndexChange(idx);
+  }
+
   function goPrev() {
-    if (safeIndex > 0) onPhotoIndexChange(safeIndex - 1);
+    if (safeIndex > 0) handleIndexChange(safeIndex - 1);
   }
 
   function goNext() {
-    if (safeIndex < unlockedCount - 1) onPhotoIndexChange(safeIndex + 1);
+    if (safeIndex < unlockedCount - 1) handleIndexChange(safeIndex + 1);
   }
+
+  const canGoPrev = safeIndex > 0;
+  const canGoNext = safeIndex < unlockedCount - 1;
 
   return (
     <div className={styles.wrapper}>
-      {/* Difficulty badge + photo counter */}
-      <div className={styles.topRow}>
-        <span className={`${styles.difficultyBadge} ${DIFFICULTY_COLORS[safeIndex]}`}>
-          {DIFFICULTY_LABELS[safeIndex]}
-        </span>
-        <span className={styles.photoCounter}>
-          {safeIndex + 1}/{unlockedCount} foto{unlockedCount !== 1 ? 's' : ''} desbloqueada{unlockedCount !== 1 ? 's' : ''}
-        </span>
-      </div>
-
-      {/* Image */}
+      {/* Photo */}
       <div className={styles.imageBox}>
-        {imageUrl ? (
+        {imageUrl && !imgError ? (
           <img
             key={imageUrl}
             src={imageUrl}
             alt={`Pista ${safeIndex + 1}`}
             className={styles.image}
+            onError={() => setImgError(true)}
           />
         ) : (
-          <div className={styles.noImage}>Sin imagen</div>
+          <div className={styles.noImage}>
+            <ImageOff size={28} className="opacity-60" />
+            <span>{imgError ? 'Error al cargar imagen' : 'Sin imagen'}</span>
+            {process.env.NODE_ENV !== 'production' && !imageUrl && (
+              <span className="text-[10px] opacity-50 px-2 text-center break-all">
+                key: {currentKey} | url: {String(imageUrl || 'vacío')}
+              </span>
+            )}
+          </div>
         )}
       </div>
 
-      {/* Navigation arrows */}
-      {unlockedCount > 1 && (
-        <div className={styles.navRow}>
-          <button
-            onClick={goPrev}
-            disabled={safeIndex === 0}
-            className={styles.navBtn}
-          >
-            <ChevronLeft size={16} />
-            Anterior
-          </button>
-          <span className={styles.navCounter}>
+      {/* Navigation bar — arrows + difficulty label between them */}
+      <div className={styles.navBar}>
+        <button
+          onClick={goPrev}
+          disabled={!canGoPrev}
+          className={styles.navBtn}
+        >
+          <ChevronLeft size={16} />
+          Anterior
+        </button>
+
+        <div className={styles.navCenter}>
+          <span className={`${styles.diffBadge} ${DIFFICULTY_COLORS[safeIndex]}`}>
+            {DIFFICULTY_LABELS[safeIndex]}
+          </span>
+          <span className={styles.photoCount}>
             {safeIndex + 1} / {unlockedCount}
           </span>
-          <button
-            onClick={goNext}
-            disabled={safeIndex >= unlockedCount - 1}
-            className={styles.navBtn}
-          >
-            Siguiente
-            <ChevronRight size={16} />
-          </button>
         </div>
-      )}
+
+        <button
+          onClick={goNext}
+          disabled={!canGoNext}
+          className={styles.navBtn}
+        >
+          Siguiente
+          <ChevronRight size={16} />
+        </button>
+      </div>
     </div>
   );
 }
