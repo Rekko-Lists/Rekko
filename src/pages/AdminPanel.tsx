@@ -7,14 +7,15 @@ import ChallengesPanel from '@/components/admin/ChallengesPanel';
 type Tab = 'seed' | 'challenges';
 
 const styles = {
-  root:        'min-h-screen bg-app-bg flex font-gabarito',
-  sidebar:     'w-[220px] bg-gradient-to-b from-grad-start to-grad-end flex flex-col flex-shrink-0',
-  sidebarTop:  'px-5 py-5 border-b border-white/10 flex flex-col gap-1',
+  root:        'min-h-screen bg-app-bg font-gabarito',
+  inner:       'flex min-h-screen mx-[6%]',
+  sidebar:     'w-[220px] flex-shrink-0 bg-surface border-r border-border flex flex-col',
+  sidebarTop:  'px-5 py-5 border-b border-border flex flex-col gap-1',
   logo:        'h-7 object-contain self-start',
-  sidebarLabel:'text-[11px] font-semibold text-white/50 uppercase tracking-wider mt-0.5',
+  sidebarLabel:'text-[11px] font-semibold text-text-muted uppercase tracking-wider mt-0.5',
   nav:         'flex-1 px-3 py-4 flex flex-col gap-1',
-  tabActive:   'flex items-center gap-3 px-3 py-2.5 rounded-btn text-sm font-semibold transition-all bg-white/15 text-white border-l-[3px] border-primary',
-  tabInactive: 'flex items-center gap-3 px-3 py-2.5 rounded-btn text-sm font-medium transition-all text-white/55 hover:text-white hover:bg-white/10 border-l-[3px] border-transparent',
+  tabActive:   'flex items-center gap-3 px-3 py-2.5 rounded-btn text-sm font-semibold transition-all bg-primary/10 text-primary border-l-[3px] border-primary',
+  tabInactive: 'flex items-center gap-3 px-3 py-2.5 rounded-btn text-sm font-medium transition-all text-text-secondary hover:text-text-main hover:bg-app-bg border-l-[3px] border-transparent',
   main:        'flex-1 overflow-y-auto',
 };
 
@@ -23,6 +24,7 @@ export default function AdminPanel() {
 
   return (
     <div className={styles.root}>
+      <div className={styles.inner}>
       <aside className={styles.sidebar}>
         <div className={styles.sidebarTop}>
           <img src={rekkoLogo} alt="Rekko" className={styles.logo} />
@@ -50,6 +52,7 @@ export default function AdminPanel() {
         {activeTab === 'seed' && <SeedPanel />}
         {activeTab === 'challenges' && <ChallengesPanel />}
       </main>
+      </div>
     </div>
   );
 }

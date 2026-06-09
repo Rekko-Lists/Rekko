@@ -279,7 +279,6 @@ export default function ChallengeForm({
                   setEmojis(updated);
                 }}
                 className={styles.emojiInput}
-                placeholder="😀"
                 maxLength={8}
               />
             </div>
