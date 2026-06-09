@@ -2,6 +2,7 @@ import { useState } from 'react';
 import api from '@/lib/api';
 import { extractApiError } from '@/lib/apiErrors';
 import Spinner from '@/components/ui/common/Spinner';
+import AnimeSearchSelect from '@/components/ui/common/AnimeSearchSelect';
 
 type ChallengeType = 'anime' | 'character' | 'opening' | 'emoji';
 
@@ -53,6 +54,7 @@ export default function ChallengeForm({
 
   const [type, setType] = useState<ChallengeType>(initialData?.type ?? 'anime');
   const [malId, setMalId] = useState<number>(initialData?.anime?.malId ?? 0);
+  const [selectedAnimeName, setSelectedAnimeName] = useState<string>(initialData?.anime?.name ?? '');
 
   // Anime fields
   const [fileHard, setFileHard] = useState<File | null>(null);
@@ -91,6 +93,10 @@ export default function ChallengeForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!malId) {
+      setError('Selecciona un anime antes de guardar.');
+      return;
+    }
     setLoading(true);
     setError(null);
 
@@ -164,18 +170,16 @@ export default function ChallengeForm({
         </select>
       </div>
 
-      {/* MAL ID */}
+      {/* Anime search */}
       <div className={styles.fieldGroup}>
-        <label className={styles.label}>MAL ID</label>
-        <input
-          type="number"
-          min={1}
-          required
-          value={malId || ''}
-          onChange={e => setMalId(Number(e.target.value))}
-          className={styles.input}
-          placeholder="Ej: 1535"
+        <label className={styles.label}>Anime</label>
+        <AnimeSearchSelect
+          value={malId || null}
+          selectedName={selectedAnimeName}
+          onSelect={(id, name) => { setMalId(id); setSelectedAnimeName(name); }}
+          onClear={() => { setMalId(0); setSelectedAnimeName(''); }}
         />
+        {!malId && <span className="text-xs text-status-red mt-1">Selecciona un anime</span>}
       </div>
 
       {/* Dynamic fields by type */}
