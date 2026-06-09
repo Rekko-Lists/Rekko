@@ -6,6 +6,8 @@ import { signInWithGoogle } from '@/lib/firebase';
 import { useAuthStore } from '@/store/useAuthStore';
 import { extractApiError } from '@/lib/apiErrors';
 import { logger } from '@/lib/logger';
+import Seo from '@/components/seo/Seo';
+import { seoPages } from '@/components/seo/pages';
 
 const styles = {
   page:      'min-h-screen bg-app-bg flex items-center justify-center font-gabarito',
@@ -86,6 +88,12 @@ export default function Login() {
 
   return (
     <div className={styles.page}>
+      <Seo
+        title={seoPages.login.title}
+        description={seoPages.login.description}
+        canonicalPath={seoPages.login.path}
+        noindex={seoPages.login.noindex}
+      />
       <form className={styles.card} onSubmit={handleSubmit}>
         <h1 className={styles.title}>Login</h1>
 

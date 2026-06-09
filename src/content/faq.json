@@ -1,0 +1,214 @@
+[
+    {
+        "question": "What exactly is REKKO?",
+        "answer": "REKKO is a global English-language social network focused on anime recommendations. It is designed to solve \"analysis paralysis\" by helping you decide what to watch next in less than 2 minutes through connections with people who share your tastes."
+    },
+    {
+        "question": "Is REKKO a streaming platform like Crunchyroll or Netflix?",
+        "answer": "No, you cannot watch episodes on REKKO. We are the \"pre-viewing decision layer.\" You come to REKKO to discover what to watch, and then you go to your favorite streaming platform to watch it."
+    },
+    {
+        "question": "How much does it cost to use REKKO?",
+        "answer": "REKKO is completely free to use. We are currently focused on building the best possible tool and growing a large community."
+    },
+    {
+        "question": "Who is REKKO for?",
+        "answer": "Any anime fan, but especially if: You are an \"indecisive explorer\" who spends too much time scrolling without making a decision. You are a \"social fan\" looking to connect and discuss your favorite anime. You are a \"practical fan\" with an endless watchlist and no idea where to start."
+    },
+    {
+        "question": "What languages is REKKO available in?",
+        "answer": "Currently, the REKKO platform and global community operate entirely in English to connect fans from around the world."
+    },
+    {
+        "question": "What does the \"Find your next anime in 2 minutes\" promise mean?",
+        "answer": "It means we have removed the friction. Simply tell us which anime you have enjoyed recently, and in less than two minutes we will provide clear and accurate recommendations based on real affinity."
+    },
+    {
+        "question": "What is an \"Anime Starter Path\"?",
+        "answer": "An Anime Starter Path is a guided route designed for new users or beginners who feel overwhelmed. Through simple choices, such as your mood or favorite genre, we provide three safe recommendations to help you get started without information overload."
+    },
+    {
+        "question": "What are \"Taste Twins\"?",
+        "answer": "Taste Twins are real people on our platform who share very similar anime preferences to yours."
+    },
+    {
+        "question": "Does REKKO use a cold algorithm to recommend anime?",
+        "answer": "No. Unlike streaming platforms or purely AI-driven tools, our recommendations are based on human affinity. We recommend anime because your Taste Twins have watched and genuinely enjoyed them."
+    },
+    {
+        "question": "Why are social recommendations better than popularity lists?",
+        "answer": "Generic rankings such as \"Top 10 Anime of the Year\" tend to recommend the same titles to everyone and ignore personal taste. REKKO helps you discover anime based on what fits you, not what appeals to the majority."
+    },
+    {
+        "question": "What if I don't like a recommendation?",
+        "answer": "You can provide feedback after finishing or dropping an anime. The more anime you rate, the more accurately REKKO can refine your profile, improve your Taste Twins, and deliver better recommendations."
+    },
+    {
+        "question": "Can I filter recommendations by my mood?",
+        "answer": "Yes. The system allows you to specify your current mood or preferred genre so that the recommendations are tailored to exactly what you feel like watching at that moment."
+    },
+    {
+        "question": "How is REKKO different from MyAnimeList (MAL) or AniList?",
+        "answer": "MAL and AniList are excellent databases for organizing, rating, and tracking anime you have already watched. REKKO focuses on the step before that: helping you decide what to watch next through a fast and social experience."
+    },
+    {
+        "question": "I already use MAL for my lists. Should I switch to REKKO?",
+        "answer": "You do not have to choose. REKKO complements your existing list. Keep your watchlist on MAL, and when you are unsure what to start next, use REKKO to make the decision."
+    },
+    {
+        "question": "How is REKKO different from platforms like RecoSensei or RekoGen?",
+        "answer": "While those tools provide recommendations through AI or algorithmic analysis of your viewing history, REKKO takes a human-first approach. Our key difference is connecting you with Taste Twins so recommendations are based on real people with similar tastes."
+    },
+    {
+        "question": "Why not just use Crunchyroll rankings?",
+        "answer": "Crunchyroll is designed to help you watch anime. Its catalogs and recommendation systems can create analysis paralysis due to the sheer number of options available. REKKO helps you choose quickly and confidently without the stress."
+    },
+    {
+        "question": "Do I need to register to try REKKO?",
+        "answer": "We've designed the website so you can see a quick demo or try the basic recommendation system without creating an account."
+    },
+    {
+        "question": "What registration methods does REKKO support?",
+        "answer": "We currently support Google OAuth and Discord OAuth."
+    },
+    {
+        "question": "Do I have to fill out long forms to get started?",
+        "answer": "No. Our onboarding process is designed to be quick and simple. Select a few interests and receive recommendations in seconds."
+    },
+    {
+        "question": "Can I delete my account if I no longer want to use REKKO?",
+        "answer": "Yes. You can manage your privacy settings and permanently delete your account at any time."
+    },
+    {
+        "question": "Why does REKKO use Discord?",
+        "answer": "Discord is where anime communities already exist. Instead of creating an isolated chat platform, REKKO integrates with Discord so users can join community discussions, participate in events, connect with Taste Twins, and share recommendations."
+    },
+    {
+        "question": "Is joining the REKKO Discord server mandatory?",
+        "answer": "No. However, it is highly recommended because most community interactions happen there."
+    },
+    {
+        "question": "What do people talk about on the REKKO Discord server?",
+        "answer": "Topics include anime recommendations, seasonal anime discussions, niche genres, community events, and Taste Twin conversations."
+    },
+    {
+        "question": "Do you have a referral program?",
+        "answer": "Yes. You can invite friends and unlock special community statuses such as \"Taste Connector\"."
+    },
+    {
+        "question": "What is REKKO's reputation system?",
+        "answer": "The reputation system rewards positive contributions and discourages harmful behavior. Its goal is to maintain a healthy and helpful community."
+    },
+    {
+        "question": "How do I earn reputation points?",
+        "answer": "Examples include: Good Post +10, Helpful Comment +5."
+    },
+    {
+        "question": "Can I lose reputation points?",
+        "answer": "Yes. Misinformation -10, Spam -15, Bad Behaviour -20."
+    },
+    {
+        "question": "What are the user roles?",
+        "answer": "USER is a standard user, MODERATOR is a community moderator, and ADMIN is a REKKO team member."
+    },
+    {
+        "question": "How can I become a MODERATOR?",
+        "answer": "Moderator roles are granted to highly active community members who maintain a strong reputation, help other users, and contribute positively to the community."
+    },
+    {
+        "question": "What technologies is the REKKO Frontend built on?",
+        "answer": "React 18, TypeScript 5, Vite 5, Tailwind CSS 3, and DaisyUI."
+    },
+    {
+        "question": "How are routes and state managed on the website?",
+        "answer": "Routing uses React Router 6 and state management uses Zustand."
+    },
+    {
+        "question": "What infrastructure does the REKKO Backend (API) use?",
+        "answer": "Node.js, ExpressJS, and TypeScript."
+    },
+    {
+        "question": "What database do you use?",
+        "answer": "Supabase for database and Prisma ORM for queries and migrations."
+    },
+    {
+        "question": "How are user images managed?",
+        "answer": "Images such as avatars, banners, and backgrounds are uploaded and managed using Cloudinary."
+    },
+    {
+        "question": "Who handles authentication?",
+        "answer": "Firebase Authentication handles OAuth login, session management, and account security."
+    },
+    {
+        "question": "Is REKKO's code public or open source?",
+        "answer": "Some parts are open source under the MIT License, including frontend and API, hosted under the Rekko-Lists GitHub organization."
+    },
+    {
+        "question": "Is there a REKKO mobile app for Android or iOS?",
+        "answer": "No. REKKO is currently a web-first platform."
+    },
+    {
+        "question": "Will REKKO include a Taste Twins notification system?",
+        "answer": "Yes, smart notifications are planned for Taste Twin activity updates and recommendations."
+    },
+    {
+        "question": "I've found a bug or issue. Where can I report it?",
+        "answer": "Through Discord (support channels) or GitHub (issues, bugs, improvements)."
+    },
+    {
+        "question": "Do you plan to incorporate refresh tokens in the future?",
+        "answer": "Yes, refresh tokens are part of the authentication roadmap."
+    },
+    {
+        "question": "Will you add classic anime to the recommendations?",
+        "answer": "Yes, classic anime like Naruto, One Piece, Dragon Ball, Death Note, and Pokémon are included in recommendations."
+    },
+    {
+        "question": "Will I be able to export my REKKO list in the future?",
+        "answer": "Possibly. Integrations with anime databases and synchronization are being evaluated."
+    },
+    {
+        "question": "Is there a team behind REKKO?",
+        "answer": "Yes. REKKO is developed by anime fans and developers including Eriquito00 and WysperOtaku."
+    },
+    {
+        "question": "If you don't monetize the platform, how will it be sustained?",
+        "answer": "At this stage, the focus is on usability, community growth, and improving recommendations rather than monetization."
+    },
+    {
+        "question": "What if my watchlist on other websites is already huge?",
+        "answer": "REKKO focuses on helping you decide what to watch today instead of expanding your watchlist."
+    },
+    {
+        "question": "Why doesn't REKKO highlight global ratings and scores like other anime websites?",
+        "answer": "Because REKKO uses an anti-ranking philosophy based on personal affinity instead of global scores."
+    },
+    {
+        "question": "My friends use AniList. Why should I invite them to REKKO?",
+        "answer": "AniList is for tracking anime, while REKKO focuses on helping you decide what to watch next."
+    },
+    {
+        "question": "I'm not a hardcore anime fan. Is REKKO for me?",
+        "answer": "Yes. REKKO is designed for casual, new, and experienced fans alike with beginner-friendly recommendation paths."
+    },
+    {
+        "question": "What if I've already watched a lot of anime and it's difficult to recommend something new?",
+        "answer": "The more anime you rate, the better the recommendations become, including hidden gems and niche discoveries."
+    },
+    {
+        "question": "Will REKKO recommend classic anime or only currently airing shows?",
+        "answer": "Both current and classic anime are included in recommendations such as Naruto, One Piece, Dragon Ball, and Fullmetal Alchemist."
+    },
+    {
+        "question": "What is the \"Advocacy\" stage within the community?",
+        "answer": "Advocacy is the final stage of the user journey where users naturally recommend REKKO after solving their anime indecision problem."
+    },
+    {
+        "question": "How do you prevent the community from becoming toxic or dominated by spam?",
+        "answer": "A reputation system rewards positive contributions and discourages spam and harmful behavior."
+    },
+    {
+        "question": "Is there any reward for helping grow the community?",
+        "answer": "Yes. Users can earn referral-based rewards such as special status, visibility, and recognition as a \"Taste Connector\"."
+    }
+]

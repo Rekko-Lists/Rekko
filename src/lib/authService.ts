@@ -7,7 +7,7 @@ const BASE = import.meta.env.VITE_API_BASE_URL;
 interface LoginResponse {
   accessToken: string;
   refreshToken: string;
-  user: { userId: number; email: string; username: string };
+  user: AuthUser;
 }
 
 interface RefreshResponse {
@@ -78,29 +78,33 @@ export const authService = {
 
   async getUserByUsername(username: string): Promise<AuthUser> {
     const res = await axios.get<{ success: boolean; data: Record<string, unknown> }>(
-      `${BASE}/user/${username}?fields=userId,email,username,emailVerified,profileImage`
+      `${BASE}/user/${username}?fields=userId,email,username,emailVerified,profileImage,role,streak`
     );
-    const d = res.data.data as { userId: number; email: string; username: string; emailVerified: boolean; profileImage?: string };
+    const d = res.data.data as unknown as AuthUser;
     return {
       userId: d.userId,
       email: d.email,
       username: d.username,
       emailVerified: d.emailVerified,
       profileImage: d.profileImage,
+      role: d.role,
+      streak: (d as { streak?: number }).streak,
     };
   },
 
   async getUserById(userId: number): Promise<AuthUser> {
     const res = await axios.get<{ success: boolean; data: Record<string, unknown> }>(
-      `${BASE}/user/${userId}?fields=userId,email,username,emailVerified,profileImage`
+      `${BASE}/user/${userId}?fields=userId,email,username,emailVerified,profileImage,role,streak`
     );
-    const d = res.data.data as { userId: number; email: string; username: string; emailVerified: boolean; profileImage?: string };
+    const d = res.data.data as unknown as AuthUser;
     return {
       userId: d.userId,
       email: d.email,
       username: d.username,
       emailVerified: d.emailVerified,
       profileImage: d.profileImage,
+      role: d.role,
+      streak: (d as { streak?: number }).streak,
     };
   },
 
@@ -117,7 +121,7 @@ export const authService = {
 
   async getPublicProfile(username: string): Promise<PublicProfile> {
     const res = await axios.get<{ success: boolean; data: PublicProfile }>(
-      `${BASE}/user/${username}?fields=userId,username,biography,profileImage,bannerImage,backgroundImage,reputation`
+      `${BASE}/user/${username}?fields=userId,username,biography,profileImage,bannerImage,backgroundImage,reputation,socialAccounts`
     );
     return res.data.data;
   },
@@ -151,6 +155,11 @@ export const authService = {
     );
     return res.data.data;
   },
+
+  async forgotPassword(username: string): Promise<void> {
+    // Backend redirects after sending the email — manual prevents fetch from following it.
+    await fetch(`${BASE}/user/${username}/forgot-password`, { method: 'POST', redirect: 'manual' });
+  },
 };
 
 export interface SocialLink {
@@ -162,7 +171,8 @@ export interface UserProfileData {
   biography?: string;
   emailVerified: boolean;
   profileImage?: string;
-  socialAccounts?: { socialAccount: { name: string }; socialUrl: string }[];
+  socialAccounts?: { name: string; url: string }[];
+  userSocialAccount?: { name: string; url: string }[];
 }
 
 export interface PublicProfile {
@@ -173,6 +183,7 @@ export interface PublicProfile {
   bannerImage?: string;
   backgroundImage?: string;
   reputation: number;
+  socialAccounts?: { name: string; url: string }[];
 }
 
 export function decodeJwtUserId(token: string): number {
