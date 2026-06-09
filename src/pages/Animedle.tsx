@@ -138,10 +138,15 @@ export default function Animedle() {
       )
       .then((res) => {
         const { challenges: fetchedChallenges } = res.data.data;
+        // Backend returns type in uppercase (e.g. "ANIME") — normalise to lowercase
+        const normalised = fetchedChallenges.map((c) => ({
+          ...c,
+          type: c.type.toLowerCase() as ChallengeResponseDTO['type'],
+        }));
         if (import.meta.env.DEV) {
-          console.log('[Animedle] challenges from /daily:', JSON.stringify(fetchedChallenges, null, 2));
+          console.log('[Animedle] challenges from /daily:', JSON.stringify(normalised, null, 2));
         }
-        setChallenges(fetchedChallenges);
+        setChallenges(normalised);
         setStates(
           fetchedChallenges.map(() => ({
             guesses: [],
