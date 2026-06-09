@@ -58,14 +58,20 @@ function getDifficultyAtIndex(index: number): string {
 // Styles
 // ---------------------------------------------------------------------------
 
-const styles = {
-  page:    'min-h-screen flex font-gabarito overflow-hidden bg-[#faf7f2]',
+const BG_STYLE = {
+  backgroundImage: 'url(/bg-clouds-banner.png)',
+  backgroundSize: 'cover',
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'center',
+} as const;
 
-  // Side panels — cloud texture + amber fade toward center
-  leftBg:         'w-[350px] flex-shrink-0 bg-cover bg-right-top relative',
-  leftBgOverlay:  'absolute inset-0 bg-gradient-to-r from-transparent to-primary/8 pointer-events-none',
-  rightBg:        'w-[350px] flex-shrink-0 bg-cover bg-left-top relative',
-  rightBgOverlay: 'absolute inset-0 bg-gradient-to-l from-transparent to-primary/8 pointer-events-none',
+const styles = {
+  // Single full-viewport background — bg image applied via BG_STYLE inline
+  page:   'min-h-screen flex font-gabarito',
+
+  // Side panels — transparent (show page bg), border line only
+  leftBg:  'w-[350px] flex-shrink-0 border-r border-border/60',
+  rightBg: 'w-[350px] flex-shrink-0 border-l border-border/60',
 
   center: 'flex-1 flex flex-col items-center bg-surface relative overflow-y-auto',
 
@@ -239,27 +245,18 @@ export default function Animedle() {
 
   if (loading) {
     return (
-      <div className={styles.page}>
-        <div className={styles.leftBg} style={{ backgroundImage: 'url(/bg_clouds.png)' }}>
-          <div className={styles.leftBgOverlay} />
-        </div>
+      <div className={styles.page} style={BG_STYLE}>
+        <div className={styles.leftBg} />
         <LoadingSkeleton />
-        <div
-          className={styles.rightBg}
-          style={{ backgroundImage: 'url(/bg_clouds.png)', transform: 'scaleX(-1)' }}
-        >
-          <div className={styles.rightBgOverlay} />
-        </div>
+        <div className={styles.rightBg} />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className={styles.page}>
-        <div className={styles.leftBg} style={{ backgroundImage: 'url(/bg_clouds.png)' }}>
-          <div className={styles.leftBgOverlay} />
-        </div>
+      <div className={styles.page} style={BG_STYLE}>
+        <div className={styles.leftBg} />
         <div className={styles.center}>
           <div className={styles.topBar}>
             <img src={rekkoLogo} alt="Rekko" className={styles.logoImg} />
@@ -269,12 +266,7 @@ export default function Animedle() {
           <span className={styles.titleAccentBar} />
           <p className="mt-8 text-status-red text-sm">{error}</p>
         </div>
-        <div
-          className={styles.rightBg}
-          style={{ backgroundImage: 'url(/bg_clouds.png)', transform: 'scaleX(-1)' }}
-        >
-          <div className={styles.rightBgOverlay} />
-        </div>
+        <div className={styles.rightBg} />
       </div>
     );
   }
@@ -295,7 +287,7 @@ export default function Animedle() {
   }));
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} style={BG_STYLE}>
       <Seo
         title={seoPages.animedle.title}
         description={seoPages.animedle.description}
@@ -309,10 +301,8 @@ export default function Animedle() {
         })}
       />
 
-      {/* Side backgrounds */}
-      <div className={styles.leftBg} style={{ backgroundImage: 'url(/bg_clouds.png)' }}>
-        <div className={styles.leftBgOverlay} />
-      </div>
+      {/* Side panels — transparent, show page background */}
+      <div className={styles.leftBg} />
 
       <div className={styles.center}>
         {/* Confetti */}
@@ -497,12 +487,7 @@ export default function Animedle() {
         <div className="h-10" />
       </div>
 
-      <div
-        className={styles.rightBg}
-        style={{ backgroundImage: 'url(/bg_clouds.png)', transform: 'scaleX(-1)' }}
-      >
-        <div className={styles.rightBgOverlay} />
-      </div>
+      <div className={styles.rightBg} />
     </div>
   );
 }
