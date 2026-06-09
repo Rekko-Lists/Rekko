@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import api from '@/lib/api';
+import Spinner from '@/components/ui/common/Spinner';
 import ChallengeForm from './ChallengeForm';
 
 type ChallengeType = 'anime' | 'character' | 'opening' | 'emoji';
@@ -21,6 +22,45 @@ function getLocalDateString(): string {
   const day = String(d.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
+
+const styles = {
+  root: 'p-6 max-w-3xl',
+  heading: 'text-2xl font-bold text-text-main font-gabarito mb-2',
+  description: 'text-text-muted mb-6',
+  dateRow: 'flex items-center gap-4 mb-6',
+  label: 'text-text-main font-medium',
+  inputDate:
+    'border border-border rounded-btn px-3 h-[42px] bg-surface text-text-main text-sm focus:outline-none focus:border-primary transition-colors',
+  btnPrimary:
+    'inline-flex items-center gap-1 bg-primary text-white px-4 py-2 rounded-btn text-sm font-medium hover:bg-primary-dark transition-colors disabled:opacity-60',
+  alertError:
+    'mb-4 rounded-card border border-status-red/30 bg-status-red/5 px-4 py-3 text-sm text-status-red',
+  alertSuccess:
+    'mb-4 rounded-card border border-status-green/30 bg-status-green/5 px-4 py-3 text-sm text-status-green',
+  challengeList: 'flex flex-col gap-4 mb-6',
+  challengeCard: 'border border-border rounded-card p-4 bg-surface',
+  challengeCardInner: 'flex items-center justify-between',
+  challengeLeft: 'flex items-center gap-3',
+  badge: 'bg-primary/10 text-primary text-xs font-medium px-2 py-0.5 rounded-pill',
+  challengeName: 'text-text-main text-sm font-medium',
+  btnOutlineSm:
+    'border border-border text-text-secondary px-3 py-1.5 text-sm rounded-btn hover:border-primary hover:text-primary transition-colors',
+  btnGhostSm:
+    'text-text-muted hover:text-text-main px-3 py-1.5 text-sm transition-colors rounded-btn mt-2',
+  noChallenge: 'text-text-muted mb-4',
+  actionsRow: 'flex gap-3 mb-6 flex-wrap',
+  btnOutlinePrimary:
+    'border border-primary text-primary px-4 py-2 rounded-btn text-sm font-medium hover:bg-primary/10 transition-colors',
+  btnDanger:
+    'border border-status-red text-status-red px-4 py-2 rounded-btn text-sm font-medium hover:bg-status-red/10 transition-colors',
+};
+
+const typeLabels: Record<ChallengeType, string> = {
+  anime: 'Anime',
+  character: 'Personaje',
+  opening: 'Opening/Ending',
+  emoji: 'Emoji',
+};
 
 export default function ChallengesPanel() {
   const [selectedDate, setSelectedDate] = useState<string>(getLocalDateString());
@@ -99,21 +139,14 @@ export default function ChallengesPanel() {
     loadChallenges();
   }
 
-  const typeLabels: Record<ChallengeType, string> = {
-    anime: 'Anime',
-    character: 'Personaje',
-    opening: 'Opening/Ending',
-    emoji: 'Emoji',
-  };
-
   return (
-    <div className="p-6 max-w-3xl">
-      <h2 className="text-2xl font-bold text-text-main font-gabarito mb-2">Challenges diarios</h2>
-      <p className="text-text-muted mb-6">Gestiona los challenges de cada fecha.</p>
+    <div className={styles.root}>
+      <h2 className={styles.heading}>Challenges diarios</h2>
+      <p className={styles.description}>Gestiona los challenges de cada fecha.</p>
 
       {/* Date picker + load */}
-      <div className="flex items-center gap-4 mb-6">
-        <label className="text-text-main font-medium">Fecha:</label>
+      <div className={styles.dateRow}>
+        <label className={styles.label}>Fecha:</label>
         <input
           type="date"
           value={selectedDate}
@@ -124,22 +157,22 @@ export default function ChallengesPanel() {
             setLoadError(null);
             setDeleteMsg(null);
           }}
-          className="input input-bordered"
+          className={styles.inputDate}
         />
-        <button onClick={loadChallenges} disabled={loading} className="btn btn-primary">
-          {loading && <span className="loading loading-spinner loading-sm mr-1" />}
+        <button onClick={loadChallenges} disabled={loading} className={styles.btnPrimary}>
+          {loading && <Spinner size="sm" variant="white" className="mr-1" />}
           {loading ? 'Cargando...' : 'Cargar challenges'}
         </button>
       </div>
 
       {loadError && (
-        <div className="alert alert-error mb-4">
+        <div className={styles.alertError}>
           <span>{loadError}</span>
         </div>
       )}
 
       {deleteMsg && (
-        <div className={`alert mb-4 ${deleteMsg.startsWith('Error') ? 'alert-error' : 'alert-success'}`}>
+        <div className={deleteMsg.startsWith('Error') ? styles.alertError : styles.alertSuccess}>
           <span>{deleteMsg}</span>
         </div>
       )}
@@ -148,9 +181,9 @@ export default function ChallengesPanel() {
         <>
           {/* Existing challenges */}
           {challenges.length > 0 && (
-            <div className="flex flex-col gap-4 mb-6">
+            <div className={styles.challengeList}>
               {challenges.map((ch, idx) => (
-                <div key={ch.challengeId ?? idx} className="border border-border rounded-lg p-4 bg-surface">
+                <div key={ch.challengeId ?? idx} className={styles.challengeCard}>
                   {editingId === ch.challengeId ? (
                     <div>
                       <ChallengeForm
@@ -161,26 +194,26 @@ export default function ChallengesPanel() {
                         challengeIndex={idx}
                       />
                       <button
-                        className="btn btn-ghost btn-sm mt-2"
+                        className={styles.btnGhostSm}
                         onClick={() => setEditingId(null)}
                       >
                         Cancelar
                       </button>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className="badge badge-primary text-xs font-medium">
+                    <div className={styles.challengeCardInner}>
+                      <div className={styles.challengeLeft}>
+                        <span className={styles.badge}>
                           {typeLabels[ch.type]}
                         </span>
-                        <span className="text-text-main text-sm font-medium">
+                        <span className={styles.challengeName}>
                           {ch.anime
                             ? (ch.anime.name ?? `MAL ID: ${ch.anime.malId}`)
                             : 'Sin anime'}
                         </span>
                       </div>
                       <button
-                        className="btn btn-outline btn-sm"
+                        className={styles.btnOutlineSm}
                         onClick={() => {
                           setAddingNew(false);
                           setEditingId(ch.challengeId);
@@ -196,14 +229,14 @@ export default function ChallengesPanel() {
           )}
 
           {challenges.length === 0 && !loadError && (
-            <p className="text-text-muted mb-4">No hay challenges para esta fecha.</p>
+            <p className={styles.noChallenge}>No hay challenges para esta fecha.</p>
           )}
 
           {/* Actions */}
-          <div className="flex gap-3 mb-6 flex-wrap">
+          <div className={styles.actionsRow}>
             {!addingNew && editingId === null && challenges.length < 4 && (
               <button
-                className="btn btn-outline btn-primary"
+                className={styles.btnOutlinePrimary}
                 onClick={() => {
                   setEditingId(null);
                   setAddingNew(true);
@@ -213,7 +246,7 @@ export default function ChallengesPanel() {
               </button>
             )}
             {challenges.length > 0 && (
-              <button className="btn btn-error btn-outline" onClick={handleDeleteAll}>
+              <button className={styles.btnDanger} onClick={handleDeleteAll}>
                 Borrar todos
               </button>
             )}
@@ -228,7 +261,7 @@ export default function ChallengesPanel() {
                 challengeIndex={challenges.length}
               />
               <button
-                className="btn btn-ghost btn-sm mt-2"
+                className={styles.btnGhostSm}
                 onClick={() => setAddingNew(false)}
               >
                 Cancelar
