@@ -58,49 +58,61 @@ function getDifficultyAtIndex(index: number): string {
 // Styles
 // ---------------------------------------------------------------------------
 
-const styles = {
-  page: 'min-h-screen bg-app-bg flex font-gabarito overflow-hidden',
-  leftBg: 'w-[350px] flex-shrink-0 bg-cover bg-right-top',
-  rightBg: 'w-[350px] flex-shrink-0 bg-cover bg-left-top',
-  center: 'flex-1 flex flex-col items-center bg-white relative overflow-y-auto',
+const BG_STYLE = {
+  backgroundImage: 'url(/bg-clouds-banner.png)',
+  backgroundSize: 'cover',
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'center',
+} as const;
 
-  // Top bar — cohesive with Navbar row 1 style
-  topBar: 'w-full flex items-center justify-between px-8 py-3 border-b border-border bg-white sticky top-0 z-10',
-  logoImg: 'h-[38px] object-contain',
-  topBarBadge: 'inline-flex items-center gap-1.5 bg-primary/10 border border-primary/30 text-primary text-xs font-semibold px-3 py-1.5 rounded-pill',
+const styles = {
+  // Single full-viewport background — bg image applied via BG_STYLE inline
+  page:   'min-h-screen flex font-gabarito',
+
+  // Side panels — transparent (show page bg), border line only
+  leftBg:  'w-[350px] flex-shrink-0 border-r border-border/60',
+  rightBg: 'w-[350px] flex-shrink-0 border-l border-border/60',
+
+  center: 'flex-1 flex flex-col items-center bg-surface relative overflow-y-auto',
+
+  // Top bar — dark gradient header like AdminPanel sidebar
+  topBar:      'w-full flex items-center justify-between px-8 py-3 sticky top-0 z-10 bg-gradient-to-r from-grad-end to-grad-start border-b border-grad-end',
+  logoImg:     'h-[38px] object-contain brightness-0 invert',
+  topBarBadge: 'inline-flex items-center gap-1.5 bg-white/15 border border-white/25 text-white text-xs font-semibold px-3 py-1.5 rounded-pill',
 
   // Title block
-  title: 'text-[52px] font-bold text-text-main mt-5 mb-0.5 leading-none',
-  titleAccentBar: 'block w-16 h-1 bg-primary rounded-full mx-auto mt-2 mb-2',
-  subtitle: 'text-sm text-text-muted mb-4',
+  title:         'text-[56px] font-bold text-text-main mt-6 mb-0 leading-none',
+  titleAccentBar:'block w-20 h-[3px] bg-primary rounded-full mx-auto mt-3 mb-1',
+  subtitle:      'text-sm text-text-muted mb-5',
 
-  // Challenge image area — dark gradient instead of raw black
-  imageArea: 'w-[590px] h-[332px] rounded-card mb-3 overflow-hidden relative border border-border',
-  imageAreaBg: 'absolute inset-0 bg-gradient-to-b from-[#1a1a2e] to-[#16213e]',
+  // Challenge image area — prominent dark panel
+  imageArea:    'w-[590px] h-[332px] rounded-btn mb-3 overflow-hidden relative border-2 border-grad-end/60 shadow-card',
+  imageAreaBg:  'absolute inset-0 bg-gradient-to-b from-[#1a1a2e] to-[#16213e]',
 
-  // Outcome banner — design-system tokens
-  outcomeBannerOk: 'w-[590px] rounded-btn px-5 py-4 flex flex-col gap-1.5 mb-2 transition-all bg-primary/10 border border-primary/40',
-  outcomeBannerFail: 'w-[590px] rounded-btn px-5 py-4 flex flex-col gap-1.5 mb-2 transition-all bg-status-red/10 border border-status-red/40',
+  // Outcome banner
+  outcomeBannerOk:   'w-[590px] rounded-btn px-5 py-4 flex flex-col gap-1.5 mb-2 bg-primary/10 border border-primary/40',
+  outcomeBannerFail: 'w-[590px] rounded-btn px-5 py-4 flex flex-col gap-1.5 mb-2 bg-status-red/8 border border-status-red/40',
 
-  // Skip button — amber CTA style
-  skipBtn: 'h-[47px] px-5 bg-primary text-white rounded-btn text-sm font-semibold hover:bg-primary-dark transition-colors',
+  // Skip button — dark gradient CTA like admin
+  skipBtn: 'h-[47px] px-6 bg-gradient-to-b from-grad-start to-grad-end text-white rounded-btn text-sm font-semibold hover:opacity-90 transition-opacity',
 
-  // Lives bar
-  lifeBarWrapper: 'flex items-center gap-2 px-1',
-  lifeBarLabel: 'text-xs font-semibold text-text-secondary mr-1',
-  lifeDotActive: 'w-10 h-2.5 rounded-full bg-status-red transition-all duration-300',
-  lifeDotInactive: 'w-10 h-2.5 rounded-full bg-border transition-all duration-300',
-  lifeBarCount: 'text-xs text-text-muted ml-1',
+  // Lives bar — card container with label
+  livesCard:        'w-[590px] bg-app-bg rounded-btn border border-border px-4 py-3 flex items-center gap-3',
+  lifeBarLabel:     'text-xs font-semibold text-text-secondary whitespace-nowrap',
+  lifeDotsRow:      'flex items-center gap-2 flex-1',
+  lifeDotActive:    'flex-1 h-3 rounded-full bg-status-red shadow-sm transition-all duration-300',
+  lifeDotInactive:  'flex-1 h-3 rounded-full bg-border-light transition-all duration-300',
+  lifeBarCount:     'text-xs font-medium text-text-secondary whitespace-nowrap',
 
   // Guess history
-  guessList: 'w-[590px] flex flex-col gap-2 mt-3 pb-2',
-  guessListLabel: 'text-xs font-semibold text-text-muted uppercase tracking-widest px-1 mb-1',
-  guess: 'h-[56px] rounded-btn flex items-center gap-4 px-5 text-sm font-medium transition-all',
-  guessOk: 'bg-primary/10 border border-primary/30',
-  guessWrong: 'bg-status-red/5 border border-status-red/30',
-  guessIcon: 'w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0',
-  guessIconOk: 'bg-primary',
-  guessIconWrong: 'bg-status-red',
+  guessList:      'w-[590px] flex flex-col gap-2 mt-3 pb-2',
+  guessListLabel: 'text-[11px] font-semibold text-text-muted uppercase tracking-[0.12em] px-1 mb-1',
+  guess:          'h-[52px] rounded-btn flex items-center gap-4 px-5 text-sm font-medium shadow-sm',
+  guessOk:        'bg-primary/12 border border-primary/35 text-text-main',
+  guessWrong:     'bg-surface border border-border text-text-muted',
+  guessIcon:      'w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0',
+  guessIconOk:    'bg-primary',
+  guessIconWrong: 'bg-status-red/70',
 };
 
 // ---------------------------------------------------------------------------
@@ -233,21 +245,18 @@ export default function Animedle() {
 
   if (loading) {
     return (
-      <div className={styles.page}>
-        <div className={styles.leftBg} style={{ backgroundImage: 'url(/bg_clouds.png)' }} />
+      <div className={styles.page} style={BG_STYLE}>
+        <div className={styles.leftBg} />
         <LoadingSkeleton />
-        <div
-          className={styles.rightBg}
-          style={{ backgroundImage: 'url(/bg_clouds.png)', transform: 'scaleX(-1)' }}
-        />
+        <div className={styles.rightBg} />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className={styles.page}>
-        <div className={styles.leftBg} style={{ backgroundImage: 'url(/bg_clouds.png)' }} />
+      <div className={styles.page} style={BG_STYLE}>
+        <div className={styles.leftBg} />
         <div className={styles.center}>
           <div className={styles.topBar}>
             <img src={rekkoLogo} alt="Rekko" className={styles.logoImg} />
@@ -257,10 +266,7 @@ export default function Animedle() {
           <span className={styles.titleAccentBar} />
           <p className="mt-8 text-status-red text-sm">{error}</p>
         </div>
-        <div
-          className={styles.rightBg}
-          style={{ backgroundImage: 'url(/bg_clouds.png)', transform: 'scaleX(-1)' }}
-        />
+        <div className={styles.rightBg} />
       </div>
     );
   }
@@ -281,7 +287,7 @@ export default function Animedle() {
   }));
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} style={BG_STYLE}>
       <Seo
         title={seoPages.animedle.title}
         description={seoPages.animedle.description}
@@ -295,8 +301,8 @@ export default function Animedle() {
         })}
       />
 
-      {/* Side backgrounds */}
-      <div className={styles.leftBg} style={{ backgroundImage: 'url(/bg_clouds.png)' }} />
+      {/* Side panels — transparent, show page background */}
+      <div className={styles.leftBg} />
 
       <div className={styles.center}>
         {/* Confetti */}
@@ -433,17 +439,19 @@ export default function Animedle() {
               </button>
             </div>
 
-            {/* Lives bar — "Vidas:" label + prominent dots */}
-            <div className={styles.lifeBarWrapper}>
+            {/* Lives bar */}
+            <div className={styles.livesCard}>
               <span className={styles.lifeBarLabel}>Vidas:</span>
-              {Array.from({ length: MAX_WRONG_GUESSES }).map((_, i) => (
-                <div
-                  key={i}
-                  className={i < wrongGuessCount ? styles.lifeDotActive : styles.lifeDotInactive}
-                />
-              ))}
+              <div className={styles.lifeDotsRow}>
+                {Array.from({ length: MAX_WRONG_GUESSES }).map((_, i) => (
+                  <div
+                    key={i}
+                    className={i < wrongGuessCount ? styles.lifeDotActive : styles.lifeDotInactive}
+                  />
+                ))}
+              </div>
               <span className={styles.lifeBarCount}>
-                {MAX_WRONG_GUESSES - wrongGuessCount} restante{MAX_WRONG_GUESSES - wrongGuessCount !== 1 ? 's' : ''}
+                {MAX_WRONG_GUESSES - wrongGuessCount}/{MAX_WRONG_GUESSES}
               </span>
             </div>
           </div>
@@ -479,10 +487,7 @@ export default function Animedle() {
         <div className="h-10" />
       </div>
 
-      <div
-        className={styles.rightBg}
-        style={{ backgroundImage: 'url(/bg_clouds.png)', transform: 'scaleX(-1)' }}
-      />
+      <div className={styles.rightBg} />
     </div>
   );
 }
