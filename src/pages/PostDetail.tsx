@@ -189,7 +189,13 @@ export default function PostDetail() {
       const newComment = await createComment({ postId, message: trimmed });
       setMessage("");
       if (newComment) {
-        setComments((prev) => [...prev, newComment]);
+        const enriched: CommentData = {
+          ...newComment,
+          user: newComment.user ?? (currentUser
+            ? { username: currentUser.username, profileImage: currentUser.profileImage ?? "" }
+            : null),
+        };
+        setComments((prev) => [...prev, enriched]);
         setCommentsTotal((prev) => prev + 1);
         setTimeout(() => {
           if (viewportRef.current) {

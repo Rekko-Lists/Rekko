@@ -23,19 +23,18 @@ const styles = {
   commentsHead: "px-6 py-4 border-b border-border text-sm font-semibold text-text-main",
   commentsViewport: "h-[620px] overflow-y-auto",
   commentRow: "border-b border-border px-6 py-4 flex gap-3 bg-app-bg",
+  commentRowNested: "flex gap-2 pt-2",
   commentContent: "min-w-0 flex-1",
   commentTop: "flex items-center gap-2",
   commentUser: "text-sm font-medium text-text-main hover:text-primary",
+  commentUserNested: "text-xs font-medium text-text-main hover:text-primary",
   commentMessage: "mt-1 text-sm text-text-main leading-relaxed",
+  commentMessageNested: "mt-0.5 text-xs text-text-main leading-relaxed",
   commentActions: "mt-2 flex gap-4 text-xs text-text-muted",
+  commentActionsNested: "mt-1 flex gap-3 text-[11px] text-text-muted",
   replyBtn: "hover:text-primary transition-colors",
   repliesToggle: "hover:text-primary transition-colors",
-  repliesSection: "mt-2 ml-2 flex flex-col gap-2 border-l border-border pl-3",
-  replyRow: "flex gap-2",
-  replyContent: "min-w-0 flex-1",
-  replyUser: "text-xs font-medium text-text-main hover:text-primary",
-  replyMessage: "mt-0.5 text-xs text-text-main leading-relaxed",
-  replyActions: "mt-1 flex gap-3 text-[11px] text-text-muted",
+  repliesSection: "mt-2 ml-2 flex flex-col gap-2 border-l-2 border-border-light pl-3",
   replyInputWrap: "mt-2 flex gap-2 items-start",
   replyInput: "flex-1 text-xs border border-border rounded-[5px] px-2 py-1.5 bg-surface text-text-main resize-none focus:outline-none focus:border-text-secondary placeholder:text-text-muted",
   replySubmit: "text-[11px] px-2.5 py-1.5 bg-primary text-white rounded-[5px] hover:bg-primary-dark transition-colors disabled:opacity-60",
@@ -70,11 +69,14 @@ export default function CommentsVirtualList({
             <CommentRow
               key={comment.commentId}
               comment={comment}
+              depth={0}
+              activeReplyId={activeReplyId}
               onLike={onLike}
               isReplying={activeReplyId === comment.commentId}
               onReply={onReply}
               onSubmitReply={onSubmitReply}
               replies={repliesMap[comment.commentId]}
+              repliesMap={repliesMap}
               onShowReplies={onShowReplies}
               isAuthenticated={isAuthenticated}
             />
@@ -86,30 +88,39 @@ export default function CommentsVirtualList({
   );
 }
 
-function CommentRow({
-  comment,
-  onLike,
-  isReplying,
-  onReply,
-  onSubmitReply,
-  replies,
-  onShowReplies,
-  isAuthenticated,
-}: {
+interface CommentRowProps {
   comment: CommentData;
+  depth: number;
+  activeReplyId: number | null;
   onLike: (commentId: number) => void;
   isReplying: boolean;
   onReply: (commentId: number) => void;
   onSubmitReply: (parentCommentId: number, message: string) => Promise<void>;
   replies?: CommentData[];
+  repliesMap: Record<number, CommentData[]>;
   onShowReplies: (commentId: number) => void;
   isAuthenticated: boolean;
-}) {
+}
+
+function CommentRow({
+  comment,
+  depth,
+  activeReplyId,
+  onLike,
+  isReplying,
+  onReply,
+  onSubmitReply,
+  replies,
+  repliesMap,
+  onShowReplies,
+  isAuthenticated,
+}: CommentRowProps) {
   const [replyText, setReplyText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const hasExpandedReplies = Boolean(replies);
+  const canReply = isAuthenticated && depth < 4;
 
   async function handleReplySubmit(e: FormEvent) {
     e.preventDefault();
@@ -123,26 +134,31 @@ function CommentRow({
     }
   }
 
+  const isNested = depth > 0;
+
   return (
-    <article className={styles.commentRow}>
+    <article className={isNested ? styles.commentRowNested : styles.commentRow}>
       <Avatar src={comment.user?.profileImage} username={comment.user?.username ?? "Unknown"} size="sm" />
       <div className={styles.commentContent}>
         <div className={styles.commentTop}>
-          <Link to={comment.user?.username ? `/profile/${comment.user.username}` : "#"} className={styles.commentUser}>
+          <Link
+            to={comment.user?.username ? `/profile/${comment.user.username}` : "#"}
+            className={isNested ? styles.commentUserNested : styles.commentUser}
+          >
             {comment.user?.username ?? "Deleted user"}
           </Link>
         </div>
-        <p className={styles.commentMessage}>{comment.message}</p>
-        <div className={styles.commentActions}>
+        <p className={isNested ? styles.commentMessageNested : styles.commentMessage}>{comment.message}</p>
+        <div className={isNested ? styles.commentActionsNested : styles.commentActions}>
           <button
             type="button"
             className={`flex items-center gap-1 ${comment.hasLiked ? "text-primary" : ""}`}
             onClick={() => onLike(comment.commentId)}
           >
-            <Heart size={11} fill={comment.hasLiked ? "#FF9E00" : "none"} className={comment.hasLiked ? "text-primary" : ""} />
+            <Heart size={isNested ? 10 : 11} fill={comment.hasLiked ? "#FF9E00" : "none"} className={comment.hasLiked ? "text-primary" : ""} />
             {comment.likes}
           </button>
-          {isAuthenticated && (
+          {canReply && (
             <button
               type="button"
               className={styles.replyBtn}
@@ -154,7 +170,7 @@ function CommentRow({
               Reply
             </button>
           )}
-          {comment.hasReplies && (
+          {(comment.hasReplies || (replies && replies.length > 0)) && (
             <button
               type="button"
               className={styles.repliesToggle}
@@ -165,7 +181,7 @@ function CommentRow({
           )}
         </div>
 
-        {isReplying && (
+        {canReply && isReplying && (
           <form className={styles.replyInputWrap} onSubmit={handleReplySubmit}>
             <textarea
               ref={inputRef}
@@ -189,25 +205,20 @@ function CommentRow({
         {hasExpandedReplies && replies!.length > 0 && (
           <div className={styles.repliesSection}>
             {replies!.map((reply) => (
-              <div key={reply.commentId} className={styles.replyRow}>
-                <Avatar src={reply.user?.profileImage} username={reply.user?.username ?? "Unknown"} size="sm" />
-                <div className={styles.replyContent}>
-                  <Link to={reply.user?.username ? `/profile/${reply.user.username}` : "#"} className={styles.replyUser}>
-                    {reply.user?.username ?? "Deleted user"}
-                  </Link>
-                  <p className={styles.replyMessage}>{reply.message}</p>
-                  <div className={styles.replyActions}>
-                    <button
-                      type="button"
-                      className={`flex items-center gap-1 ${reply.hasLiked ? "text-primary" : ""}`}
-                      onClick={() => onLike(reply.commentId)}
-                    >
-                      <Heart size={10} fill={reply.hasLiked ? "#FF9E00" : "none"} className={reply.hasLiked ? "text-primary" : ""} />
-                      {reply.likes}
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <CommentRow
+                key={reply.commentId}
+                comment={reply}
+                depth={depth + 1}
+                activeReplyId={activeReplyId}
+                onLike={onLike}
+                isReplying={activeReplyId === reply.commentId}
+                onReply={onReply}
+                onSubmitReply={onSubmitReply}
+                replies={repliesMap[reply.commentId]}
+                repliesMap={repliesMap}
+                onShowReplies={onShowReplies}
+                isAuthenticated={isAuthenticated}
+              />
             ))}
           </div>
         )}
