@@ -580,7 +580,7 @@ export default function Animes() {
         ]}
       />
       {/* Sticky control bar — SubNav + QuickFilter scroll with the page header */}
-      <div className="sticky top-[136px] z-20 bg-surface shadow-sm">
+      <div className="sticky top-[136px] z-20 bg-app-bg">
         <SubNav
           activeTab={activeTab}
           onTabChange={handleTabChange}
@@ -596,6 +596,9 @@ export default function Animes() {
             onOpenAdvanced={toggleAdv}
           />
         )}
+
+        {/* Separator inset to match nav margins */}
+        <div className="h-px bg-border mx-[6%]" />
       </div>
 
       <div className={styles.body}>

@@ -110,7 +110,7 @@ export default function ProfileAnimeList({ userId, username }: Props) {
             </div>
           </div>
         ) : (
-          <ListTableView entries={entries} />
+          <ListTableView entries={entries} showEdit={false} />
         )
       )}
     </div>

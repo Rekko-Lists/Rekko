@@ -61,7 +61,7 @@ const SITE_LINKS: SiteLinkItem[] = [
 
 const ADMIN_LINK: SiteLinkItem = {
   label: "Admin Panel",
-  icon: "Settings",
+  icon: "Shield",
   href: "/admin",
 };
 

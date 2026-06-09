@@ -10,8 +10,8 @@ interface SubNavProps {
 }
 
 const styles = {
-  nav:       'bg-surface font-gabarito px-[6%]',
-  inner:     'flex items-end border-b border-border',
+  nav:       'bg-app-bg font-gabarito px-[6%]',
+  inner:     'flex items-end',
   tabs:      'flex flex-1 items-end gap-0.5',
   active:    "px-5 pt-2 pb-[9px] text-sm font-semibold bg-accent text-white rounded-t-[5px] cursor-pointer relative after:content-[''] after:absolute after:bottom-[-1px] after:inset-x-0 after:h-px after:bg-primary",
   tab:       'px-4 pt-2 pb-[9px] text-sm text-text-secondary cursor-pointer hover:text-text-main bg-transparent',

@@ -48,8 +48,8 @@ const styles = {
   cloudImgSkipped: 'opacity-40',
   cloudImgNeutral: 'opacity-55 group-hover:opacity-75',
 
-  // Icon sits centered in the cloud hole
-  iconWrapper: 'absolute inset-0 flex items-center justify-center',
+  // Icon sits centered in the cloud hole — offset slightly up-left to align with the opening
+  iconWrapper: 'absolute inset-0 flex items-center justify-center pb-3 pr-3',
 
   // All icons are dark gray — active gets darkest, neutral lighter
   iconActive:  'text-gray-800',

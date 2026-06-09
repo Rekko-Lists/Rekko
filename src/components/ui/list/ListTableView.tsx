@@ -69,9 +69,10 @@ const styles = {
 interface Props {
   entries: UserListEntry[];
   onEdit?: (entry: UserListEntry) => void;
+  showEdit?: boolean;
 }
 
-export default function ListTableView({ entries, onEdit }: Props) {
+export default function ListTableView({ entries, onEdit, showEdit = true }: Props) {
   if (entries.length === 0) {
     return (
       <div className={styles.empty}>
@@ -93,7 +94,7 @@ export default function ListTableView({ entries, onEdit }: Props) {
             <th className={`${styles.th} hidden lg:table-cell`}>Type</th>
             <th className={`${styles.th} hidden xl:table-cell`}>Airing</th>
             <th className={styles.thRight}>Score</th>
-            <th className={styles.thLast} />
+            {showEdit && <th className={styles.thLast} />}
           </tr>
         </thead>
         <tbody>
@@ -103,6 +104,7 @@ export default function ListTableView({ entries, onEdit }: Props) {
               entry={entry}
               isEven={i % 2 === 0}
               onEdit={onEdit}
+              showEdit={showEdit}
             />
           ))}
         </tbody>
@@ -115,10 +117,12 @@ function ListRow({
   entry,
   isEven,
   onEdit,
+  showEdit,
 }: {
   entry: UserListEntry;
   isEven: boolean;
   onEdit?: (e: UserListEntry) => void;
+  showEdit?: boolean;
 }) {
   const cfg = STATE_CONFIG[entry.state];
   const isMovie = entry.mediaType === 'movie';
@@ -212,11 +216,13 @@ function ListRow({
         )}
       </td>
 
-      <td className={styles.tdEdit}>
-        <button onClick={() => onEdit?.(entry)} className={styles.editBtn}>
-          <Edit2 size={12} className={styles.editIcon} />
-        </button>
-      </td>
+      {showEdit && (
+        <td className={styles.tdEdit}>
+          <button onClick={() => onEdit?.(entry)} className={styles.editBtn}>
+            <Edit2 size={12} className={styles.editIcon} />
+          </button>
+        </td>
+      )}
     </tr>
   );
 }
