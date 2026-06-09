@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import api from '@/lib/api';
 import { extractApiError } from '@/lib/apiErrors';
+import Spinner from '@/components/ui/common/Spinner';
 
 type ChallengeType = 'anime' | 'character' | 'opening' | 'emoji';
 
@@ -17,6 +18,34 @@ interface ChallengeFormProps {
   challengeId?: number;
   challengeIndex?: number;
 }
+
+const styles = {
+  form: 'flex flex-col gap-4 p-4 border border-border rounded-card bg-surface',
+  formTitle: 'font-semibold text-text-main font-gabarito',
+  fieldGroup: 'flex flex-col gap-1',
+  label: 'text-sm font-medium text-text-main',
+  labelBlock: 'text-sm font-medium text-text-main block mb-1',
+  labelMuted: 'text-text-muted text-xs',
+  select:
+    'border border-border rounded-btn px-3 h-[42px] bg-surface text-text-main text-sm focus:outline-none focus:border-primary transition-colors w-full max-w-xs',
+  input:
+    'border border-border rounded-btn px-3 h-[42px] bg-surface text-text-main text-sm focus:outline-none focus:border-primary transition-colors w-full max-w-xs',
+  fileInput:
+    'border border-border rounded-btn px-3 py-2 bg-surface text-sm text-text-secondary w-full max-w-xs file:mr-3 file:text-sm file:rounded-btn file:border-0 file:bg-primary/10 file:text-primary file:px-3 file:py-1.5 file:font-medium hover:file:bg-primary/20',
+  emojiRow: 'flex items-center gap-2',
+  emojiLabel: 'text-sm font-medium text-text-main w-16',
+  emojiInput:
+    'w-12 h-12 border border-border rounded-btn text-center text-2xl bg-surface focus:outline-none focus:border-primary',
+  animeSection: 'flex flex-col gap-3',
+  openingSection: 'flex flex-col gap-3',
+  emojiSection: 'flex flex-col gap-2',
+  fileBlock: 'flex flex-col gap-1',
+  alertError:
+    'rounded-card border border-status-red/30 bg-status-red/5 px-4 py-3 text-sm text-status-red',
+  submitRow: 'flex gap-2',
+  btnPrimary:
+    'inline-flex items-center gap-1 bg-primary text-white px-4 py-2 rounded-btn text-sm font-medium hover:bg-primary-dark transition-colors disabled:opacity-60',
+};
 
 export default function ChallengeForm({
   date,
@@ -117,16 +146,16 @@ export default function ChallengeForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-4 border border-border rounded-lg bg-surface">
-      <h3 className="font-semibold text-text-main font-gabarito">
+    <form onSubmit={handleSubmit} className={styles.form}>
+      <h3 className={styles.formTitle}>
         {isEdit ? 'Editar challenge' : 'Nuevo challenge'}
       </h3>
 
       {/* Type selector */}
-      <div className="flex flex-col gap-1">
-        <label className="text-sm font-medium text-text-main">Tipo</label>
+      <div className={styles.fieldGroup}>
+        <label className={styles.label}>Tipo</label>
         <select
-          className="select select-bordered w-full max-w-xs"
+          className={styles.select}
           value={type}
           onChange={e => setType(e.target.value as ChallengeType)}
           disabled={isEdit}
@@ -139,87 +168,87 @@ export default function ChallengeForm({
       </div>
 
       {/* MAL ID */}
-      <div className="flex flex-col gap-1">
-        <label className="text-sm font-medium text-text-main">MAL ID</label>
+      <div className={styles.fieldGroup}>
+        <label className={styles.label}>MAL ID</label>
         <input
           type="number"
           min={1}
           required
           value={malId || ''}
           onChange={e => setMalId(Number(e.target.value))}
-          className="input input-bordered w-full max-w-xs"
+          className={styles.input}
           placeholder="Ej: 1535"
         />
       </div>
 
       {/* Dynamic fields by type */}
       {type === 'anime' && (
-        <div className="flex flex-col gap-3">
-          <div>
-            <label className="text-sm font-medium text-text-main block mb-1">
-              Foto difícil <span className="text-text-muted text-xs">(se muestra 1ª)</span>
+        <div className={styles.animeSection}>
+          <div className={styles.fileBlock}>
+            <label className={styles.labelBlock}>
+              Foto difícil <span className={styles.labelMuted}>(se muestra 1ª)</span>
             </label>
             <input
               type="file"
               accept="image/*"
               onChange={e => setFileHard(e.target.files?.[0] ?? null)}
-              className="file-input file-input-bordered w-full max-w-xs"
+              className={styles.fileInput}
             />
           </div>
-          <div>
-            <label className="text-sm font-medium text-text-main block mb-1">
-              Foto media <span className="text-text-muted text-xs">(se muestra 2ª)</span>
+          <div className={styles.fileBlock}>
+            <label className={styles.labelBlock}>
+              Foto media <span className={styles.labelMuted}>(se muestra 2ª)</span>
             </label>
             <input
               type="file"
               accept="image/*"
               onChange={e => setFileMedium(e.target.files?.[0] ?? null)}
-              className="file-input file-input-bordered w-full max-w-xs"
+              className={styles.fileInput}
             />
           </div>
-          <div>
-            <label className="text-sm font-medium text-text-main block mb-1">
-              Foto fácil <span className="text-text-muted text-xs">(se muestra 3ª)</span>
+          <div className={styles.fileBlock}>
+            <label className={styles.labelBlock}>
+              Foto fácil <span className={styles.labelMuted}>(se muestra 3ª)</span>
             </label>
             <input
               type="file"
               accept="image/*"
               onChange={e => setFileEasy(e.target.files?.[0] ?? null)}
-              className="file-input file-input-bordered w-full max-w-xs"
+              className={styles.fileInput}
             />
           </div>
-          <div>
-            <label className="text-sm font-medium text-text-main block mb-1">
-              Foto muy fácil <span className="text-text-muted text-xs">(se muestra 4ª)</span>
+          <div className={styles.fileBlock}>
+            <label className={styles.labelBlock}>
+              Foto muy fácil <span className={styles.labelMuted}>(se muestra 4ª)</span>
             </label>
             <input
               type="file"
               accept="image/*"
               onChange={e => setFileVeryEasy(e.target.files?.[0] ?? null)}
-              className="file-input file-input-bordered w-full max-w-xs"
+              className={styles.fileInput}
             />
           </div>
         </div>
       )}
 
       {type === 'character' && (
-        <div>
-          <label className="text-sm font-medium text-text-main block mb-1">Foto del personaje</label>
+        <div className={styles.fileBlock}>
+          <label className={styles.labelBlock}>Foto del personaje</label>
           <input
             type="file"
             accept="image/*"
             onChange={e => setFileCharacter(e.target.files?.[0] ?? null)}
-            className="file-input file-input-bordered w-full max-w-xs"
+            className={styles.fileInput}
           />
         </div>
       )}
 
       {type === 'opening' && (
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-text-main">Tipo de media</label>
+        <div className={styles.openingSection}>
+          <div className={styles.fieldGroup}>
+            <label className={styles.label}>Tipo de media</label>
             <select
-              className="select select-bordered w-full max-w-xs"
+              className={styles.select}
               value={mediaType}
               onChange={e => setMediaType(e.target.value as 'opening' | 'ending')}
             >
@@ -227,23 +256,23 @@ export default function ChallengeForm({
               <option value="ending">Ending</option>
             </select>
           </div>
-          <div>
-            <label className="text-sm font-medium text-text-main block mb-1">Audio del opening/ending</label>
+          <div className={styles.fileBlock}>
+            <label className={styles.labelBlock}>Audio del opening/ending</label>
             <input
               type="file"
               accept="audio/*"
               onChange={e => setFileOpening(e.target.files?.[0] ?? null)}
-              className="file-input file-input-bordered w-full max-w-xs"
+              className={styles.fileInput}
             />
           </div>
         </div>
       )}
 
       {type === 'emoji' && (
-        <div className="flex flex-col gap-2">
+        <div className={styles.emojiSection}>
           {emojis.map((emoji, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <label className="text-sm font-medium text-text-main w-16">Emoji {i + 1}</label>
+            <div key={i} className={styles.emojiRow}>
+              <label className={styles.emojiLabel}>Emoji {i + 1}</label>
               <input
                 type="text"
                 value={emoji}
@@ -252,7 +281,7 @@ export default function ChallengeForm({
                   updated[i] = e.target.value;
                   setEmojis(updated);
                 }}
-                className="input input-bordered w-24 text-center text-xl"
+                className={styles.emojiInput}
                 placeholder="😀"
                 maxLength={8}
               />
@@ -262,14 +291,14 @@ export default function ChallengeForm({
       )}
 
       {error && (
-        <div className="alert alert-error">
+        <div className={styles.alertError}>
           <span>{error}</span>
         </div>
       )}
 
-      <div className="flex gap-2">
-        <button type="submit" disabled={loading} className="btn btn-primary">
-          {loading && <span className="loading loading-spinner loading-sm mr-1" />}
+      <div className={styles.submitRow}>
+        <button type="submit" disabled={loading} className={styles.btnPrimary}>
+          {loading && <Spinner size="sm" variant="white" className="mr-1" />}
           {loading ? 'Guardando...' : isEdit ? 'Actualizar' : 'Crear'}
         </button>
       </div>

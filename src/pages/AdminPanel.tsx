@@ -5,35 +5,40 @@ import ChallengesPanel from '@/components/admin/ChallengesPanel';
 
 type Tab = 'seed' | 'challenges';
 
+const styles = {
+  root: 'min-h-screen bg-app-bg flex font-gabarito',
+  sidebar: 'w-64 bg-surface border-r border-border flex flex-col flex-shrink-0',
+  sidebarHeader: 'p-6 border-b border-border',
+  sidebarTitle: 'text-xl font-bold text-text-main font-gabarito',
+  nav: 'flex-1 p-4 flex flex-col gap-2',
+  tabActive:
+    'flex items-center gap-3 px-4 py-3 rounded-btn text-sm font-medium transition-colors bg-primary text-white',
+  tabInactive:
+    'flex items-center gap-3 px-4 py-3 rounded-btn text-sm font-medium transition-colors text-text-muted hover:text-text-main hover:bg-app-bg',
+  main: 'flex-1 overflow-y-auto',
+};
+
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState<Tab>('seed');
 
   return (
-    <div className="min-h-screen bg-app-bg flex font-gabarito">
+    <div className={styles.root}>
       {/* Sidebar */}
-      <aside className="w-64 bg-surface border-r border-border flex flex-col flex-shrink-0">
-        <div className="p-6 border-b border-border">
-          <h1 className="text-xl font-bold text-text-main font-gabarito">Panel Admin</h1>
+      <aside className={styles.sidebar}>
+        <div className={styles.sidebarHeader}>
+          <h1 className={styles.sidebarTitle}>Panel Admin</h1>
         </div>
-        <nav className="flex-1 p-4 flex flex-col gap-2">
+        <nav className={styles.nav}>
           <button
             onClick={() => setActiveTab('seed')}
-            className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === 'seed'
-                ? 'bg-primary text-white'
-                : 'text-text-muted hover:text-text-main hover:bg-app-bg'
-            }`}
+            className={activeTab === 'seed' ? styles.tabActive : styles.tabInactive}
           >
             <Database size={18} />
             Seed de Animes
           </button>
           <button
             onClick={() => setActiveTab('challenges')}
-            className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === 'challenges'
-                ? 'bg-primary text-white'
-                : 'text-text-muted hover:text-text-main hover:bg-app-bg'
-            }`}
+            className={activeTab === 'challenges' ? styles.tabActive : styles.tabInactive}
           >
             <Calendar size={18} />
             Challenges diarios
@@ -42,7 +47,7 @@ export default function AdminPanel() {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto">
+      <main className={styles.main}>
         {activeTab === 'seed' && <SeedPanel />}
         {activeTab === 'challenges' && <ChallengesPanel />}
       </main>
