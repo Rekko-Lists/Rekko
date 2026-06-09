@@ -158,7 +158,7 @@ export default function Animedle() {
           }))
         );
       })
-      .catch(() => setError('No se pudieron cargar los retos de hoy. Inténtalo más tarde.'))
+      .catch(() => setError("Could not load today's challenges. Please try again later."))
       .finally(() => setLoading(false));
   }, []);
 
@@ -254,7 +254,7 @@ export default function Animedle() {
         <div className={styles.center}>
           <div className={styles.topBar}>
             <img src={rekkoLogo} alt="Rekko" className={styles.logoImg} />
-            <span className={styles.topBarBadge}>Juego diario</span>
+            <span className={styles.topBarBadge}>Daily game</span>
           </div>
           <h1 className={styles.title}>Animedle</h1>
           <span className={styles.titleAccentBar} />
@@ -307,22 +307,20 @@ export default function Animedle() {
         {/* Top bar — logo left, game badge right */}
         <div className={styles.topBar}>
           <img src={rekkoLogo} alt="Rekko" className={styles.logoImg} />
-          <span className={styles.topBarBadge}>Juego diario</span>
+          <span className={styles.topBarBadge}>Daily game</span>
         </div>
 
         {/* Title with amber accent underline */}
         <h1 className={styles.title}>Animedle</h1>
         <span className={styles.titleAccentBar} />
-        <p className={styles.subtitle}>Adivina el anime del día — 4 retos</p>
+        <p className={styles.subtitle}>Guess today's anime — 4 challenges</p>
 
-        {/* Challenge tabs */}
-        {challenges.length > 1 && (
-          <ChallengeTabBar
-            tabs={tabs}
-            activeIndex={activeChallenge}
-            onSelect={setActiveChallenge}
-          />
-        )}
+        {/* Cloud challenge navigation */}
+        <ChallengeTabBar
+          tabs={tabs}
+          activeIndex={activeChallenge}
+          onSelect={setActiveChallenge}
+        />
 
         {/* Challenge content area — dark gradient background */}
         <div className={styles.imageArea}>
@@ -369,12 +367,12 @@ export default function Animedle() {
               <>
                 <p className="text-sm font-bold text-text-main flex items-center gap-2">
                   <Check size={16} className="text-status-green" />
-                  ¡Correcto! Era{' '}
+                  Correct! It was{' '}
                   <span className="text-primary">{challenge.anime.name}</span>
                 </p>
                 {challenge.type === 'anime' && (
                   <p className="text-xs text-text-muted">
-                    Resuelto en foto {state.solvedAtPhotoIndex + 1} de 4
+                    Solved at photo {state.solvedAtPhotoIndex + 1} of 4
                   </p>
                 )}
               </>
@@ -382,7 +380,7 @@ export default function Animedle() {
             {(state.skipped || isAutoFailed) && (
               <p className="text-sm font-bold text-text-main flex items-center gap-2">
                 <X size={16} className="text-status-red" />
-                {state.skipped ? 'Saltaste este reto.' : '¡Sin vidas!'} Era{' '}
+                {state.skipped ? 'You skipped this challenge.' : 'No lives left!'} It was{' '}
                 <span className="text-primary">{challenge.anime.name}</span>
               </p>
             )}
@@ -413,7 +411,7 @@ export default function Animedle() {
                   onClick={() => setActiveChallenge(nextIdx)}
                   className="mt-1 self-start text-xs font-medium text-primary hover:text-primary-dark transition-colors"
                 >
-                  Siguiente reto →
+                  Next challenge →
                 </button>
               );
             })()}
@@ -428,13 +426,13 @@ export default function Animedle() {
                 <AnimeGuessInput onGuess={handleGuess} disabled={challengeOver} />
               </div>
               <button onClick={handleSkip} className={styles.skipBtn}>
-                Saltar
+                Skip
               </button>
             </div>
 
             {/* Lives bar */}
             <div className={styles.livesCard}>
-              <span className={styles.lifeBarLabel}>Vidas:</span>
+              <span className={styles.lifeBarLabel}>Lives:</span>
               <div className={styles.lifeDotsRow}>
                 {Array.from({ length: MAX_WRONG_GUESSES }).map((_, i) => (
                   <div
@@ -453,7 +451,7 @@ export default function Animedle() {
         {/* Guess history */}
         {state.guesses.length > 0 && (
           <div className={styles.guessList}>
-            <p className={styles.guessListLabel}>Intentos</p>
+            <p className={styles.guessListLabel}>Guesses</p>
             {[...state.guesses].reverse().map((g, i) => (
               <div
                 key={i}

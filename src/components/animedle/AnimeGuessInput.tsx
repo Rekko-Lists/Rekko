@@ -120,7 +120,7 @@ export default function AnimeGuessInput({ onGuess, disabled = false }: Props) {
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           onFocus={() => results.length > 0 && setShowDropdown(true)}
-          placeholder="Nombre del anime... (mín. 3 caracteres)"
+          placeholder="Anime name... (min. 3 characters)"
           disabled={disabled}
           className={styles.input}
         />
@@ -138,7 +138,7 @@ export default function AnimeGuessInput({ onGuess, disabled = false }: Props) {
           {loading ? (
             <span className={styles.spinner} />
           ) : (
-            'Adivinar'
+            'Guess'
           )}
         </button>
       </div>
@@ -147,7 +147,7 @@ export default function AnimeGuessInput({ onGuess, disabled = false }: Props) {
       {showDropdown && !disabled && (
         <div className={styles.dropdown}>
           {loading && (
-            <div className={styles.dropdownLoading}>Buscando...</div>
+            <div className={styles.dropdownLoading}>Searching...</div>
           )}
           {!loading && results.map((anime) => (
             <button

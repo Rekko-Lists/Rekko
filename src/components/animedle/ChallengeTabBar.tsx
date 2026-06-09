@@ -1,4 +1,4 @@
-import { Images, User, Music, Smile, Check, X, Minus } from 'lucide-react';
+import { Images, User, Headphones, Smile, Check, X, Minus } from 'lucide-react';
 
 type ChallengeType = 'anime' | 'character' | 'opening' | 'emoji';
 type TabState = 'neutral' | 'active' | 'solved' | 'failed' | 'skipped';
@@ -18,18 +18,17 @@ interface Props {
 const ICONS: Record<ChallengeType, React.ElementType> = {
   anime: Images,
   character: User,
-  opening: Music,
+  opening: Headphones,
   emoji: Smile,
 };
 
 const LABELS: Record<ChallengeType, string> = {
   anime: 'Anime',
-  character: 'Personaje',
+  character: 'Character',
   opening: 'Opening',
-  emoji: 'Emojis',
+  emoji: 'Emoji',
 };
 
-// State badge icon: check for solved, X for failed, dash for skipped, nothing for neutral/active
 const STATE_BADGE: Partial<Record<TabState, React.ElementType>> = {
   solved: Check,
   failed: X,
@@ -37,33 +36,60 @@ const STATE_BADGE: Partial<Record<TabState, React.ElementType>> = {
 };
 
 const styles = {
-  // Tab row — Navbar row 2 style: border-b, full-width, centered
-  row: 'flex items-end justify-center gap-0 w-full border-b border-border mb-3',
+  row: 'flex items-center justify-center gap-5 mb-4',
 
-  // Individual tab button
-  tabBase: 'relative flex items-center gap-2 px-5 py-2.5 text-sm font-medium cursor-pointer transition-colors duration-150 select-none focus:outline-none',
-  tabNeutral: 'text-text-muted hover:text-text-main',
-  tabActive: 'text-text-main',
-  tabSolved: 'text-status-green hover:text-status-green',
-  tabFailed: 'text-status-red hover:text-status-red',
-  tabSkipped: 'text-text-muted hover:text-text-muted',
+  cloud: 'relative flex flex-col items-center gap-1.5 cursor-pointer select-none group',
 
-  // Active indicator — amber underline at bottom of tab row (2px, same as Navbar)
-  activeIndicator: 'absolute bottom-0 left-0 right-0 h-[2px] bg-primary rounded-t-sm',
+  cloudImg: 'w-[100px] h-[72px] object-contain transition-all duration-200',
+  cloudImgActive: 'opacity-100 drop-shadow-[0_0_8px_rgba(255,158,0,0.7)]',
+  cloudImgSolved: 'opacity-100 drop-shadow-[0_0_6px_rgba(78,187,34,0.6)]',
+  cloudImgFailed: 'opacity-90 drop-shadow-[0_0_6px_rgba(255,100,100,0.5)]',
+  cloudImgSkipped: 'opacity-50',
+  cloudImgNeutral: 'opacity-60 group-hover:opacity-80',
 
-  // Small state badge chip
-  badgeBase: 'inline-flex items-center justify-center w-4 h-4 rounded-full flex-shrink-0',
+  iconWrapper: 'absolute inset-0 flex items-center justify-center pb-2',
+
+  iconActive: 'text-primary',
+  iconSolved: 'text-status-green',
+  iconFailed: 'text-status-red',
+  iconSkipped: 'text-text-muted',
+  iconNeutral: 'text-text-muted group-hover:text-text-secondary',
+
+  label: 'text-[11px] font-semibold tracking-wide transition-colors duration-150',
+  labelActive: 'text-primary',
+  labelSolved: 'text-status-green',
+  labelFailed: 'text-status-red',
+  labelSkipped: 'text-text-muted',
+  labelNeutral: 'text-text-muted group-hover:text-text-secondary',
+
+  badge: 'absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center',
   badgeSolved: 'bg-status-green text-white',
   badgeFailed: 'bg-status-red text-white',
   badgeSkipped: 'bg-border text-text-muted',
 };
 
-const TAB_TEXT_CLASS: Record<TabState, string> = {
-  neutral: styles.tabNeutral,
-  active: styles.tabActive,
-  solved: styles.tabSolved,
-  failed: styles.tabFailed,
-  skipped: styles.tabSkipped,
+const CLOUD_IMG_CLASS: Record<TabState, string> = {
+  active: styles.cloudImgActive,
+  solved: styles.cloudImgSolved,
+  failed: styles.cloudImgFailed,
+  skipped: styles.cloudImgSkipped,
+  neutral: styles.cloudImgNeutral,
+};
+
+const ICON_CLASS: Record<TabState, string> = {
+  active: styles.iconActive,
+  solved: styles.iconSolved,
+  failed: styles.iconFailed,
+  skipped: styles.iconSkipped,
+  neutral: styles.iconNeutral,
+};
+
+const LABEL_CLASS: Record<TabState, string> = {
+  active: styles.labelActive,
+  solved: styles.labelSolved,
+  failed: styles.labelFailed,
+  skipped: styles.labelSkipped,
+  neutral: styles.labelNeutral,
 };
 
 const BADGE_CLASS: Partial<Record<TabState, string>> = {
@@ -86,21 +112,34 @@ export default function ChallengeTabBar({ tabs, activeIndex, onSelect }: Props) 
           <button
             key={tab.index}
             onClick={() => onSelect(tab.index)}
-            className={`${styles.tabBase} ${TAB_TEXT_CLASS[currentState]}`}
+            className={styles.cloud}
             aria-label={LABELS[tab.type]}
           >
-            <Icon size={15} />
-            <span>{LABELS[tab.type]}</span>
+            {/* Cloud image */}
+            <div className="relative">
+              <img
+                src="/rekko_slot_cloud.png"
+                alt=""
+                className={`${styles.cloudImg} ${CLOUD_IMG_CLASS[currentState]}`}
+              />
 
-            {/* State badge (shown for solved / failed / skipped) */}
-            {BadgeIcon && badgeClass && (
-              <span className={`${styles.badgeBase} ${badgeClass}`}>
-                <BadgeIcon size={10} strokeWidth={3} />
-              </span>
-            )}
+              {/* Icon centered on the cloud */}
+              <div className={styles.iconWrapper}>
+                <Icon size={26} strokeWidth={1.8} className={ICON_CLASS[currentState]} />
+              </div>
 
-            {/* Active amber underline */}
-            {isActive && <span className={styles.activeIndicator} />}
+              {/* State badge (solved / failed / skipped) */}
+              {BadgeIcon && badgeClass && (
+                <span className={`${styles.badge} ${badgeClass}`}>
+                  <BadgeIcon size={11} strokeWidth={3} />
+                </span>
+              )}
+            </div>
+
+            {/* Label below cloud */}
+            <span className={`${styles.label} ${LABEL_CLASS[currentState]}`}>
+              {LABELS[tab.type]}
+            </span>
           </button>
         );
       })}

@@ -16,7 +16,7 @@ interface Props {
 
 const PHOTO_ORDER = ['hard', 'medium', 'easy', 'veryEasy'] as const;
 
-const DIFFICULTY_LABELS = ['DIFÍCIL', 'MEDIA', 'FÁCIL', 'MUY FÁCIL'];
+const DIFFICULTY_LABELS = ['HARD', 'MEDIUM', 'EASY', 'VERY EASY'];
 
 const DIFFICULTY_COLORS = [
   'bg-status-red/90 text-white',
@@ -78,17 +78,17 @@ export default function AnimeChallengeView({
           <img
             key={imageUrl}
             src={imageUrl}
-            alt={`Pista ${safeIndex + 1}`}
+            alt={`Hint ${safeIndex + 1}`}
             className={styles.image}
             onError={() => setImgError(true)}
           />
         ) : (
           <div className={styles.noImage}>
             <ImageOff size={28} className="opacity-60" />
-            <span>{imgError ? 'Error al cargar imagen' : 'Sin imagen'}</span>
+            <span>{imgError ? 'Error loading image' : 'No image'}</span>
             {import.meta.env.DEV && !imageUrl && (
               <span className="text-[10px] opacity-50 px-2 text-center break-all">
-                key: {currentKey} | url: {String(imageUrl || 'vacío')}
+                key: {currentKey} | url: {String(imageUrl || 'empty')}
               </span>
             )}
           </div>
@@ -103,7 +103,7 @@ export default function AnimeChallengeView({
           className={styles.navBtn}
         >
           <ChevronLeft size={16} />
-          Anterior
+          Previous
         </button>
 
         <div className={styles.navCenter}>
@@ -120,7 +120,7 @@ export default function AnimeChallengeView({
           disabled={!canGoNext}
           className={styles.navBtn}
         >
-          Siguiente
+          Next
           <ChevronRight size={16} />
         </button>
       </div>
