@@ -62,18 +62,45 @@ const styles = {
   page: 'min-h-screen bg-app-bg flex font-gabarito overflow-hidden',
   leftBg: 'w-[350px] flex-shrink-0 bg-cover bg-right-top',
   rightBg: 'w-[350px] flex-shrink-0 bg-cover bg-left-top',
-  center: 'flex-1 flex flex-col items-center bg-white relative',
-  topBar: 'w-full flex items-center justify-between px-6 py-3 border-b border-border',
-  logoImg: 'h-[42px] object-contain',
-  apiLink: 'flex items-center gap-2 text-sm text-text-secondary cursor-default select-none',
-  title: 'text-[52px] font-bold text-text-main mt-4 mb-1',
-  subtitle: 'text-sm text-text-muted mb-3',
-  imageArea: 'w-[590px] h-[332px] bg-black rounded-card mb-3 overflow-hidden relative',
-  guessList: 'w-[590px] flex flex-col gap-2 mt-3',
-  guess: 'h-[56px] rounded-btn flex items-center gap-4 px-5 text-sm font-medium',
-  guessOk: 'bg-[#FFFDE7] border border-[#E8D44D]',
-  guessWrong: 'bg-[#FFF0F0] border border-status-red',
+  center: 'flex-1 flex flex-col items-center bg-white relative overflow-y-auto',
+
+  // Top bar — cohesive with Navbar row 1 style
+  topBar: 'w-full flex items-center justify-between px-8 py-3 border-b border-border bg-white sticky top-0 z-10',
+  logoImg: 'h-[38px] object-contain',
+  topBarBadge: 'inline-flex items-center gap-1.5 bg-primary/10 border border-primary/30 text-primary text-xs font-semibold px-3 py-1.5 rounded-pill',
+
+  // Title block
+  title: 'text-[52px] font-bold text-text-main mt-5 mb-0.5 leading-none',
+  titleAccentBar: 'block w-16 h-1 bg-primary rounded-full mx-auto mt-2 mb-2',
+  subtitle: 'text-sm text-text-muted mb-4',
+
+  // Challenge image area — dark gradient instead of raw black
+  imageArea: 'w-[590px] h-[332px] rounded-card mb-3 overflow-hidden relative border border-border',
+  imageAreaBg: 'absolute inset-0 bg-gradient-to-b from-[#1a1a2e] to-[#16213e]',
+
+  // Outcome banner — design-system tokens
+  outcomeBannerOk: 'w-[590px] rounded-btn px-5 py-4 flex flex-col gap-1.5 mb-2 transition-all bg-primary/10 border border-primary/40',
+  outcomeBannerFail: 'w-[590px] rounded-btn px-5 py-4 flex flex-col gap-1.5 mb-2 transition-all bg-status-red/10 border border-status-red/40',
+
+  // Skip button — amber CTA style
+  skipBtn: 'h-[47px] px-5 bg-primary text-white rounded-btn text-sm font-semibold hover:bg-primary-dark transition-colors',
+
+  // Lives bar
+  lifeBarWrapper: 'flex items-center gap-2 px-1',
+  lifeBarLabel: 'text-xs font-semibold text-text-secondary mr-1',
+  lifeDotActive: 'w-10 h-2.5 rounded-full bg-status-red transition-all duration-300',
+  lifeDotInactive: 'w-10 h-2.5 rounded-full bg-border transition-all duration-300',
+  lifeBarCount: 'text-xs text-text-muted ml-1',
+
+  // Guess history
+  guessList: 'w-[590px] flex flex-col gap-2 mt-3 pb-2',
+  guessListLabel: 'text-xs font-semibold text-text-muted uppercase tracking-widest px-1 mb-1',
+  guess: 'h-[56px] rounded-btn flex items-center gap-4 px-5 text-sm font-medium transition-all',
+  guessOk: 'bg-primary/10 border border-primary/30',
+  guessWrong: 'bg-status-red/5 border border-status-red/30',
   guessIcon: 'w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0',
+  guessIconOk: 'bg-primary',
+  guessIconWrong: 'bg-status-red',
 };
 
 // ---------------------------------------------------------------------------
@@ -84,10 +111,12 @@ function LoadingSkeleton() {
   return (
     <div className={styles.center}>
       <div className={styles.topBar}>
-        <div className="h-[42px] w-32 bg-app-bg rounded animate-pulse" />
+        <div className="h-[38px] w-32 bg-app-bg rounded animate-pulse" />
+        <div className="h-7 w-24 bg-app-bg rounded-pill animate-pulse" />
       </div>
-      <div className="text-[52px] font-bold text-text-main mt-4 mb-1 opacity-30">Animedle</div>
-      <div className="w-[590px] h-[332px] bg-app-bg rounded-card mb-3 animate-pulse" />
+      <div className="text-[52px] font-bold text-text-main mt-5 mb-0.5 opacity-20 leading-none">Animedle</div>
+      <div className="w-16 h-1 bg-app-bg rounded-full mx-auto mt-2 mb-4 animate-pulse" />
+      <div className="w-[590px] h-[332px] bg-app-bg rounded-card mb-3 animate-pulse border border-border" />
       <div className="w-[590px] h-[47px] bg-app-bg rounded-btn animate-pulse" />
     </div>
   );
@@ -222,8 +251,10 @@ export default function Animedle() {
         <div className={styles.center}>
           <div className={styles.topBar}>
             <img src={rekkoLogo} alt="Rekko" className={styles.logoImg} />
+            <span className={styles.topBarBadge}>Juego diario</span>
           </div>
           <h1 className={styles.title}>Animedle</h1>
+          <span className={styles.titleAccentBar} />
           <p className="mt-8 text-status-red text-sm">{error}</p>
         </div>
         <div
@@ -273,16 +304,15 @@ export default function Animedle() {
           <ConfettiEffect key={`confetti-${activeChallenge}`} />
         )}
 
-        {/* Top bar */}
+        {/* Top bar — logo left, game badge right */}
         <div className={styles.topBar}>
           <img src={rekkoLogo} alt="Rekko" className={styles.logoImg} />
-          <span className={styles.apiLink}>
-            <span className="text-lg">⊕</span> API Docs
-          </span>
+          <span className={styles.topBarBadge}>Juego diario</span>
         </div>
 
-        {/* Title */}
+        {/* Title with amber accent underline */}
         <h1 className={styles.title}>Animedle</h1>
+        <span className={styles.titleAccentBar} />
         <p className={styles.subtitle}>Adivina el anime del día — 4 retos</p>
 
         {/* Challenge tabs */}
@@ -294,8 +324,9 @@ export default function Animedle() {
           />
         )}
 
-        {/* Challenge content area */}
+        {/* Challenge content area — dark gradient background */}
         <div className={styles.imageArea}>
+          <div className={styles.imageAreaBg} />
           {challenge.type === 'anime' && (
             <AnimeChallengeView
               data={challenge.data as Parameters<typeof AnimeChallengeView>[0]['data']}
@@ -331,15 +362,9 @@ export default function Animedle() {
           )}
         </div>
 
-        {/* Outcome banner */}
+        {/* Outcome banner — design-system tokens */}
         {challengeOver && (
-          <div
-            className={`w-[590px] rounded-btn px-5 py-3 flex flex-col gap-1 mb-2 transition-all ${
-              state.solved
-                ? 'bg-[#FFFDE7] border border-[#E8D44D]'
-                : 'bg-[#FFF0F0] border border-status-red'
-            }`}
-          >
+          <div className={state.solved ? styles.outcomeBannerOk : styles.outcomeBannerFail}>
             {state.solved && (
               <>
                 <p className="text-sm font-bold text-text-main flex items-center gap-2">
@@ -403,26 +428,22 @@ export default function Animedle() {
               <div className="flex-1">
                 <AnimeGuessInput onGuess={handleGuess} disabled={challengeOver} />
               </div>
-              <button
-                onClick={handleSkip}
-                className="h-[47px] px-4 border border-border rounded-btn text-sm text-text-secondary hover:text-text-main hover:border-text-main transition-colors"
-              >
+              <button onClick={handleSkip} className={styles.skipBtn}>
                 Saltar
               </button>
             </div>
 
-            {/* Wrong guesses counter */}
-            <div className="flex items-center gap-2 px-1">
+            {/* Lives bar — "Vidas:" label + prominent dots */}
+            <div className={styles.lifeBarWrapper}>
+              <span className={styles.lifeBarLabel}>Vidas:</span>
               {Array.from({ length: MAX_WRONG_GUESSES }).map((_, i) => (
                 <div
                   key={i}
-                  className={`w-8 h-2 rounded-full transition-colors ${
-                    i < wrongGuessCount ? 'bg-status-red' : 'bg-border'
-                  }`}
+                  className={i < wrongGuessCount ? styles.lifeDotActive : styles.lifeDotInactive}
                 />
               ))}
-              <span className="text-xs text-text-muted ml-1">
-                {MAX_WRONG_GUESSES - wrongGuessCount} intento{MAX_WRONG_GUESSES - wrongGuessCount !== 1 ? 's' : ''} restante{MAX_WRONG_GUESSES - wrongGuessCount !== 1 ? 's' : ''}
+              <span className={styles.lifeBarCount}>
+                {MAX_WRONG_GUESSES - wrongGuessCount} restante{MAX_WRONG_GUESSES - wrongGuessCount !== 1 ? 's' : ''}
               </span>
             </div>
           </div>
@@ -431,6 +452,7 @@ export default function Animedle() {
         {/* Guess history */}
         {state.guesses.length > 0 && (
           <div className={styles.guessList}>
+            <p className={styles.guessListLabel}>Intentos</p>
             {[...state.guesses].reverse().map((g, i) => (
               <div
                 key={i}
@@ -438,7 +460,7 @@ export default function Animedle() {
               >
                 <span
                   className={`${styles.guessIcon} ${
-                    g.correct ? 'bg-[#E8D44D]' : 'bg-status-red'
+                    g.correct ? styles.guessIconOk : styles.guessIconWrong
                   }`}
                 >
                   {g.correct ? (
