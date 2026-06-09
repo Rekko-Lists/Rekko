@@ -335,7 +335,7 @@ export default function Animes() {
 
   const filterProperties = useMemo<FilterProperty[]>(
     () => [
-      { key: "genre", label: "Genre", chipGrid: true, options: genres },
+      { key: "genre", label: "Genre", options: genres },
       { key: "type", label: "Type", options: STATIC_TYPE_OPTIONS },
       { key: "status", label: "Status", options: STATIC_STATUS_OPTIONS },
     ],
@@ -579,21 +579,24 @@ export default function Animes() {
           ),
         ]}
       />
-      <SubNav
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        onToggleFilter={toggleAdv}
-        filterOpen={advOpen}
-      />
-
-      {/* Filtros mutuamente excluyentes: solo uno visible a la vez */}
-      {!advOpen && !(activeTab === "By Genre" && !selectedGenre) && (
-        <QuickFilter
-          properties={filterProperties}
-          onApply={handleQuickFilter}
-          onOpenAdvanced={toggleAdv}
+      {/* Sticky control bar — SubNav + QuickFilter scroll with the page header */}
+      <div className="sticky top-[136px] z-20 bg-surface shadow-sm">
+        <SubNav
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          onToggleFilter={toggleAdv}
+          filterOpen={advOpen}
         />
-      )}
+
+        {/* Filtros mutuamente excluyentes: solo uno visible a la vez */}
+        {!advOpen && !(activeTab === "By Genre" && !selectedGenre) && (
+          <QuickFilter
+            properties={filterProperties}
+            onApply={handleQuickFilter}
+            onOpenAdvanced={toggleAdv}
+          />
+        )}
+      </div>
 
       <div className={styles.body}>
         {/* By Genre — vista de selección de género agrupada por letra */}

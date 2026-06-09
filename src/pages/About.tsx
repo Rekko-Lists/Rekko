@@ -8,6 +8,7 @@ import AnimeListWidget from "@/components/ui/feed/widgets/AnimeListWidget";
 
 import SiteLinks from "@/components/ui/common/SiteLinks";
 import type { SiteLinkItem } from "@/components/ui/common/SiteLinks";
+import { useAuthStore } from "@/store/useAuthStore";
 import type { RecommendationItem } from "@/components/ui/feed/PopularRecommendationsCard";
 
 import MarkdownRenderer from "@/components/ui/common/MarkdownRenderer";
@@ -35,22 +36,10 @@ import Seo from "@/components/seo/Seo";
 
 const NEWS_FALLBACK_MAL_IDS = [52991, 5114, 9253, 30276];
 
-const SITE_LINKS: SiteLinkItem[] = [
-    {
-        label: "Rules of the site",
-        icon: "Book",
-        href: "/rules",
-    },
-    {
-        label: "About",
-        icon: "Book",
-        href: "/about",
-    },
-    {
-        label: "FAQ",
-        icon: "Question",
-        href: "/faq",
-    },
+const BASE_SITE_LINKS: SiteLinkItem[] = [
+    { label: "Rules of the site", icon: "Book",     href: "/rules" },
+    { label: "About",             icon: "Book",     href: "/about" },
+    { label: "FAQ",               icon: "Question", href: "/faq"   },
 ];
 
 const styles = {
@@ -63,6 +52,16 @@ const styles = {
 
 export default function About() {
     const navigate = useNavigate();
+    const user = useAuthStore((s) => s.user);
+    const siteLinks = useMemo<SiteLinkItem[]>(
+        () => [
+            ...BASE_SITE_LINKS,
+            ...(user?.role === 'ADMIN'
+                ? [{ label: 'Admin Panel', icon: 'Shield', href: '/admin' }]
+                : []),
+        ],
+        [user?.role],
+    );
 
     const [news, setNews] = useState<AnimeNewsItem[]>([]);
     const [leaderboard, setLeaderboard] = useState<
@@ -203,7 +202,7 @@ export default function About() {
 
                 {randomWidgets[0] && <AnimeListWidget {...randomWidgets[0]} />}
 
-                <SiteLinks items={SITE_LINKS} />
+                <SiteLinks items={siteLinks} />
             </aside>
 
             <div className={styles.divider} />

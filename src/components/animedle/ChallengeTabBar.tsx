@@ -41,7 +41,7 @@ const styles = {
   cloud: 'relative cursor-pointer select-none group',
 
   // Larger cloud — icon fits in the hole
-  cloudImg: 'w-[150px] h-[106px] object-contain transition-opacity duration-200',
+  cloudImg: 'w-[166px] h-[118px] object-contain transition-opacity duration-200',
   cloudImgActive:  'opacity-100',
   cloudImgSolved:  'opacity-90',
   cloudImgFailed:  'opacity-80',

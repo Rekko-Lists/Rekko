@@ -225,6 +225,15 @@ export default function PostDetail() {
       // Refresh replies for this parent
       const replies = await getCommentReplies(parentCommentId);
       setRepliesMap((prev) => ({ ...prev, [parentCommentId]: replies }));
+      // Ensure the parent comment reflects that it now has replies so the
+      // toggle button stays visible even if the user hides then re-expands.
+      setComments((prev) =>
+        prev.map((c) =>
+          c.commentId === parentCommentId
+            ? { ...c, hasReplies: true, replyCount: (c.replyCount ?? 0) + 1 }
+            : c
+        )
+      );
     } catch (err: unknown) {
       setError(extractApiError(err));
     }

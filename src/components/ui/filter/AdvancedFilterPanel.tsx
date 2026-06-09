@@ -29,7 +29,7 @@ const TYPES          = ['TV', 'Movie', 'OVA', 'ONA', 'Special'];
 const VISIBLE_GENRES = 12;
 
 const styles = {
-  panel:    'w-[461px] min-h-[569px] flex-shrink-0 bg-surface border-[1.5px] border-border rounded-card px-6 py-8 h-fit font-gabarito self-start mt-4',
+  panel:    'w-[461px] min-h-[569px] flex-shrink-0 bg-surface border-[1.5px] border-border rounded-card px-6 py-8 h-fit font-gabarito self-start mt-4 sticky top-[180px]',
   header:   'flex items-center justify-between mb-4',
   title:    'font-semibold text-sm',
   section:  'mb-3',
@@ -125,7 +125,7 @@ function DualRangeSlider({
 export default function AdvancedFilterPanel({
   availableGenres, seasonOptions, values, onValuesChange, onApply, onClose,
 }: AdvancedFilterPanelProps) {
-  const [open, setOpen] = useState({ genre: true, episodes: false, rating: true, type: false, season: true });
+  const [open, setOpen] = useState({ genre: true, episodes: true, rating: true, type: true, season: true });
   const [showAllGenres, setShowAllGenres] = useState(false);
 
   const resolvedSeasonOptions = seasonOptions ?? computeSeasonOptions();

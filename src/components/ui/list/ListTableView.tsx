@@ -1,6 +1,12 @@
 import { Star, Film, Tv, Edit2 } from 'lucide-react';
 import type { UserListEntry, ListState } from '@/hooks/useUserList';
 
+const AIRING_LABELS: Record<string, string> = {
+  finished_airing:  'Finished',
+  currently_airing: 'Airing',
+  not_yet_aired:    'Upcoming',
+};
+
 const STATE_CONFIG: Record<ListState, { label: string; dot: string }> = {
   WATCHING:      { label: 'Watching',       dot: 'bg-status-blue'  },
   COMPLETED:     { label: 'Completed',      dot: 'bg-status-green' },
@@ -49,6 +55,8 @@ const styles = {
   progNone:    'text-xs text-text-secondary',
   tdType:      'py-2 px-3 hidden lg:table-cell',
   typeRow:     'flex items-center gap-1 text-xs text-text-secondary capitalize',
+  tdAiring:    'py-2 px-3 hidden xl:table-cell',
+  airingText:  'text-xs text-text-secondary',
   tdScore:     'py-2 px-3 text-right',
   scoreVal:    'inline-flex items-center gap-1 text-sm font-semibold text-text-main',
   scoreNone:   'text-xs text-border',
@@ -83,6 +91,7 @@ export default function ListTableView({ entries, onEdit }: Props) {
             <th className={`${styles.th} hidden sm:table-cell`}>Status</th>
             <th className={`${styles.th} hidden md:table-cell`}>Progress</th>
             <th className={`${styles.th} hidden lg:table-cell`}>Type</th>
+            <th className={`${styles.th} hidden xl:table-cell`}>Airing</th>
             <th className={styles.thRight}>Score</th>
             <th className={styles.thLast} />
           </tr>
@@ -183,6 +192,12 @@ function ListRow({
         <span className={styles.typeRow}>
           {isMovie ? <Film size={12} /> : <Tv size={12} />}
           {entry.mediaType.replace(/_/g, ' ')}
+        </span>
+      </td>
+
+      <td className={styles.tdAiring}>
+        <span className={styles.airingText}>
+          {AIRING_LABELS[entry.animeStatus] ?? '—'}
         </span>
       </td>
 

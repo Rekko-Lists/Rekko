@@ -1,6 +1,12 @@
 import { Star, Film, Tv } from 'lucide-react';
 import type { UserListEntry, ListState } from '@/hooks/useUserList';
 
+const AIRING_LABELS: Record<string, string> = {
+  finished_airing:  'Finished',
+  currently_airing: 'Airing',
+  not_yet_aired:    'Upcoming',
+};
+
 const STATE_CONFIG: Record<ListState, { label: string; badge: string }> = {
   WATCHING:      { label: 'Watching',       badge: 'bg-status-blue'  },
   COMPLETED:     { label: 'Completed',      badge: 'bg-status-green' },
@@ -27,7 +33,7 @@ const styles = {
   progressMeta: 'flex justify-between text-[10px] text-white/70',
   progressBar:  'h-[3px] rounded-full bg-white/20 overflow-hidden',
   progressFill: 'h-full bg-primary rounded-full transition-all',
-  overlayMeta:  'flex items-center gap-1.5 text-[10px] text-white/60',
+  overlayMeta:  'flex items-center justify-between text-[10px] text-white/60',
   overlayType:  'capitalize',
   starIcon:     'text-primary',
   footer:       'px-2 py-2',
@@ -104,8 +110,13 @@ function AnimeListCard({ entry, onEdit }: { entry: UserListEntry; onEdit?: (e: U
             </div>
           )}
           <div className={styles.overlayMeta}>
-            {isMovie ? <Film size={10} /> : <Tv size={10} />}
-            <span className={styles.overlayType}>{entry.mediaType.replace('_', ' ')}</span>
+            <span className="flex items-center gap-1">
+              {isMovie ? <Film size={10} /> : <Tv size={10} />}
+              <span className={styles.overlayType}>{entry.mediaType.replace('_', ' ')}</span>
+            </span>
+            {AIRING_LABELS[entry.animeStatus] && (
+              <span>{AIRING_LABELS[entry.animeStatus]}</span>
+            )}
           </div>
         </div>
       </div>
