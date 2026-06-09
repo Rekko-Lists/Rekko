@@ -10,6 +10,19 @@ interface Props {
   disabled?: boolean;
 }
 
+const styles = {
+  container: 'relative w-full',
+  inputRow: 'flex items-center w-full',
+  input: 'flex-1 h-[47px] border border-border rounded-l-btn px-4 bg-surface text-sm text-text-main placeholder:text-text-muted shadow-input focus:outline-none focus:border-primary transition-colors disabled:bg-app-bg disabled:cursor-not-allowed',
+  submitBtn: 'h-[47px] px-5 bg-gradient-cta text-white text-sm font-semibold rounded-r-btn hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed',
+  spinner: 'w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin inline-block',
+  dropdown: 'absolute top-full left-0 right-0 z-50 mt-1 bg-surface border border-border rounded-btn shadow-card max-h-52 overflow-y-auto',
+  dropdownLoading: 'px-4 py-2.5 text-sm text-text-muted',
+  dropdownItem: 'w-full flex items-center gap-3 px-4 py-2.5 hover:bg-app-bg transition-colors text-left cursor-pointer',
+  dropdownCover: 'w-8 h-10 object-cover rounded-card flex-shrink-0',
+  dropdownName: 'text-sm text-text-main line-clamp-2',
+};
+
 export default function AnimeGuessInput({ onGuess, disabled = false }: Props) {
   const [inputValue, setInputValue] = useState('');
   const [results, setResults] = useState<Anime[]>([]);
@@ -98,8 +111,8 @@ export default function AnimeGuessInput({ onGuess, disabled = false }: Props) {
   }
 
   return (
-    <div ref={containerRef} className="relative w-full">
-      <div className="flex items-center w-full">
+    <div ref={containerRef} className={styles.container}>
+      <div className={styles.inputRow}>
         <input
           ref={inputRef}
           type="text"
@@ -109,7 +122,7 @@ export default function AnimeGuessInput({ onGuess, disabled = false }: Props) {
           onFocus={() => results.length > 0 && setShowDropdown(true)}
           placeholder="Nombre del anime... (mín. 3 caracteres)"
           disabled={disabled}
-          className="flex-1 h-[47px] border border-border rounded-l-btn px-4 text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-primary transition-colors disabled:bg-app-bg disabled:cursor-not-allowed"
+          className={styles.input}
         />
         <button
           type="button"
@@ -120,10 +133,10 @@ export default function AnimeGuessInput({ onGuess, disabled = false }: Props) {
             selectAnime(match ? match.name : trimmed);
           }}
           disabled={disabled || !inputValue.trim()}
-          className="h-[47px] px-4 bg-gradient-cta text-white text-sm rounded-r-btn hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed font-medium"
+          className={styles.submitBtn}
         >
           {loading ? (
-            <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin inline-block" />
+            <span className={styles.spinner} />
           ) : (
             'Adivinar'
           )}
@@ -132,25 +145,25 @@ export default function AnimeGuessInput({ onGuess, disabled = false }: Props) {
 
       {/* Dropdown */}
       {showDropdown && !disabled && (
-        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-border rounded-btn shadow-card max-h-52 overflow-y-auto">
+        <div className={styles.dropdown}>
           {loading && (
-            <div className="px-3 py-2 text-sm text-text-muted">Buscando...</div>
+            <div className={styles.dropdownLoading}>Buscando...</div>
           )}
           {!loading && results.map((anime) => (
             <button
               key={anime.malId}
               type="button"
-              className="w-full flex items-center gap-3 px-3 py-2 hover:bg-app-bg transition-colors text-left"
+              className={styles.dropdownItem}
               onMouseDown={(e) => { e.preventDefault(); selectAnime(anime.name); }}
             >
               {anime.imgMedium && (
                 <img
                   src={anime.imgMedium}
                   alt={anime.name}
-                  className="w-8 h-10 object-cover rounded-[4px] flex-shrink-0"
+                  className={styles.dropdownCover}
                 />
               )}
-              <span className="text-sm text-text-main line-clamp-2">{anime.name}</span>
+              <span className={styles.dropdownName}>{anime.name}</span>
             </button>
           ))}
         </div>

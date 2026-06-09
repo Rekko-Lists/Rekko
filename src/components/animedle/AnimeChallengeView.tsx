@@ -22,6 +22,19 @@ const DIFFICULTY_COLORS = [
   'bg-status-blue text-white',
 ];
 
+const styles = {
+  wrapper: 'flex flex-col items-center justify-center h-full gap-3 relative z-10',
+  topRow: 'flex items-center justify-between w-full px-3',
+  difficultyBadge: 'text-xs font-bold px-3 py-1 rounded-pill',
+  photoCounter: 'text-xs text-white/70 font-medium',
+  imageBox: 'w-full flex-1 overflow-hidden flex items-center justify-center min-h-0',
+  image: 'w-full h-full object-cover transition-opacity duration-300',
+  noImage: 'w-full h-full flex items-center justify-center text-white/50 text-sm',
+  navRow: 'flex items-center gap-4 pb-1',
+  navBtn: 'flex items-center gap-1 px-4 py-1.5 rounded-btn bg-gradient-cta text-white text-sm disabled:opacity-30 hover:opacity-90 transition-opacity',
+  navCounter: 'text-xs text-white/60',
+};
+
 export default function AnimeChallengeView({
   data,
   wrongGuesses,
@@ -44,53 +57,49 @@ export default function AnimeChallengeView({
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-full gap-3">
-      {/* Difficulty badge + counter */}
-      <div className="flex items-center justify-between w-full px-1">
-        <span
-          className={`text-xs font-bold px-3 py-1 rounded-pill ${DIFFICULTY_COLORS[safeIndex]}`}
-        >
+    <div className={styles.wrapper}>
+      {/* Difficulty badge + photo counter */}
+      <div className={styles.topRow}>
+        <span className={`${styles.difficultyBadge} ${DIFFICULTY_COLORS[safeIndex]}`}>
           {DIFFICULTY_LABELS[safeIndex]}
         </span>
-        <span className="text-xs text-text-muted font-medium">
+        <span className={styles.photoCounter}>
           {safeIndex + 1}/{unlockedCount} foto{unlockedCount !== 1 ? 's' : ''} desbloqueada{unlockedCount !== 1 ? 's' : ''}
         </span>
       </div>
 
       {/* Image */}
-      <div className="w-full flex-1 overflow-hidden rounded-card bg-black flex items-center justify-center min-h-0">
+      <div className={styles.imageBox}>
         {imageUrl ? (
           <img
             key={imageUrl}
             src={imageUrl}
             alt={`Pista ${safeIndex + 1}`}
-            className="w-full h-full object-cover transition-opacity duration-300"
+            className={styles.image}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-text-muted text-sm">
-            Sin imagen
-          </div>
+          <div className={styles.noImage}>Sin imagen</div>
         )}
       </div>
 
       {/* Navigation arrows */}
       {unlockedCount > 1 && (
-        <div className="flex items-center gap-4">
+        <div className={styles.navRow}>
           <button
             onClick={goPrev}
             disabled={safeIndex === 0}
-            className="flex items-center gap-1 px-4 py-1.5 rounded-btn bg-gradient-cta text-white text-sm disabled:opacity-30 hover:opacity-90 transition-opacity"
+            className={styles.navBtn}
           >
             <ChevronLeft size={16} />
             Anterior
           </button>
-          <span className="text-xs text-text-muted">
+          <span className={styles.navCounter}>
             {safeIndex + 1} / {unlockedCount}
           </span>
           <button
             onClick={goNext}
             disabled={safeIndex >= unlockedCount - 1}
-            className="flex items-center gap-1 px-4 py-1.5 rounded-btn bg-gradient-cta text-white text-sm disabled:opacity-30 hover:opacity-90 transition-opacity"
+            className={styles.navBtn}
           >
             Siguiente
             <ChevronRight size={16} />

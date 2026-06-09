@@ -8,27 +8,32 @@ interface Props {
   };
 }
 
+const styles = {
+  wrapper: 'flex flex-col items-center justify-center h-full gap-5 relative z-10',
+  labelRow: 'flex items-center gap-2 text-primary',
+  labelText: 'text-lg font-bold uppercase tracking-wide',
+  hint: 'text-sm text-white/60',
+  audio: 'w-full max-w-[480px] rounded-btn',
+  noAudio: 'text-sm text-white/50 italic',
+};
+
 export default function OpeningChallengeView({ data }: Props) {
   const audioUrl = getUrl(data.opening);
   const label = data.mediaType === 'ending' ? 'Ending' : 'Opening';
 
   return (
-    <div className="flex flex-col items-center justify-center h-full gap-5">
-      <div className="flex items-center gap-2 text-primary">
+    <div className={styles.wrapper}>
+      <div className={styles.labelRow}>
         <Music size={28} />
-        <span className="text-lg font-bold uppercase tracking-wide">{label}</span>
+        <span className={styles.labelText}>{label}</span>
       </div>
-      <p className="text-sm text-text-muted">
+      <p className={styles.hint}>
         Escucha el {label.toLowerCase()} e intenta adivinar el anime
       </p>
       {audioUrl ? (
-        <audio
-          controls
-          src={audioUrl}
-          className="w-full max-w-[480px] rounded-btn"
-        />
+        <audio controls src={audioUrl} className={styles.audio} />
       ) : (
-        <p className="text-sm text-text-muted italic">Audio no disponible</p>
+        <p className={styles.noAudio}>Audio no disponible</p>
       )}
     </div>
   );

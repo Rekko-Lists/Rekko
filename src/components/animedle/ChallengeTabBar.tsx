@@ -1,4 +1,4 @@
-import { Images, User, Music, Smile } from 'lucide-react';
+import { Images, User, Music, Smile, Check, X, Minus } from 'lucide-react';
 
 type ChallengeType = 'anime' | 'character' | 'opening' | 'emoji';
 type TabState = 'neutral' | 'active' | 'solved' | 'failed' | 'skipped';
@@ -29,60 +29,78 @@ const LABELS: Record<ChallengeType, string> = {
   emoji: 'Emojis',
 };
 
-const STATE_STYLES: Record<TabState, string> = {
-  neutral: 'opacity-70 hover:opacity-100',
-  active: 'opacity-100 scale-105',
-  solved: 'opacity-100 brightness-110 drop-shadow-[0_0_6px_rgba(78,187,34,0.7)]',
-  failed: 'opacity-100 drop-shadow-[0_0_6px_rgba(255,100,100,0.7)]',
-  skipped: 'opacity-50',
+// State badge icon: check for solved, X for failed, dash for skipped, nothing for neutral/active
+const STATE_BADGE: Partial<Record<TabState, React.ElementType>> = {
+  solved: Check,
+  failed: X,
+  skipped: Minus,
 };
 
-const CLOUD_OVERLAY: Record<TabState, string> = {
-  neutral: '',
-  active: 'ring-2 ring-primary ring-offset-1',
-  solved: 'ring-2 ring-status-green ring-offset-1',
-  failed: 'ring-2 ring-status-red ring-offset-1',
-  skipped: 'ring-2 ring-border ring-offset-1',
+const styles = {
+  // Tab row — Navbar row 2 style: border-b, full-width, centered
+  row: 'flex items-end justify-center gap-0 w-full border-b border-border mb-3',
+
+  // Individual tab button
+  tabBase: 'relative flex items-center gap-2 px-5 py-2.5 text-sm font-medium cursor-pointer transition-colors duration-150 select-none focus:outline-none',
+  tabNeutral: 'text-text-muted hover:text-text-main',
+  tabActive: 'text-text-main',
+  tabSolved: 'text-status-green hover:text-status-green',
+  tabFailed: 'text-status-red hover:text-status-red',
+  tabSkipped: 'text-text-muted hover:text-text-muted',
+
+  // Active indicator — amber underline at bottom of tab row (2px, same as Navbar)
+  activeIndicator: 'absolute bottom-0 left-0 right-0 h-[2px] bg-primary rounded-t-sm',
+
+  // Small state badge chip
+  badgeBase: 'inline-flex items-center justify-center w-4 h-4 rounded-full flex-shrink-0',
+  badgeSolved: 'bg-status-green text-white',
+  badgeFailed: 'bg-status-red text-white',
+  badgeSkipped: 'bg-border text-text-muted',
+};
+
+const TAB_TEXT_CLASS: Record<TabState, string> = {
+  neutral: styles.tabNeutral,
+  active: styles.tabActive,
+  solved: styles.tabSolved,
+  failed: styles.tabFailed,
+  skipped: styles.tabSkipped,
+};
+
+const BADGE_CLASS: Partial<Record<TabState, string>> = {
+  solved: styles.badgeSolved,
+  failed: styles.badgeFailed,
+  skipped: styles.badgeSkipped,
 };
 
 export default function ChallengeTabBar({ tabs, activeIndex, onSelect }: Props) {
   return (
-    <div className="flex items-center justify-center gap-4 w-full my-2">
+    <div className={styles.row}>
       {tabs.map((tab) => {
         const Icon = ICONS[tab.type];
         const isActive = tab.index === activeIndex;
         const currentState: TabState = isActive ? 'active' : tab.state;
+        const BadgeIcon = STATE_BADGE[currentState];
+        const badgeClass = BADGE_CLASS[currentState];
 
         return (
           <button
             key={tab.index}
             onClick={() => onSelect(tab.index)}
-            className={`flex flex-col items-center gap-1 cursor-pointer transition-all duration-200 ${STATE_STYLES[currentState]}`}
+            className={`${styles.tabBase} ${TAB_TEXT_CLASS[currentState]}`}
             aria-label={LABELS[tab.type]}
           >
-            <div className={`relative w-14 h-10 rounded-md ${CLOUD_OVERLAY[currentState]}`}>
-              <img
-                src="/OrangeCloud.png"
-                alt=""
-                className="w-full h-full object-contain"
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Icon
-                  size={16}
-                  className={
-                    currentState === 'solved'
-                      ? 'text-status-green'
-                      : currentState === 'failed'
-                      ? 'text-status-red'
-                      : 'text-text-main'
-                  }
-                  style={{ marginTop: '-2px' }}
-                />
-              </div>
-            </div>
-            <span className="text-[11px] text-text-secondary font-medium">
-              {LABELS[tab.type]}
-            </span>
+            <Icon size={15} />
+            <span>{LABELS[tab.type]}</span>
+
+            {/* State badge (shown for solved / failed / skipped) */}
+            {BadgeIcon && badgeClass && (
+              <span className={`${styles.badgeBase} ${badgeClass}`}>
+                <BadgeIcon size={10} strokeWidth={3} />
+              </span>
+            )}
+
+            {/* Active amber underline */}
+            {isActive && <span className={styles.activeIndicator} />}
           </button>
         );
       })}
