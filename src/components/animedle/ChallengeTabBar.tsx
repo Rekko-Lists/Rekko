@@ -36,65 +36,53 @@ const STATE_BADGE: Partial<Record<TabState, React.ElementType>> = {
 };
 
 const styles = {
-  row: 'flex items-center justify-center gap-5 mb-4',
+  row: 'flex items-center justify-center gap-4 mb-4',
 
-  cloud: 'relative flex flex-col items-center gap-1.5 cursor-pointer select-none group',
+  cloud: 'relative cursor-pointer select-none group',
 
-  cloudImg: 'w-[100px] h-[72px] object-contain transition-all duration-200',
-  cloudImgActive: 'opacity-100 drop-shadow-[0_0_8px_rgba(255,158,0,0.7)]',
-  cloudImgSolved: 'opacity-100 drop-shadow-[0_0_6px_rgba(78,187,34,0.6)]',
-  cloudImgFailed: 'opacity-90 drop-shadow-[0_0_6px_rgba(255,100,100,0.5)]',
-  cloudImgSkipped: 'opacity-50',
-  cloudImgNeutral: 'opacity-60 group-hover:opacity-80',
+  // Larger cloud — icon fits in the hole
+  cloudImg: 'w-[150px] h-[106px] object-contain transition-opacity duration-200',
+  cloudImgActive:  'opacity-100',
+  cloudImgSolved:  'opacity-90',
+  cloudImgFailed:  'opacity-80',
+  cloudImgSkipped: 'opacity-40',
+  cloudImgNeutral: 'opacity-55 group-hover:opacity-75',
 
-  iconWrapper: 'absolute inset-0 flex items-center justify-center pb-2',
+  // Icon sits centered in the cloud hole
+  iconWrapper: 'absolute inset-0 flex items-center justify-center',
 
-  iconActive: 'text-primary',
-  iconSolved: 'text-status-green',
-  iconFailed: 'text-status-red',
-  iconSkipped: 'text-text-muted',
-  iconNeutral: 'text-text-muted group-hover:text-text-secondary',
+  // All icons are dark gray — active gets darkest, neutral lighter
+  iconActive:  'text-gray-800',
+  iconSolved:  'text-gray-700',
+  iconFailed:  'text-gray-500',
+  iconSkipped: 'text-gray-400',
+  iconNeutral: 'text-gray-400 group-hover:text-gray-600',
 
-  label: 'text-[11px] font-semibold tracking-wide transition-colors duration-150',
-  labelActive: 'text-primary',
-  labelSolved: 'text-status-green',
-  labelFailed: 'text-status-red',
-  labelSkipped: 'text-text-muted',
-  labelNeutral: 'text-text-muted group-hover:text-text-secondary',
-
-  badge: 'absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center',
-  badgeSolved: 'bg-status-green text-white',
-  badgeFailed: 'bg-status-red text-white',
+  badge: 'absolute top-0.5 right-2 w-5 h-5 rounded-full flex items-center justify-center',
+  badgeSolved:  'bg-status-green text-white',
+  badgeFailed:  'bg-status-red text-white',
   badgeSkipped: 'bg-border text-text-muted',
 };
 
 const CLOUD_IMG_CLASS: Record<TabState, string> = {
-  active: styles.cloudImgActive,
-  solved: styles.cloudImgSolved,
-  failed: styles.cloudImgFailed,
+  active:  styles.cloudImgActive,
+  solved:  styles.cloudImgSolved,
+  failed:  styles.cloudImgFailed,
   skipped: styles.cloudImgSkipped,
   neutral: styles.cloudImgNeutral,
 };
 
 const ICON_CLASS: Record<TabState, string> = {
-  active: styles.iconActive,
-  solved: styles.iconSolved,
-  failed: styles.iconFailed,
+  active:  styles.iconActive,
+  solved:  styles.iconSolved,
+  failed:  styles.iconFailed,
   skipped: styles.iconSkipped,
   neutral: styles.iconNeutral,
 };
 
-const LABEL_CLASS: Record<TabState, string> = {
-  active: styles.labelActive,
-  solved: styles.labelSolved,
-  failed: styles.labelFailed,
-  skipped: styles.labelSkipped,
-  neutral: styles.labelNeutral,
-};
-
 const BADGE_CLASS: Partial<Record<TabState, string>> = {
-  solved: styles.badgeSolved,
-  failed: styles.badgeFailed,
+  solved:  styles.badgeSolved,
+  failed:  styles.badgeFailed,
   skipped: styles.badgeSkipped,
 };
 
@@ -115,31 +103,23 @@ export default function ChallengeTabBar({ tabs, activeIndex, onSelect }: Props) 
             className={styles.cloud}
             aria-label={LABELS[tab.type]}
           >
-            {/* Cloud image */}
-            <div className="relative">
-              <img
-                src="/rekko_slot_cloud.png"
-                alt=""
-                className={`${styles.cloudImg} ${CLOUD_IMG_CLASS[currentState]}`}
-              />
+            <img
+              src="/rekko_slot_cloud.png"
+              alt=""
+              className={`${styles.cloudImg} ${CLOUD_IMG_CLASS[currentState]}`}
+            />
 
-              {/* Icon centered on the cloud */}
-              <div className={styles.iconWrapper}>
-                <Icon size={26} strokeWidth={1.8} className={ICON_CLASS[currentState]} />
-              </div>
-
-              {/* State badge (solved / failed / skipped) */}
-              {BadgeIcon && badgeClass && (
-                <span className={`${styles.badge} ${badgeClass}`}>
-                  <BadgeIcon size={11} strokeWidth={3} />
-                </span>
-              )}
+            {/* Icon centered in the cloud hole */}
+            <div className={styles.iconWrapper}>
+              <Icon size={18} strokeWidth={2} className={ICON_CLASS[currentState]} />
             </div>
 
-            {/* Label below cloud */}
-            <span className={`${styles.label} ${LABEL_CLASS[currentState]}`}>
-              {LABELS[tab.type]}
-            </span>
+            {/* State badge (solved / failed / skipped) */}
+            {BadgeIcon && badgeClass && (
+              <span className={`${styles.badge} ${badgeClass}`}>
+                <BadgeIcon size={11} strokeWidth={3} />
+              </span>
+            )}
           </button>
         );
       })}
