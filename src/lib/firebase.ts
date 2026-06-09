@@ -1,5 +1,11 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+} from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey:     import.meta.env.VITE_FIREBASE_API_KEY,
@@ -13,6 +19,15 @@ export const googleProvider = new GoogleAuthProvider();
 
 export async function signInWithGoogle(): Promise<string> {
   const result = await signInWithPopup(auth, googleProvider);
-  const idToken = await result.user.getIdToken();
-  return idToken;
+  return result.user.getIdToken();
+}
+
+export async function signInWithGoogleRedirect(): Promise<void> {
+  await signInWithRedirect(auth, googleProvider);
+}
+
+export async function getGoogleRedirectResult(): Promise<string | null> {
+  const result = await getRedirectResult(auth);
+  if (!result) return null;
+  return result.user.getIdToken();
 }

@@ -27,7 +27,9 @@ export default function MainLayout() {
 
   return (
     <div className="min-h-screen bg-app-bg flex flex-col">
-      <Navbar />
+      <div className="sticky top-0 z-50 bg-app-bg">
+        <Navbar />
+      </div>
       <main className="flex-1">
         <Outlet />
       </main>

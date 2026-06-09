@@ -1,4 +1,5 @@
 import { Heart } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import Avatar from '@/components/ui/common/Avatar';
 
 const RANK_COLORS: Record<number, string> = {
@@ -9,9 +10,12 @@ const RANK_COLORS: Record<number, string> = {
 
 const styles = {
   card:     'bg-surface border-[1.5px] border-border rounded-card p-4',
-  title:    'text-sm font-normal text-text-main mb-3',
+  header:   'mb-3 flex items-center justify-between gap-2',
+  title:    'text-sm font-normal text-text-main',
+  viewMore: 'text-[11px] font-medium text-primary hover:text-primary-dark hover:underline underline-offset-2',
   row:      'flex items-center gap-2 py-2 border-b border-border last:border-0',
   hearts:   'ml-auto flex items-center gap-1 text-xs text-text-secondary',
+  link:     'flex items-center gap-2 min-w-0 flex-1',
 };
 
 interface LeaderboardEntry {
@@ -23,12 +27,20 @@ interface LeaderboardEntry {
 
 interface Props {
   entries: LeaderboardEntry[];
+  onViewMore?: () => void;
 }
 
-export default function ReputationLeaderboard({ entries }: Props) {
+export default function ReputationLeaderboard({ entries, onViewMore }: Props) {
   return (
     <div className={styles.card}>
-      <p className={styles.title}>Reputation Leaderboard</p>
+      <div className={styles.header}>
+        <p className={styles.title}>Reputation Leaderboard</p>
+        {onViewMore && (
+          <button type="button" className={styles.viewMore} onClick={onViewMore}>
+            View more
+          </button>
+        )}
+      </div>
       {entries.map(e => (
         <div key={e.rank} className={styles.row}>
           <span
@@ -37,8 +49,10 @@ export default function ReputationLeaderboard({ entries }: Props) {
           >
             {e.rank}
           </span>
-          <Avatar username={e.user} src={e.avatar} size="sm" />
-          <span className="text-xs text-text-main ml-1">{e.user}</span>
+          <Link to={`/profile/${e.user}`} className={styles.link}>
+            <Avatar username={e.user} src={e.avatar} size="sm" />
+            <span className="text-xs text-text-main truncate">{e.user}</span>
+          </Link>
           <span className={styles.hearts}>
             <Heart size={12} fill="#FF9E00" className="text-primary" />
             {e.hearts}

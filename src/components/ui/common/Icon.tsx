@@ -1,4 +1,4 @@
-import { BookOpen, MessageCircleQuestionIcon } from "lucide-react";
+import { BookOpen, MessageCircleQuestionIcon, Shield } from "lucide-react";
 
 interface Props {
     iconName: string,
@@ -10,6 +10,8 @@ function setIcon(iconName: string, size: number) {
         return <BookOpen size={size}/>
     } else if (iconName === 'Question') {
         return <MessageCircleQuestionIcon size={size} />
+    } else if (iconName === 'Shield') {
+        return <Shield size={size} />
     }
 }
 

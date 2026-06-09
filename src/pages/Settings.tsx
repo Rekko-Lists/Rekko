@@ -7,6 +7,8 @@ import type { SocialLink } from '@/lib/authService';
 import { extractApiError } from '@/lib/apiErrors';
 import { logger } from '@/lib/logger';
 import ImageUploadModal from '@/components/ui/profile/ImageUploadModal';
+import Seo from '@/components/seo/Seo';
+import { seoPages } from '@/components/seo/pages';
 
 const PLATFORMS = ['twitter', 'instagram', 'github', 'youtube', 'twitch', 'linkedin', 'discord', 'tiktok'];
 
@@ -64,6 +66,9 @@ export default function Settings() {
   // Email verification
   const [verifyMsg, setVerifyMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
+  // Password reset
+  const [passwordMsg, setPasswordMsg] = useState<{ text: string; ok: boolean } | null>(null);
+
   // Profile image upload modal
   const [avatarModalOpen, setAvatarModalOpen] = useState(false);
 
@@ -73,8 +78,9 @@ export default function Settings() {
     authService.getUserProfile(user.username)
       .then(data => {
         setBio(data.biography ?? '');
-        if (data.socialAccounts?.length) {
-          setLinks(data.socialAccounts.map(sa => ({ name: sa.socialAccount.name, url: sa.socialUrl })));
+        const accounts = data.socialAccounts ?? data.userSocialAccount;
+        if (accounts?.length) {
+          setLinks(accounts.map(sa => ({ name: sa.name, url: sa.url })));
         }
         // Refresh emailVerified and profileImage from the server
         setUser({ ...user, emailVerified: data.emailVerified, profileImage: data.profileImage ?? user.profileImage });
@@ -130,6 +136,16 @@ export default function Settings() {
     }
   }
 
+  async function handleForgotPassword() {
+    if (!user) return;
+    try {
+      await authService.forgotPassword(user.username);
+      setPasswordMsg({ text: 'Password reset email sent to your email address.', ok: true });
+    } catch {
+      setPasswordMsg({ text: 'Failed to send reset email. Please try again.', ok: false });
+    }
+  }
+
   async function handleVerifyEmail() {
     if (!user) return;
     try {
@@ -142,6 +158,12 @@ export default function Settings() {
 
   return (
     <div className={styles.page}>
+      <Seo
+        title={seoPages.settings.title}
+        description={seoPages.settings.description}
+        canonicalPath={seoPages.settings.path}
+        noindex={seoPages.settings.noindex}
+      />
       {/* Sidebar */}
       <aside className={styles.sidebar}>
         <button className={section === 'general' ? styles.sideActive : styles.sideItem} onClick={() => setSection('general')}>
@@ -304,11 +326,18 @@ export default function Settings() {
                 )}
               </div>
 
-              {/* Password — TODO: implement change password flow */}
+              {/* Password — sends a reset email */}
               <div className={styles.secRow}>
                 <span>Password</span>
-                <span className="text-sm text-text-muted cursor-not-allowed">Change (coming soon)</span>
+                <button className={styles.changeBtn} onClick={handleForgotPassword}>
+                  Send reset email
+                </button>
               </div>
+              {passwordMsg && (
+                <p className={`${styles.feedback} px-4 ${passwordMsg.ok ? styles.ok : styles.err}`}>
+                  {passwordMsg.text}
+                </p>
+              )}
             </div>
           )}
 
