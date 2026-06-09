@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import Button from '@/components/ui/common/Button';
 import { authService, decodeJwtUserId } from '@/lib/authService';
-import { signInWithGoogle } from '@/lib/firebase';
+import { signInWithGoogle, signInWithGoogleRedirect, getGoogleRedirectResult } from '@/lib/firebase';
 import { useAuthStore } from '@/store/useAuthStore';
 import { extractApiError } from '@/lib/apiErrors';
 import { logger } from '@/lib/logger';
@@ -40,6 +40,29 @@ export default function Login() {
 
   const { login } = useAuthStore();
 
+  // Handle returning from Google redirect flow
+  useEffect(() => {
+    async function checkRedirect() {
+      try {
+        const tokenId = await getGoogleRedirectResult();
+        if (!tokenId) return;
+        setLoading(true);
+        const { accessToken, refreshToken } = await authService.loginWithGoogle(tokenId);
+        const userId = decodeJwtUserId(accessToken);
+        const fullUser = await authService.getUserById(userId);
+        login(fullUser, accessToken, refreshToken, remember);
+        navigate('/feed');
+      } catch (err: unknown) {
+        logger.error('Google redirect result error', err);
+        setError(extractApiError(err, 'Google sign-in failed. Please try again.'));
+      } finally {
+        setLoading(false);
+      }
+    }
+    checkRedirect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
@@ -57,26 +80,30 @@ export default function Login() {
   }
 
   async function handleGoogleLogin() {
-    let tokenId: string;
+    setError('');
+    setLoading(true);
     try {
-      tokenId = await signInWithGoogle();
-      logger.info('Google OAuth: Firebase token obtained');
-    } catch (err: unknown) {
-      const code = (err as { code?: string })?.code;
-      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return;
-      setError('Google sign-in popup failed. Check your Firebase config.');
-      return;
-    }
-    try {
+      const tokenId = await signInWithGoogle();
+      logger.info('Google OAuth: Firebase token obtained via popup');
       const { accessToken, refreshToken } = await authService.loginWithGoogle(tokenId);
       const userId = decodeJwtUserId(accessToken);
-      logger.info('Google OAuth: userId decoded', userId);
       const fullUser = await authService.getUserById(userId);
       login(fullUser, accessToken, refreshToken, remember);
       navigate('/feed');
     } catch (err: unknown) {
-      logger.error('Google OAuth error', err);
-      setError(extractApiError(err, 'Google sign-in failed. Please try again in a moment.'));
+      const code = (err as { code?: string })?.code;
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+        setLoading(false);
+        return;
+      }
+      if (code === 'auth/popup-blocked') {
+        logger.info('Google OAuth: popup blocked, falling back to redirect');
+        await signInWithGoogleRedirect(); // navigates away; result handled on return
+        return;
+      }
+      logger.error('Google OAuth popup error', err);
+      setError(extractApiError(err, 'Google sign-in failed. Please try again.'));
+      setLoading(false);
     }
   }
 
