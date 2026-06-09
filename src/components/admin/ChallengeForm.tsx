@@ -20,31 +20,26 @@ interface ChallengeFormProps {
 }
 
 const styles = {
-  form: 'flex flex-col gap-4 p-4 border border-border rounded-card bg-surface',
-  formTitle: 'font-semibold text-text-main font-gabarito',
-  fieldGroup: 'flex flex-col gap-1',
-  label: 'text-sm font-medium text-text-main',
-  labelBlock: 'text-sm font-medium text-text-main block mb-1',
-  labelMuted: 'text-text-muted text-xs',
-  select:
-    'border border-border rounded-btn px-3 h-[42px] bg-surface text-text-main text-sm focus:outline-none focus:border-primary transition-colors w-full max-w-xs',
-  input:
-    'border border-border rounded-btn px-3 h-[42px] bg-surface text-text-main text-sm focus:outline-none focus:border-primary transition-colors w-full max-w-xs',
-  fileInput:
-    'border border-border rounded-btn px-3 py-2 bg-surface text-sm text-text-secondary w-full max-w-xs file:mr-3 file:text-sm file:rounded-btn file:border-0 file:bg-primary/10 file:text-primary file:px-3 file:py-1.5 file:font-medium hover:file:bg-primary/20',
-  emojiRow: 'flex items-center gap-2',
-  emojiLabel: 'text-sm font-medium text-text-main w-16',
-  emojiInput:
-    'w-12 h-12 border border-border rounded-btn text-center text-2xl bg-surface focus:outline-none focus:border-primary',
-  animeSection: 'flex flex-col gap-3',
-  openingSection: 'flex flex-col gap-3',
-  emojiSection: 'flex flex-col gap-2',
-  fileBlock: 'flex flex-col gap-1',
-  alertError:
-    'rounded-card border border-status-red/30 bg-status-red/5 px-4 py-3 text-sm text-status-red',
-  submitRow: 'flex gap-2',
-  btnPrimary:
-    'inline-flex items-center gap-1 bg-primary text-white px-4 py-2 rounded-btn text-sm font-medium hover:bg-primary-dark transition-colors disabled:opacity-60',
+  form:          'flex flex-col gap-5 p-6 border border-border rounded-card bg-surface shadow-card',
+  formTitle:     'text-lg font-semibold text-text-main leading-none',
+  divider:       'border-t border-border-light',
+  fieldGroup:    'flex flex-col gap-1.5',
+  label:         'text-sm font-medium text-text-main',
+  labelBlock:    'text-sm font-medium text-text-main block mb-1',
+  labelMuted:    'text-text-muted text-xs ml-1',
+  select:        'border border-border rounded-btn px-3 h-[42px] bg-app-bg text-text-main text-sm focus:outline-none focus:border-primary transition-colors w-full max-w-xs shadow-input',
+  input:         'border border-border rounded-btn px-3 h-[42px] bg-app-bg text-text-main text-sm focus:outline-none focus:border-primary transition-colors w-full max-w-xs shadow-input',
+  fileInput:     'border border-border rounded-btn px-3 py-2 bg-app-bg text-sm text-text-secondary w-full max-w-xs file:mr-3 file:text-sm file:rounded-btn file:border-0 file:bg-primary/10 file:text-primary file:px-3 file:py-1.5 file:font-medium hover:file:bg-primary/20',
+  emojiRow:      'flex items-center gap-2',
+  emojiLabel:    'text-sm font-medium text-text-main w-16',
+  emojiInput:    'w-12 h-12 border border-border rounded-btn text-center text-2xl bg-app-bg focus:outline-none focus:border-primary shadow-input',
+  animeSection:  'flex flex-col gap-4',
+  openingSection:'flex flex-col gap-4',
+  emojiSection:  'flex flex-col gap-2',
+  fileBlock:     'flex flex-col gap-1',
+  alertError:    'rounded-card border border-status-red/30 bg-status-red/5 px-4 py-3 text-sm text-status-red',
+  submitRow:     'flex gap-2 pt-1',
+  btnCta:        'inline-flex items-center gap-2 bg-gradient-to-b from-grad-start to-grad-end text-white px-5 h-[42px] rounded-btn text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-60',
 };
 
 export default function ChallengeForm({
@@ -150,6 +145,8 @@ export default function ChallengeForm({
       <h3 className={styles.formTitle}>
         {isEdit ? 'Editar challenge' : 'Nuevo challenge'}
       </h3>
+
+      <div className={styles.divider} />
 
       {/* Type selector */}
       <div className={styles.fieldGroup}>
@@ -282,7 +279,6 @@ export default function ChallengeForm({
                   setEmojis(updated);
                 }}
                 className={styles.emojiInput}
-                placeholder="😀"
                 maxLength={8}
               />
             </div>
@@ -297,7 +293,7 @@ export default function ChallengeForm({
       )}
 
       <div className={styles.submitRow}>
-        <button type="submit" disabled={loading} className={styles.btnPrimary}>
+        <button type="submit" disabled={loading} className={styles.btnCta}>
           {loading && <Spinner size="sm" variant="white" className="mr-1" />}
           {loading ? 'Guardando...' : isEdit ? 'Actualizar' : 'Crear'}
         </button>

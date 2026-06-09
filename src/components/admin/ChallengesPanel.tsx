@@ -24,35 +24,29 @@ function getLocalDateString(): string {
 }
 
 const styles = {
-  root: 'p-6 max-w-3xl',
-  heading: 'text-2xl font-bold text-text-main font-gabarito mb-2',
-  description: 'text-text-muted mb-6',
-  dateRow: 'flex items-center gap-4 mb-6',
-  label: 'text-text-main font-medium',
-  inputDate:
-    'border border-border rounded-btn px-3 h-[42px] bg-surface text-text-main text-sm focus:outline-none focus:border-primary transition-colors',
-  btnPrimary:
-    'inline-flex items-center gap-1 bg-primary text-white px-4 py-2 rounded-btn text-sm font-medium hover:bg-primary-dark transition-colors disabled:opacity-60',
-  alertError:
-    'mb-4 rounded-card border border-status-red/30 bg-status-red/5 px-4 py-3 text-sm text-status-red',
-  alertSuccess:
-    'mb-4 rounded-card border border-status-green/30 bg-status-green/5 px-4 py-3 text-sm text-status-green',
-  challengeList: 'flex flex-col gap-4 mb-6',
-  challengeCard: 'border border-border rounded-card p-4 bg-surface',
+  root:           'px-8 py-8 max-w-3xl',
+  titleRow:       'flex items-baseline gap-3 mb-1',
+  title:          'text-[32px] font-semibold text-text-main leading-none',
+  titleDash:      'text-[24px] font-semibold text-text-secondary leading-none',
+  description:    'text-sm text-text-muted mt-2 mb-6',
+  dateRow:        'flex items-center gap-4 mb-6',
+  label:          'text-sm font-medium text-text-main',
+  inputDate:      'border border-border rounded-btn px-3 h-[42px] bg-app-bg text-text-main text-sm focus:outline-none focus:border-primary transition-colors shadow-input',
+  btnCta:         'inline-flex items-center gap-2 bg-gradient-to-b from-grad-start to-grad-end text-white px-5 h-[42px] rounded-btn text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-60',
+  alertError:     'mb-4 rounded-card border border-status-red/30 bg-status-red/5 px-4 py-3 text-sm text-status-red',
+  alertSuccess:   'mb-4 rounded-card border border-status-green/30 bg-status-green/5 px-4 py-3 text-sm text-status-green',
+  challengeList:  'flex flex-col gap-3 mb-6',
+  challengeCard:  'border border-border rounded-card p-4 bg-surface shadow-card',
   challengeCardInner: 'flex items-center justify-between',
-  challengeLeft: 'flex items-center gap-3',
-  badge: 'bg-primary/10 text-primary text-xs font-medium px-2 py-0.5 rounded-pill',
-  challengeName: 'text-text-main text-sm font-medium',
-  btnOutlineSm:
-    'border border-border text-text-secondary px-3 py-1.5 text-sm rounded-btn hover:border-primary hover:text-primary transition-colors',
-  btnGhostSm:
-    'text-text-muted hover:text-text-main px-3 py-1.5 text-sm transition-colors rounded-btn mt-2',
-  noChallenge: 'text-text-muted mb-4',
-  actionsRow: 'flex gap-3 mb-6 flex-wrap',
-  btnOutlinePrimary:
-    'border border-primary text-primary px-4 py-2 rounded-btn text-sm font-medium hover:bg-primary/10 transition-colors',
-  btnDanger:
-    'border border-status-red text-status-red px-4 py-2 rounded-btn text-sm font-medium hover:bg-status-red/10 transition-colors',
+  challengeLeft:  'flex items-center gap-3',
+  badge:          'bg-primary/10 text-primary text-xs font-semibold px-2.5 py-0.5 rounded-pill',
+  challengeName:  'text-text-main text-sm font-medium',
+  btnOutlineSm:   'border border-border text-text-secondary px-3 py-1.5 text-xs rounded-btn hover:border-primary hover:text-primary transition-colors',
+  btnGhostSm:     'text-text-muted hover:text-text-main px-3 py-1.5 text-sm transition-colors rounded-btn mt-2',
+  noChallenge:    'text-text-muted mb-4',
+  actionsRow:     'flex gap-3 mb-6 flex-wrap',
+  btnOutlinePrimary: 'inline-flex items-center gap-1.5 border border-primary text-primary px-4 h-[38px] rounded-btn text-sm font-medium hover:bg-primary/10 transition-colors',
+  btnDanger:      'inline-flex items-center gap-1.5 border border-status-red text-status-red px-4 h-[38px] rounded-btn text-sm font-medium hover:bg-status-red/10 transition-colors',
 };
 
 const typeLabels: Record<ChallengeType, string> = {
@@ -141,8 +135,11 @@ export default function ChallengesPanel() {
 
   return (
     <div className={styles.root}>
-      <h2 className={styles.heading}>Challenges diarios</h2>
-      <p className={styles.description}>Gestiona los challenges de cada fecha.</p>
+      <div className={styles.titleRow}>
+        <h2 className={styles.title}>Challenges</h2>
+        <span className={styles.titleDash}>— Diarios</span>
+      </div>
+      <p className={styles.description}>Gestiona los challenges de Animedle para cada fecha.</p>
 
       {/* Date picker + load */}
       <div className={styles.dateRow}>
@@ -159,7 +156,7 @@ export default function ChallengesPanel() {
           }}
           className={styles.inputDate}
         />
-        <button onClick={loadChallenges} disabled={loading} className={styles.btnPrimary}>
+        <button onClick={loadChallenges} disabled={loading} className={styles.btnCta}>
           {loading && <Spinner size="sm" variant="white" className="mr-1" />}
           {loading ? 'Cargando...' : 'Cargar challenges'}
         </button>
