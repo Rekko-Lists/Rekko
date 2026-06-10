@@ -15,7 +15,7 @@ const MAX_SECTION_RESULTS = 6;
 const MIN_QUERY_LENGTH = 3;
 
 const styles = {
-  wrapper: "relative w-[380px] font-gabarito",
+  wrapper: "relative w-full max-w-[380px] mx-auto font-gabarito",
   form: "relative",
   input:
     "w-full h-[40px] pl-4 pr-10 bg-[rgba(246,246,246,0.6)] border-[1.5px] border-border rounded-pill text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-primary transition-colors",

@@ -32,7 +32,7 @@ const rankStyles = {
 } as const;
 
 const styles = {
-  wrap: "relative mx-auto mb-12 grid min-h-[330px] w-full max-w-[850px] grid-cols-3 items-end gap-5 pt-14",
+  wrap: "relative mx-auto mb-12 grid min-h-[330px] w-full max-w-[850px] grid-cols-3 items-end gap-2 pt-14 sm:gap-5",
   spot: "leaderboard-pop relative flex flex-col items-center text-center transition-transform hover:-translate-y-2",
   avatar: "absolute -top-10 z-20 rounded-full ring-4 ring-white",
   icon: "absolute -top-[78px] z-30",

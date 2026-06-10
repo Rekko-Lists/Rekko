@@ -8,14 +8,15 @@ type Tab = 'seed' | 'challenges';
 
 const styles = {
   root:        'min-h-screen bg-app-bg font-gabarito',
-  inner:       'flex min-h-screen mx-[6%]',
-  sidebar:     'w-[220px] flex-shrink-0 bg-surface border-r border-border flex flex-col',
-  sidebarTop:  'px-5 py-5 border-b border-border flex flex-col gap-1',
+  // Movil: sidebar pasa a ser una barra superior con tabs horizontales
+  inner:       'flex min-h-screen flex-col mx-0 md:flex-row md:mx-[6%]',
+  sidebar:     'w-full flex-shrink-0 bg-surface border-b border-border flex flex-col md:w-[220px] md:border-b-0 md:border-r',
+  sidebarTop:  'px-5 py-4 border-b border-border flex items-center gap-2 md:py-5 md:flex-col md:items-start md:gap-1',
   logo:        'h-7 object-contain self-start',
-  sidebarLabel:'text-[11px] font-semibold text-text-muted uppercase tracking-wider mt-0.5',
-  nav:         'flex-1 px-3 py-4 flex flex-col gap-1',
-  tabActive:   'flex items-center gap-3 px-3 py-2.5 rounded-btn text-sm font-semibold transition-all bg-primary/10 text-primary border-l-[3px] border-primary',
-  tabInactive: 'flex items-center gap-3 px-3 py-2.5 rounded-btn text-sm font-medium transition-all text-text-secondary hover:text-text-main hover:bg-app-bg border-l-[3px] border-transparent',
+  sidebarLabel:'text-[11px] font-semibold text-text-muted uppercase tracking-wider md:mt-0.5',
+  nav:         'flex flex-row gap-1 px-3 py-2 overflow-x-auto md:flex-1 md:flex-col md:py-4',
+  tabActive:   'flex flex-shrink-0 items-center gap-3 px-3 py-2.5 rounded-btn text-sm font-semibold transition-all bg-primary/10 text-primary border-l-[3px] border-primary whitespace-nowrap',
+  tabInactive: 'flex flex-shrink-0 items-center gap-3 px-3 py-2.5 rounded-btn text-sm font-medium transition-all text-text-secondary hover:text-text-main hover:bg-app-bg border-l-[3px] border-transparent whitespace-nowrap',
   main:        'flex-1 overflow-y-auto',
 };
 

@@ -19,14 +19,14 @@ export default function EmailStatusPage() {
   const info = MESSAGES[status] ?? MESSAGES['invalid'];
 
   return (
-    <div className="min-h-screen bg-app-bg flex items-center justify-center font-gabarito">
+    <div className="min-h-screen bg-app-bg flex items-center justify-center font-gabarito px-4">
       <Seo
         title={`${seoPages.emailStatus.title}: ${info.title}`}
         description={info.body || seoPages.emailStatus.description}
         canonicalPath={seoPages.emailStatus.path}
         noindex={seoPages.emailStatus.noindex}
       />
-      <div className="bg-surface w-[380px] rounded-[10px] shadow-card px-10 py-10 flex flex-col items-center gap-4 text-center">
+      <div className="bg-surface w-full max-w-[380px] rounded-[10px] shadow-card px-6 py-8 flex flex-col items-center gap-4 text-center sm:px-10 sm:py-10">
         {info.ok
           ? <CheckCircle size={48} className="text-status-green" />
           : <XCircle size={48} className="text-status-red" />

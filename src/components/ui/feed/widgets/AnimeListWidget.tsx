@@ -8,6 +8,8 @@ interface Props {
   load: (signal?: AbortSignal) => Promise<Anime[]>;
   onViewMore?: () => void;
   showBroadcastTime?: boolean;
+  /** Mobile in-feed mode: render without card background/border. */
+  flat?: boolean;
 }
 
 const styles = {
@@ -46,7 +48,7 @@ function formatJstTimeToLocal(value?: string): string | null {
   return `${time} ${timezone}`;
 }
 
-export default function AnimeListWidget({ title, load, onViewMore, showBroadcastTime = false }: Props) {
+export default function AnimeListWidget({ title, load, onViewMore, showBroadcastTime = false, flat = false }: Props) {
   const navigate = useNavigate();
   const [animes, setAnimes] = useState<Anime[]>([]);
 
@@ -64,7 +66,7 @@ export default function AnimeListWidget({ title, load, onViewMore, showBroadcast
   }, [load]);
 
   return (
-    <FeedWidgetCard title={title} onViewMore={onViewMore}>
+    <FeedWidgetCard title={title} onViewMore={onViewMore} flat={flat}>
       {animes.length === 0 ? (
         <p className={styles.empty}>No animes found.</p>
       ) : (

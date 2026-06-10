@@ -13,26 +13,27 @@ import { seoPages } from '@/components/seo/pages';
 const PLATFORMS = ['twitter', 'instagram', 'github', 'youtube', 'twitch', 'linkedin', 'discord', 'tiktok'];
 
 const styles = {
-  page:        'flex font-gabarito min-h-full',
-  sidebar:     'w-[230px] flex-shrink-0 border-r-[1.5px] border-border py-8 px-6 flex flex-col gap-4',
-  sideItem:    'flex items-center gap-2 text-sm cursor-pointer text-text-secondary hover:text-text-main transition-colors',
-  sideActive:  'flex items-center gap-2 text-sm cursor-pointer text-text-main font-semibold',
-  content:     'flex-1 px-10 py-8 flex gap-10',
+  // Movil: sidebar pasa a ser una barra horizontal superior; avatar baja al final
+  page:        'flex flex-col font-gabarito min-h-full md:flex-row',
+  sidebar:     'w-full flex-shrink-0 border-b-[1.5px] border-border py-3 px-4 flex flex-row gap-5 overflow-x-auto md:w-[230px] md:flex-col md:gap-4 md:border-b-0 md:border-r-[1.5px] md:py-8 md:px-6',
+  sideItem:    'flex flex-shrink-0 items-center gap-2 text-sm cursor-pointer text-text-secondary hover:text-text-main transition-colors whitespace-nowrap',
+  sideActive:  'flex flex-shrink-0 items-center gap-2 text-sm cursor-pointer text-text-main font-semibold whitespace-nowrap',
+  content:     'flex-1 px-4 py-6 flex flex-col-reverse gap-8 md:px-10 md:py-8 lg:flex-row lg:gap-10',
   mainCol:     'flex-1 flex flex-col gap-8 min-w-0',
   section:     'flex flex-col gap-4',
-  sectionHead: 'text-[28px] font-semibold text-text-main border-b-2 border-primary pb-1 w-fit',
+  sectionHead: 'text-[24px] font-semibold text-text-main border-b-2 border-primary pb-1 w-fit md:text-[28px]',
   label:       'text-sm font-semibold text-text-main',
   sublabel:    'text-xs text-text-muted',
-  input:       'w-[153px] h-[32px] border border-border rounded-[5px] px-3 text-sm text-text-main bg-surface focus:outline-none focus:border-text-secondary',
-  inputMd:     'w-[260px] h-[32px] border border-border rounded-[5px] px-3 text-sm text-text-main bg-surface focus:outline-none focus:border-text-secondary',
-  textarea:    'w-[243px] h-[110px] border border-border rounded-[5px] px-3 py-2 text-sm text-text-main bg-surface resize-none focus:outline-none focus:border-text-secondary placeholder:text-text-muted',
+  input:       'w-full max-w-[200px] h-[32px] border border-border rounded-[5px] px-3 text-sm text-text-main bg-surface focus:outline-none focus:border-text-secondary',
+  inputMd:     'w-full max-w-[260px] h-[32px] border border-border rounded-[5px] px-3 text-sm text-text-main bg-surface focus:outline-none focus:border-text-secondary',
+  textarea:    'w-full max-w-[400px] h-[110px] border border-border rounded-[5px] px-3 py-2 text-sm text-text-main bg-surface resize-none focus:outline-none focus:border-text-secondary placeholder:text-text-muted',
   linkInput:   'flex-1 h-[28px] border border-border rounded-[5px] px-3 text-sm text-text-main bg-surface focus:outline-none',
   selectSmall: 'h-[28px] border border-border rounded-[5px] px-2 text-sm text-text-main bg-surface focus:outline-none capitalize',
   addLink:     'text-sm text-primary cursor-pointer hover:underline',
   secRow:      'border border-border rounded-[5px] px-4 py-3 flex items-center justify-between text-sm text-text-main',
   changeBtn:   'text-sm text-primary cursor-pointer hover:underline',
-  avatarCol:   'flex flex-col items-center gap-3',
-  avatarCirc:  'w-[174px] h-[174px] rounded-full bg-border-light overflow-hidden',
+  avatarCol:   'flex flex-col items-center gap-3 lg:items-center',
+  avatarCirc:  'w-[140px] h-[140px] rounded-full bg-border-light overflow-hidden md:w-[174px] md:h-[174px]',
   editBtn:     'flex items-center gap-1 text-sm cursor-pointer text-text-secondary hover:text-primary transition-colors border border-border rounded-[5px] px-3 py-1',
   feedback:    'text-xs mt-1',
   ok:          'text-status-green',
@@ -189,7 +190,7 @@ export default function Settings() {
                   <span className={styles.label}>Change Username</span>
                   <span className={styles.sublabel}>Current: @{user?.username}</span>
                   {usernameOpen ? (
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
                       <input
                         className={styles.input}
                         placeholder="New username"
@@ -308,7 +309,7 @@ export default function Settings() {
                   </button>
                 </div>
                 {emailOpen && (
-                  <div className="flex items-center gap-2 px-4 pb-2">
+                  <div className="flex items-center gap-2 px-4 pb-2 flex-wrap">
                     <input
                       className={styles.inputMd}
                       type="email"

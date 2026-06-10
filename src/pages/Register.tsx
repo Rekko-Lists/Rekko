@@ -8,8 +8,8 @@ import Seo from '@/components/seo/Seo';
 import { seoPages } from '@/components/seo/pages';
 
 const styles = {
-  page:      'min-h-screen bg-app-bg flex items-center justify-center font-gabarito',
-  card:      'bg-surface w-[400px] rounded-[10px] shadow-card px-12 py-10 flex flex-col gap-3',
+  page:      'min-h-screen bg-app-bg flex items-center justify-center font-gabarito px-4',
+  card:      'bg-surface w-full max-w-[400px] rounded-[10px] shadow-card px-6 py-8 flex flex-col gap-3 sm:px-12 sm:py-10',
   title:     'text-[32px] font-normal text-text-main text-center mb-0',
   input:     'w-full h-[42px] rounded-btn border border-border bg-[rgba(246,246,246,0.6)] shadow-input px-3 text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-text-secondary',
   error:     'text-xs text-status-red text-center -mt-1',

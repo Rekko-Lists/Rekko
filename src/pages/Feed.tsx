@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
+import { useIsMobile } from "@/hooks/useMediaQuery";
 import PostCard from "@/components/ui/feed/PostCard";
 import AnimeNewsCard from "@/components/ui/feed/AnimeNewsCard";
 import ReputationLeaderboard from "@/components/ui/feed/ReputationLeaderboard";
@@ -40,6 +41,8 @@ import {
 
 const FEED_LIMIT = 10;
 const NEWS_FALLBACK_MAL_IDS = [52991, 5114, 9253, 30276];
+// On mobile a widget is interleaved into the feed after every N posts (Reddit-style)
+const MOBILE_WIDGET_EVERY = 3;
 
 const SITE_LINKS: SiteLinkItem[] = [
   {
@@ -76,6 +79,7 @@ const styles = {
 
 export default function Feed() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const posts = useFeedStore((s) => s.posts);
   const loading = useFeedStore((s) => s.loading);
   const hasMore = useFeedStore((s) => s.hasMore);
@@ -295,6 +299,62 @@ export default function Feed() {
     }
   }
 
+  // Mobile: widgets interleaved between posts (Reddit-style), rendered "flat"
+  // (no card bg/border — content floats on the page background).
+  const mobileWidgets: { key: string; node: ReactNode }[] = [];
+  if (isMobile) {
+    if (news.length > 0) {
+      mobileWidgets.push({ key: "news", node: <AnimeNewsCard items={news} flat /> });
+    }
+    if (randomWidgets[0]) {
+      const { key, ...props } = randomWidgets[0];
+      mobileWidgets.push({ key, node: <AnimeListWidget {...props} flat /> });
+    }
+    if (leaderboard.length > 0) {
+      mobileWidgets.push({
+        key: "leaderboard",
+        node: (
+          <ReputationLeaderboard
+            entries={leaderboard}
+            onViewMore={() => navigate("/leaderboard")}
+            flat
+          />
+        ),
+      });
+    }
+    if (recommendations.length > 0) {
+      mobileWidgets.push({
+        key: "recommendations",
+        node: <PopularRecommendationsCard items={recommendations} flat />,
+      });
+    }
+    if (randomWidgets[1]) {
+      const { key, ...props } = randomWidgets[1];
+      mobileWidgets.push({ key, node: <AnimeListWidget {...props} flat /> });
+    }
+  }
+
+  const mobileFeedItems: ReactNode[] = [];
+  if (isMobile) {
+    let widgetIndex = 0;
+    posts.forEach((post, index) => {
+      mobileFeedItems.push(
+        <PostCard key={post.id} post={post} onLike={handleLike} onDelete={handleDelete} />,
+      );
+      if ((index + 1) % MOBILE_WIDGET_EVERY === 0 && widgetIndex < mobileWidgets.length) {
+        const widget = mobileWidgets[widgetIndex];
+        widgetIndex += 1;
+        mobileFeedItems.push(<div key={`widget-${widget.key}`}>{widget.node}</div>);
+      }
+    });
+    // Con pocos posts no se alcanza el primer intervalo — mete al menos un widget
+    if (posts.length > 0 && posts.length < MOBILE_WIDGET_EVERY && mobileWidgets.length > 0) {
+      mobileFeedItems.push(
+        <div key={`widget-${mobileWidgets[0].key}`}>{mobileWidgets[0].node}</div>,
+      );
+    }
+  }
+
   return (
     <div className={styles.page}>
       <Seo
@@ -321,42 +381,57 @@ export default function Feed() {
           ),
         ]}
       />
-      <aside className={styles.sidebar}>
-        <AnimeNewsCard items={news} />
-        {randomWidgets[0] && (() => {
-          const { key, ...props } = randomWidgets[0];
-          return <AnimeListWidget key={key} {...props} />;
-        })()}
-        <SiteLinks items={user?.role === 'ADMIN' ? [...SITE_LINKS, ADMIN_LINK] : SITE_LINKS} />
-      </aside>
+      {!isMobile && (
+        <>
+          <aside className={styles.sidebar}>
+            <AnimeNewsCard items={news} />
+            {randomWidgets[0] && (() => {
+              const { key, ...props } = randomWidgets[0];
+              return <AnimeListWidget key={key} {...props} />;
+            })()}
+            <SiteLinks items={user?.role === 'ADMIN' ? [...SITE_LINKS, ADMIN_LINK] : SITE_LINKS} />
+          </aside>
 
-      <div className={styles.divider} />
+          <div className={styles.divider} />
+        </>
+      )}
 
       <main className={styles.center}>
         {error && <p className={styles.error}>{error}</p>}
-        {posts.map((post) => (
-          <PostCard key={post.id} post={post} onLike={handleLike} onDelete={handleDelete} />
-        ))}
+        {isMobile
+          ? mobileFeedItems
+          : posts.map((post) => (
+              <PostCard key={post.id} post={post} onLike={handleLike} onDelete={handleDelete} />
+            ))}
         {loading && <p className={styles.state}>Loading posts...</p>}
         {!loading && posts.length === 0 && !error && (
           <p className={styles.state}>No posts yet.</p>
         )}
         {!error && <div ref={sentinelRef} />}
+        {isMobile && (
+          <div className="px-1 pb-2">
+            <SiteLinks items={user?.role === 'ADMIN' ? [...SITE_LINKS, ADMIN_LINK] : SITE_LINKS} />
+          </div>
+        )}
       </main>
 
-      <div className={styles.divider} />
+      {!isMobile && (
+        <>
+          <div className={styles.divider} />
 
-      <aside className={styles.sidebar}>
-        <ReputationLeaderboard
-          entries={leaderboard}
-          onViewMore={() => navigate("/leaderboard")}
-        />
-        <PopularRecommendationsCard items={recommendations} />
-        {randomWidgets[1] && (() => {
-          const { key, ...props } = randomWidgets[1];
-          return <AnimeListWidget key={key} {...props} />;
-        })()}
-      </aside>
+          <aside className={styles.sidebar}>
+            <ReputationLeaderboard
+              entries={leaderboard}
+              onViewMore={() => navigate("/leaderboard")}
+            />
+            <PopularRecommendationsCard items={recommendations} />
+            {randomWidgets[1] && (() => {
+              const { key, ...props } = randomWidgets[1];
+              return <AnimeListWidget key={key} {...props} />;
+            })()}
+          </aside>
+        </>
+      )}
     </div>
   );
 }

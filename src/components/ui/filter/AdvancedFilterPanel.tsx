@@ -29,7 +29,8 @@ const TYPES          = ['TV', 'Movie', 'OVA', 'ONA', 'Special'];
 const VISIBLE_GENRES = 12;
 
 const styles = {
-  panel:    'w-[461px] min-h-[569px] flex-shrink-0 bg-surface border-[1.5px] border-border rounded-card px-6 py-8 h-fit font-gabarito self-start mt-4 sticky top-[180px]',
+  // Movil: bottom sheet fijo sobre la pagina. Desktop (md+): panel lateral sticky original.
+  panel:    'fixed inset-x-0 bottom-16 z-40 max-h-[72vh] w-full overflow-y-auto rounded-t-[16px] border-t-[1.5px] border-border bg-surface px-6 py-6 font-gabarito shadow-[0_-6px_24px_rgba(0,0,0,0.18)] md:static md:bottom-auto md:z-auto md:max-h-none md:w-[461px] md:min-h-[569px] md:flex-shrink-0 md:overflow-visible md:rounded-card md:border-[1.5px] md:px-6 md:py-8 md:h-fit md:self-start md:mt-4 md:shadow-none lg:sticky lg:top-[180px]',
   header:   'flex items-center justify-between mb-4',
   title:    'font-semibold text-sm',
   section:  'mb-3',

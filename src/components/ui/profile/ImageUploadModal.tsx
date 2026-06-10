@@ -136,10 +136,10 @@ export default function ImageUploadModal({ type, username, onSuccess, onClose }:
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4"
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="bg-surface rounded-[10px] shadow-card w-[440px] flex flex-col gap-4 p-6 relative font-gabarito">
+      <div className="bg-surface rounded-[10px] shadow-card w-full max-w-[440px] flex flex-col gap-4 p-6 relative font-gabarito">
         <button
           className="absolute top-3 right-3 text-text-muted hover:text-text-main transition-colors"
           onClick={onClose}

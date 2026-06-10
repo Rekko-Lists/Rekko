@@ -14,9 +14,10 @@ interface Props {
 }
 
 const styles = {
-  card:       'flex flex-col font-gabarito cursor-pointer w-[180px] group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-card',
+  card:       'flex flex-col font-gabarito cursor-pointer w-full min-w-0 group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-card',
   poster:     'relative w-full aspect-[175/245] rounded-card overflow-hidden bg-gradient-to-br from-slate-600 to-slate-900',
-  overlay:    'absolute bottom-0 inset-x-0 bg-black/65 flex items-center justify-between px-3 py-4 translate-y-full group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-200',
+  // En tactil (sin hover) el overlay queda siempre visible y mas compacto
+  overlay:    'absolute bottom-0 inset-x-0 bg-black/65 flex items-center justify-between px-2 py-2 sm:px-3 sm:py-4 translate-y-full group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-200 [@media(hover:none)]:translate-y-0 [@media(hover:none)]:opacity-100',
   addBtn:     'text-white text-[11px] font-medium hover:text-primary transition-colors',
   score:      'flex items-center gap-0.5 text-white text-[13px] font-semibold',
   iconRow:    'flex items-center gap-3 mt-2 px-0.5',
