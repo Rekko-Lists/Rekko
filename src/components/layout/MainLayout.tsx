@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
+import BottomNav from './BottomNav';
 import { useAuthStore } from '@/store/useAuthStore';
 import { authService } from '@/lib/authService';
 
@@ -30,9 +31,11 @@ export default function MainLayout() {
       <div className="sticky top-0 z-50 bg-app-bg">
         <Navbar />
       </div>
-      <main className="flex-1">
+      {/* pb on mobile so content isn't hidden behind the fixed bottom nav */}
+      <main className="flex-1 pb-24 lg:pb-0">
         <Outlet />
       </main>
+      <BottomNav />
     </div>
   );
 }

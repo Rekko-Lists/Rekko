@@ -7,7 +7,7 @@ interface Props {
 }
 
 const styles = {
-  card:    'w-[202px] bg-[rgba(246,246,246,0.6)] border border-border rounded-card p-3 font-gabarito text-[13px] text-text-main leading-tight',
+  card:    'w-full max-w-[340px] xl:w-[202px] bg-[rgba(246,246,246,0.6)] border border-border rounded-card p-3 font-gabarito text-[13px] text-text-main leading-tight',
   icon:    'text-text-muted mb-2',
   row:     'mb-1.5 last:mb-0',
   label:   'text-text-main font-medium',

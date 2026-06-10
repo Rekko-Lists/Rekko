@@ -15,11 +15,12 @@ const NEWS_FALLBACK_MAL_IDS = [52991, 5114, 9253, 30276];
 
 const styles = {
   page: "relative mx-auto grid min-h-[calc(100vh-136px)] w-full max-w-[1608px] grid-cols-1 gap-6 overflow-hidden px-4 py-0 font-gabarito lg:grid-cols-[260px_minmax(0,1040px)_260px]",
-  side: "relative z-10 flex flex-col justify-start gap-4 py-6 lg:sticky lg:top-[136px] lg:h-[calc(100vh-136px)] lg:overflow-y-auto",
-  main: "relative z-10 flex min-w-0 items-start py-8",
-  card: "flex w-full flex-col overflow-hidden border-x border-border bg-surface/85 px-6 py-10 shadow-[0_20px_80px_rgba(0,0,0,0.06)]",
+  // Widgets laterales fuera en movil — solo lg+
+  side: "relative z-10 hidden flex-col justify-start gap-4 py-6 lg:flex lg:sticky lg:top-[136px] lg:h-[calc(100vh-136px)] lg:overflow-y-auto",
+  main: "relative z-10 flex min-w-0 items-start py-4 lg:py-8",
+  card: "flex w-full flex-col overflow-hidden border-x border-border bg-surface/85 px-3 py-8 shadow-[0_20px_80px_rgba(0,0,0,0.06)] sm:px-6 lg:py-10",
   eyebrow: "text-center text-xs font-semibold uppercase tracking-[0.32em] text-primary",
-  title: "leaderboard-title mt-2 text-center text-[42px] font-black leading-none text-text-main",
+  title: "leaderboard-title mt-2 text-center text-[30px] font-black leading-none text-text-main md:text-[42px]",
   subtitle: "mx-auto mt-3 max-w-[560px] text-center text-sm text-text-muted",
 };
 

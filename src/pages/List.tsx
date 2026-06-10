@@ -49,18 +49,18 @@ const STATE_ACCENT: Partial<Record<TabFilter, string>> = {
 // ─── Styles ────────────────────────────────────────────────────────────────
 
 const styles = {
-  page:          'px-[6%] py-6 font-gabarito min-h-screen',
+  page:          'px-4 py-6 font-gabarito min-h-screen md:px-[6%]',
   header:        'mb-6',
   titleRow:      'flex items-baseline gap-2 mb-1',
-  title:         'text-[40px] font-semibold text-text-main leading-none',
-  titleDash:     'text-[28px] text-text-secondary font-semibold leading-none',
-  statsRow:      'flex items-center gap-5 mt-3',
+  title:         'text-[28px] font-semibold text-text-main leading-none md:text-[40px]',
+  titleDash:     'text-[22px] text-text-secondary font-semibold leading-none md:text-[28px]',
+  statsRow:      'flex items-center gap-3 mt-3 flex-wrap md:gap-5',
   statItem:      'flex flex-col items-center',
   statCount:     'text-xl font-semibold leading-none',
   statLabel:     'text-[11px] text-text-secondary mt-0.5 whitespace-nowrap',
   divider:       'w-px h-8 bg-border',
   controls:      'flex items-center justify-between gap-4 mb-5 flex-wrap',
-  tabRow:        'flex items-center border-b border-border',
+  tabRow:        'flex items-center border-b border-border overflow-x-auto whitespace-nowrap max-w-full [-webkit-overflow-scrolling:touch]',
   tabBtn:        'relative pb-2 px-3 text-sm whitespace-nowrap transition-colors flex items-center gap-1.5 text-text-secondary hover:text-text-main',
   tabBtnActive:  'relative pb-2 px-3 text-sm whitespace-nowrap transition-colors flex items-center gap-1.5 font-semibold text-text-main',
   tabUnderline:  'absolute bottom-0 left-0 right-0 h-[2px] bg-primary rounded-full',

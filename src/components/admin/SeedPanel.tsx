@@ -4,14 +4,14 @@ import { extractApiError } from '@/lib/apiErrors';
 import Spinner from '@/components/ui/common/Spinner';
 
 const styles = {
-  root:         'px-8 py-8 max-w-2xl',
+  root:         'px-4 py-6 max-w-2xl md:px-8 md:py-8',
   titleRow:     'flex items-baseline gap-3 mb-1',
   title:        'text-[32px] font-semibold text-text-main leading-none',
   titleDash:    'text-[24px] font-semibold text-text-secondary leading-none',
   description:  'text-sm text-text-muted mt-2 mb-6',
   card:         'bg-surface border border-border rounded-card shadow-card p-6',
   cardTitle:    'text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4',
-  row:          'flex items-center gap-4',
+  row:          'flex items-center gap-4 flex-wrap',
   label:        'text-sm font-medium text-text-main',
   input:        'border border-border rounded-btn px-3 h-[42px] bg-app-bg text-text-main text-sm focus:outline-none focus:border-primary transition-colors w-24 shadow-input',
   btnCta:       'inline-flex items-center gap-2 bg-gradient-to-b from-grad-start to-grad-end text-white px-5 h-[42px] rounded-btn text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-60',

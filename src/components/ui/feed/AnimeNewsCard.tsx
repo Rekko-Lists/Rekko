@@ -1,6 +1,8 @@
 const styles = {
   card:       'bg-surface border-[1.5px] border-border rounded-card p-4 font-gabarito',
+  cardFlat:   'px-1 py-2 font-gabarito',
   title:      'text-sm font-normal text-text-main mb-3',
+  titleFlat:  'text-sm font-semibold text-text-main border-b-2 border-primary pb-0.5 w-fit mb-3',
   // Vertical (default) — comportamiento original
   list:       '',
   item:       'flex gap-2 mb-3 last:mb-0',
@@ -27,9 +29,11 @@ interface NewsItem {
 interface Props {
   items: NewsItem[];
   orientation?: 'vertical' | 'horizontal';
+  /** Mobile in-feed mode: render without card background/border. */
+  flat?: boolean;
 }
 
-export default function AnimeNewsCard({ items, orientation = 'vertical' }: Props) {
+export default function AnimeNewsCard({ items, orientation = 'vertical', flat = false }: Props) {
   if (orientation === 'horizontal') {
     return (
       <div className={styles.card}>
@@ -60,8 +64,8 @@ export default function AnimeNewsCard({ items, orientation = 'vertical' }: Props
 
   // Vertical (default) — sin cambios respecto al comportamiento original
   return (
-    <div className={styles.card}>
-      <p className={styles.title}>Anime News</p>
+    <div className={flat ? styles.cardFlat : styles.card}>
+      <p className={flat ? styles.titleFlat : styles.title}>Anime News</p>
       {items.map(n => (
           <a
             key={n.id}

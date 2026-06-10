@@ -42,7 +42,7 @@ const styles = {
   state: "px-6 py-8 text-center text-text-muted",
   error: "px-6 py-8 text-center text-status-red",
   backTop:
-    "fixed right-[10%] bottom-12 z-40 w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center shadow-card hover:bg-primary-dark transition-colors",
+    "fixed right-4 bottom-24 z-40 w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center shadow-card hover:bg-primary-dark transition-colors lg:right-[10%] lg:bottom-12",
 };
 
 function normalizeRelated(post: PostDetailData) {

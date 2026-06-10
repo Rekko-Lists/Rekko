@@ -20,7 +20,7 @@ interface QuickFilterProps {
 }
 
 const styles = {
-  wrap:     'flex flex-col gap-2 px-[6%] py-3 font-gabarito',
+  wrap:     'flex flex-col gap-2 px-4 py-3 font-gabarito md:px-[6%]',
   rowsWrap: 'flex flex-wrap gap-3 items-start',
   row:      'flex items-center gap-2',
   select:   'h-[36px] border border-border rounded-[5px] px-3 text-sm bg-surface cursor-pointer focus:outline-none text-text-main',

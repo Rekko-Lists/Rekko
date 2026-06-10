@@ -41,7 +41,8 @@ const EMPTY_DATA: ExploreData = {
 const styles = {
   page: 'relative min-h-full overflow-hidden bg-app-bg px-4 pb-6 font-gabarito md:px-8 xl:px-[6%]',
   layout: 'relative z-10 grid min-h-[calc(100vh-138px-24px)] grid-cols-1 gap-4 xl:grid-cols-[281px_minmax(0,1fr)_281px] xl:items-stretch',
-  sideRank: 'w-full xl:w-auto',
+  // Widgets laterales fuera en movil/tablet — solo visibles en xl+
+  sideRank: 'hidden xl:block xl:w-auto',
   sideUp: 'xl:self-start xl:mt-6',
   sideDown: 'xl:self-end',
   centerCol: 'w-full min-w-0 self-stretch',

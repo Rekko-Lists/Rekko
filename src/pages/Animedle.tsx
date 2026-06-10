@@ -55,35 +55,35 @@ const styles = {
   // Single full-viewport background — bg image applied via BG_STYLE inline
   page:   'min-h-screen flex font-gabarito',
 
-  // Side panels — transparent (show page bg), border line only
-  leftBg:  'w-[350px] flex-shrink-0 border-r border-border/60',
-  rightBg: 'w-[350px] flex-shrink-0 border-l border-border/60',
+  // Side panels — transparent (show page bg), border line only. Fuera en movil/tablet.
+  leftBg:  'hidden xl:block w-[350px] flex-shrink-0 border-r border-border/60',
+  rightBg: 'hidden xl:block w-[350px] flex-shrink-0 border-l border-border/60',
 
-  center: 'flex-1 flex flex-col items-center bg-surface relative overflow-y-auto',
+  center: 'flex-1 flex flex-col items-center bg-surface relative overflow-y-auto min-w-0',
 
   // Top bar — dark gradient header like AdminPanel sidebar
-  topBar:      'w-full flex items-center justify-between px-8 py-3 sticky top-0 z-10 bg-gradient-to-r from-grad-end to-grad-start border-b border-grad-end',
+  topBar:      'w-full flex items-center justify-between px-4 py-3 sticky top-0 z-10 bg-gradient-to-r from-grad-end to-grad-start border-b border-grad-end sm:px-8',
   logoImg:     'h-[38px] object-contain brightness-0 invert',
   topBarBadge: 'inline-flex items-center gap-1.5 bg-white/15 border border-white/25 text-white text-xs font-semibold px-3 py-1.5 rounded-pill',
 
   // Title block
-  title:         'text-[56px] font-bold text-text-main mt-6 mb-0 leading-none',
+  title:         'text-[40px] font-bold text-text-main mt-6 mb-0 leading-none sm:text-[56px]',
   titleAccentBar:'block w-20 h-[3px] bg-primary rounded-full mx-auto mt-3 mb-1',
   subtitle:      'text-sm text-text-muted mb-5',
 
   // Challenge image area — prominent dark panel
-  imageArea:    'w-[590px] h-[332px] rounded-btn mb-3 overflow-hidden relative border-2 border-grad-end/60 shadow-card',
+  imageArea:    'w-[92%] max-w-[590px] aspect-[590/332] h-auto rounded-btn mb-3 overflow-hidden relative border-2 border-grad-end/60 shadow-card',
   imageAreaBg:  'absolute inset-0 bg-gradient-to-b from-[#1a1a2e] to-[#16213e]',
 
   // Outcome banner
-  outcomeBannerOk:   'w-[590px] rounded-btn px-5 py-4 flex flex-col gap-1.5 mb-2 bg-primary/10 border border-primary/40',
-  outcomeBannerFail: 'w-[590px] rounded-btn px-5 py-4 flex flex-col gap-1.5 mb-2 bg-status-red/8 border border-status-red/40',
+  outcomeBannerOk:   'w-[92%] max-w-[590px] rounded-btn px-5 py-4 flex flex-col gap-1.5 mb-2 bg-primary/10 border border-primary/40',
+  outcomeBannerFail: 'w-[92%] max-w-[590px] rounded-btn px-5 py-4 flex flex-col gap-1.5 mb-2 bg-status-red/8 border border-status-red/40',
 
   // Skip button — dark gradient CTA like admin
   skipBtn: 'h-[47px] px-6 bg-gradient-to-b from-grad-start to-grad-end text-white rounded-btn text-sm font-semibold hover:opacity-90 transition-opacity',
 
   // Lives bar — card container with label
-  livesCard:        'w-[590px] bg-app-bg rounded-btn border border-border px-4 py-3 flex items-center gap-3',
+  livesCard:        'w-[92%] max-w-[590px] bg-app-bg rounded-btn border border-border px-4 py-3 flex items-center gap-3',
   lifeBarLabel:     'text-xs font-semibold text-text-secondary whitespace-nowrap',
   lifeDotsRow:      'flex items-center gap-2 flex-1',
   lifeDotActive:    'flex-1 h-3 rounded-full bg-status-red shadow-sm transition-all duration-300',
@@ -91,7 +91,7 @@ const styles = {
   lifeBarCount:     'text-xs font-medium text-text-secondary whitespace-nowrap',
 
   // Guess history
-  guessList:      'w-[590px] flex flex-col gap-2 mt-3 pb-2',
+  guessList:      'w-[92%] max-w-[590px] flex flex-col gap-2 mt-3 pb-2',
   guessListLabel: 'text-[11px] font-semibold text-text-muted uppercase tracking-[0.12em] px-1 mb-1',
   guess:          'h-[52px] rounded-btn flex items-center gap-4 px-5 text-sm font-medium shadow-sm',
   guessOk:        'bg-primary/12 border border-primary/35 text-text-main',
@@ -114,8 +114,8 @@ function LoadingSkeleton() {
       </div>
       <div className="text-[52px] font-bold text-text-main mt-5 mb-0.5 opacity-20 leading-none">Animedle</div>
       <div className="w-16 h-1 bg-app-bg rounded-full mx-auto mt-2 mb-4 animate-pulse" />
-      <div className="w-[590px] h-[332px] bg-app-bg rounded-card mb-3 animate-pulse border border-border" />
-      <div className="w-[590px] h-[47px] bg-app-bg rounded-btn animate-pulse" />
+      <div className="w-[92%] max-w-[590px] aspect-[590/332] h-auto bg-app-bg rounded-card mb-3 animate-pulse border border-border" />
+      <div className="w-[92%] max-w-[590px] h-[47px] bg-app-bg rounded-btn animate-pulse" />
     </div>
   );
 }
@@ -420,7 +420,7 @@ export default function Animedle() {
 
         {/* Input + skip */}
         {!challengeOver && (
-          <div className="w-[590px] flex flex-col gap-2 mb-2">
+          <div className="w-[92%] max-w-[590px] flex flex-col gap-2 mb-2">
             <div className="flex items-center gap-2">
               <div className="flex-1">
                 <AnimeGuessInput onGuess={handleGuess} disabled={challengeOver} />

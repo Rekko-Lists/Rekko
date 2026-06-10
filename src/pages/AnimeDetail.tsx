@@ -25,9 +25,9 @@ const styles = {
   page: "min-h-full bg-app-bg font-gabarito relative overflow-x-hidden",
   bgClouds:
     "hidden min-[1900px]:block min-[2600px]:hidden absolute inset-x-0 bottom-0 z-0 h-[clamp(450px,23.44vw,600px)] w-full bg-no-repeat bg-[length:100%_auto] pointer-events-none",
-  container: "relative z-10 max-w-[1500px] mx-auto px-[6%] py-8",
+  container: "relative z-10 max-w-[1500px] mx-auto px-4 py-6 sm:px-[6%] sm:py-8",
   rowMain: "grid grid-cols-1 gap-8 items-start xl:grid-cols-[209px_minmax(0,1fr)]",
-  leftCol: "flex flex-col gap-3",
+  leftCol: "flex flex-col gap-3 items-center xl:items-stretch",
   contentGrid: "grid grid-cols-1 gap-y-6 items-start xl:grid-cols-[minmax(0,1fr)_430px] xl:gap-x-8",
   topHeader:
     "grid grid-cols-1 gap-y-3 items-end border-b border-border pb-3 xl:col-span-2 xl:grid-cols-[minmax(0,1fr)_430px] xl:gap-x-8",

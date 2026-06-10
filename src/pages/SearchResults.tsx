@@ -13,7 +13,7 @@ const MIN_QUERY_LENGTH = 3;
 
 const styles = {
   page: "min-h-full bg-app-bg font-gabarito",
-  container: "max-w-[1000px] mx-auto px-6 py-8",
+  container: "max-w-[1000px] mx-auto px-4 py-6 sm:px-6 sm:py-8",
   title: "text-[28px] text-text-main mb-2",
   subtitle: "text-sm text-text-muted mb-6",
   grid: "grid grid-cols-1 lg:grid-cols-3 gap-5",

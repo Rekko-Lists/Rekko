@@ -11,7 +11,7 @@ import { itemListJsonLd, pageJsonLd } from '@/components/seo/jsonLd';
 
 const styles = {
   page:      'min-h-full bg-app-bg font-gabarito',
-  container: 'max-w-[900px] mx-auto px-6 py-8',
+  container: 'max-w-[900px] mx-auto px-4 py-6 sm:px-6 sm:py-8',
   header:    'flex items-center gap-3 mb-6',
   cover:     'w-[40px] h-[55px] rounded-card overflow-hidden bg-gradient-to-br from-slate-500 to-slate-800',
   title:     'text-[24px] text-text-main',

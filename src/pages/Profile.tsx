@@ -278,7 +278,7 @@ export default function Profile() {
       <img
         src={rekkoSword}
         alt=""
-        className="absolute right-2 top-[60px] h-[220px] object-contain rotate-[-20deg] opacity-75 pointer-events-none z-10"
+        className="hidden md:block absolute right-2 top-[60px] h-[220px] object-contain rotate-[-20deg] opacity-75 pointer-events-none z-10"
       />
 
       {/* Profile card */}
@@ -300,7 +300,7 @@ export default function Profile() {
         </div>
 
         {/* Avatar — overlaps banner bottom */}
-        <div className="absolute top-[94px] left-8">
+        <div className="absolute top-[94px] left-4 md:left-8">
           <div className="relative">
             <Avatar
               src={profileUser?.profileImage}
@@ -320,7 +320,7 @@ export default function Profile() {
         </div>
 
         {/* Main content */}
-        <div className="px-8 pt-[72px] pb-10 flex flex-col gap-6">
+        <div className="px-4 pt-[72px] pb-10 flex flex-col gap-6 md:px-8">
 
           {/* User info */}
           <div>

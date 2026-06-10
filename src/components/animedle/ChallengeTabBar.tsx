@@ -36,12 +36,12 @@ const STATE_BADGE: Partial<Record<TabState, React.ElementType>> = {
 };
 
 const styles = {
-  row: 'flex items-center justify-center gap-4 mb-4',
+  row: 'flex items-center justify-center gap-1 mb-4 sm:gap-4',
 
   cloud: 'relative cursor-pointer select-none group',
 
-  // Larger cloud — icon fits in the hole
-  cloudImg: 'w-[166px] h-[118px] object-contain transition-opacity duration-200',
+  // Larger cloud — icon fits in the hole. Mas pequeño en movil para que entren 4.
+  cloudImg: 'w-[82px] h-[60px] object-contain transition-opacity duration-200 sm:w-[166px] sm:h-[118px]',
   cloudImgActive:  'opacity-100',
   cloudImgSolved:  'opacity-90',
   cloudImgFailed:  'opacity-80',
@@ -49,7 +49,7 @@ const styles = {
   cloudImgNeutral: 'opacity-55 group-hover:opacity-75',
 
   // Icon sits centered in the cloud hole — offset slightly up-left to align with the opening
-  iconWrapper: 'absolute inset-0 flex items-center justify-center pb-3 pr-3',
+  iconWrapper: 'absolute inset-0 flex items-center justify-center pb-1.5 pr-1.5 sm:pb-3 sm:pr-3',
 
   // All icons are dark gray — active gets darkest, neutral lighter
   iconActive:  'text-gray-800',

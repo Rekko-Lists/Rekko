@@ -140,11 +140,11 @@ const AVAILABLE_GENRES = [
 
 const styles = {
   page: "flex flex-col font-gabarito min-h-full pt-4",
-  body: "flex gap-2 px-[6%] pb-8",
-  grid: "flex-1 grid gap-4 pt-4 content-start grid-cols-[repeat(auto-fill,minmax(180px,1fr))]",
+  body: "flex gap-2 px-4 pb-8 md:px-[6%]",
+  grid: "flex-1 grid gap-3 pt-4 content-start grid-cols-[repeat(auto-fill,minmax(110px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] md:gap-4 md:grid-cols-[repeat(auto-fill,minmax(180px,1fr))]",
   loading: "flex-1 flex items-center justify-center text-text-muted py-20",
   error: "flex-1 flex items-center justify-center text-status-red py-20",
-  letterGrid: "flex-1 pt-4 grid grid-cols-3 gap-5",
+  letterGrid: "flex-1 pt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 md:gap-5",
   letterBox:
     "bg-surface border-[1.5px] border-border rounded-card px-6 py-5 flex flex-col",
   letterBadge:
@@ -580,7 +580,7 @@ export default function Animes() {
         ]}
       />
       {/* Sticky control bar — SubNav + QuickFilter scroll with the page header */}
-      <div className="sticky top-[136px] z-20 bg-app-bg">
+      <div className="sticky top-[62px] z-20 bg-app-bg lg:top-[136px]">
         <SubNav
           activeTab={activeTab}
           onTabChange={handleTabChange}
@@ -598,7 +598,7 @@ export default function Animes() {
         )}
 
         {/* Separator inset to match nav margins */}
-        <div className="h-px bg-border mx-[6%]" />
+        <div className="h-px bg-border mx-4 md:mx-[6%]" />
       </div>
 
       <div className={styles.body}>

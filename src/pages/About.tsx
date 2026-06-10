@@ -45,7 +45,7 @@ const BASE_SITE_LINKS: SiteLinkItem[] = [
 const styles = {
     page: "flex flex-col px-4 font-gabarito min-h-full items-stretch lg:flex-row lg:items-start lg:px-[6%]",
     sidebar:
-        "flex w-full flex-col gap-4 py-4 lg:sticky lg:top-[136px] lg:max-h-[calc(100vh-148px)] lg:w-[231px] lg:flex-shrink-0 lg:overflow-y-auto lg:py-6",
+        "hidden lg:flex flex-col gap-4 py-4 lg:sticky lg:top-[136px] lg:max-h-[calc(100vh-148px)] lg:w-[231px] lg:flex-shrink-0 lg:overflow-y-auto lg:py-6",
     center: "flex-1 flex flex-col gap-4 min-w-0 py-6",
     divider: "hidden w-[1.5px] bg-black/15 self-stretch mx-5 lg:block",
 };
