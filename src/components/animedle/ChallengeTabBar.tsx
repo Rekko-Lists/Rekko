@@ -49,7 +49,7 @@ const styles = {
   cloudImgNeutral: 'opacity-55 group-hover:opacity-75',
 
   // Icon sits centered in the cloud hole — offset slightly up-left to align with the opening
-  iconWrapper: 'absolute inset-0 flex items-center justify-center pb-1.5 pr-1.5 sm:pb-3 sm:pr-3',
+  iconWrapper: 'absolute inset-0 flex items-center justify-center pb-1.5 pl-4 pt-2 sm:pb-3 sm:pr-3',
 
   // All icons are dark gray — active gets darkest, neutral lighter
   iconActive:  'text-gray-800',

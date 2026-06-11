@@ -24,7 +24,7 @@ const styles = {
   centerWrap: 'relative flex items-start justify-center',
   centerBtn:
     'absolute -top-6 w-[60px] h-[60px] rounded-full bg-gradient-cta shadow-card flex items-center justify-center active:scale-95 transition-transform',
-  centerSword: 'h-[32px] w-[32px] object-contain pointer-events-none brightness-0 invert',
+  centerSword: 'h-[55px] w-[55px] object-contain pointer-events-none brightness-0 invert',
 };
 
 function Tab({ label, to, Icon }: { label: string; to: string; Icon: typeof Home }) {
