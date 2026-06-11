@@ -17,7 +17,6 @@ interface ChallengeFormProps {
   onSuccess: () => void;
   initialData?: ChallengeResponseDTO;
   challengeId?: number;
-  challengeIndex?: number;
 }
 
 const styles = {
@@ -48,7 +47,6 @@ export default function ChallengeForm({
   onSuccess,
   initialData,
   challengeId,
-  challengeIndex = 0,
 }: ChallengeFormProps) {
   const isEdit = challengeId !== undefined;
 
@@ -69,26 +67,22 @@ export default function ChallengeForm({
   const [mediaType, setMediaType] = useState<'opening' | 'ending'>('opening');
   const [fileOpening, setFileOpening] = useState<File | null>(null);
 
-  // Emoji fields
-  const [emojis, setEmojis] = useState<string[]>([
-    String((initialData?.data as Record<string, string>)?.emoji1 ?? ''),
-    String((initialData?.data as Record<string, string>)?.emoji2 ?? ''),
-    String((initialData?.data as Record<string, string>)?.emoji3 ?? ''),
-    String((initialData?.data as Record<string, string>)?.emoji4 ?? ''),
-    String((initialData?.data as Record<string, string>)?.emoji5 ?? ''),
-  ]);
+  // Emoji fields. Canonical shape is { emojis: string[] }; we also read the
+  // legacy { emoji1..emoji5 } shape so old rows remain editable.
+  const [emojis, setEmojis] = useState<string[]>(() => {
+    const raw = initialData?.data as Record<string, unknown> | undefined;
+    const arr = Array.isArray(raw?.emojis) ? (raw!.emojis as unknown[]) : null;
+    const base = arr
+      ? arr.map(e => String(e ?? ''))
+      : [raw?.emoji1, raw?.emoji2, raw?.emoji3, raw?.emoji4, raw?.emoji5].map(e => String(e ?? ''));
+    return [...base, '', '', '', '', ''].slice(0, 5);
+  });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  function buildEmojiData(): Record<string, string> {
-    return {
-      emoji1: emojis[0],
-      emoji2: emojis[1],
-      emoji3: emojis[2],
-      emoji4: emojis[3],
-      emoji5: emojis[4],
-    };
+  function buildEmojiData(): { emojis: string[] } {
+    return { emojis: emojis.map(e => e.trim()) };
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -101,7 +95,9 @@ export default function ChallengeForm({
     setError(null);
 
     try {
-      const idx = challengeIndex;
+      // Each submit sends exactly one challenge, and the backend always
+      // enriches it at array index 0, so file fields must use index 0.
+      const idx = 0;
       const challengePayload = {
         date,
         challenges: [

@@ -188,7 +188,6 @@ export default function ChallengesPanel() {
                         onSuccess={onFormSuccess}
                         initialData={ch}
                         challengeId={ch.challengeId}
-                        challengeIndex={idx}
                       />
                       <button
                         className={styles.btnGhostSm}
@@ -255,7 +254,6 @@ export default function ChallengesPanel() {
               <ChallengeForm
                 date={selectedDate}
                 onSuccess={onFormSuccess}
-                challengeIndex={challenges.length}
               />
               <button
                 className={styles.btnGhostSm}

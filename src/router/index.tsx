@@ -20,6 +20,7 @@ const Settings = lazy(() => import("@/pages/Settings"));
 const DiscordCallback = lazy(() => import("@/pages/DiscordCallback"));
 const EmailStatusPage = lazy(() => import("@/pages/EmailStatusPage"));
 const ResetPasswordPage = lazy(() => import("@/pages/ResetPasswordPage"));
+const ForgotPasswordPage = lazy(() => import("@/pages/ForgotPasswordPage"));
 const PasswordChangedPage = lazy(() => import("@/pages/PasswordChangedPage"));
 const About = lazy(() => import("@/pages/About"));
 const Rules = lazy(() => import("@/pages/Rules"));
@@ -53,6 +54,7 @@ export const router = createBrowserRouter([
   { path: "/oauth/discord/callback", element: page(<DiscordCallback />) },
   { path: "/email-verified", element: page(<EmailStatusPage />) },
   { path: "/email-changed", element: page(<EmailStatusPage />) },
+  { path: "/forgot-password", element: page(<ForgotPasswordPage />) },
   { path: "/user/resetpassword", element: page(<ResetPasswordPage />) },
   { path: "/password-changed", element: page(<PasswordChangedPage />) },
   { path: "/password-forgot", element: page(<PasswordChangedPage />) },
