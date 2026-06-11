@@ -152,7 +152,7 @@ export default function Login() {
             <input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} className="accent-primary" />
             Remember me
           </label>
-          <span className={styles.forgot}>Forgot password?</span>
+          <Link to="/forgot-password" className={styles.forgot}>Forgot password?</Link>
         </div>
 
         {error && <p className={styles.error}>{error}</p>}

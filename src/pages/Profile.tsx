@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Edit, Settings as SettingsIcon, Image } from 'lucide-react';
+import { Edit, Settings as SettingsIcon, Image, Flame } from 'lucide-react';
 import {
   FaTwitter, FaInstagram, FaGithub, FaYoutube, FaTwitch,
   FaLinkedin, FaDiscord, FaTiktok,
@@ -335,9 +335,22 @@ export default function Profile() {
                 </button>
               )}
             </div>
-            <h1 className="text-[28px] font-semibold text-text-main leading-tight">
-              {profileUser?.username ?? username}
-            </h1>
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-[28px] font-semibold text-text-main leading-tight">
+                {profileUser?.username ?? username}
+              </h1>
+              {/* Animedle streak */}
+              <span
+                className="inline-flex items-center gap-1.5 bg-primary/10 border border-primary/30 text-primary rounded-pill px-3 py-1 text-sm font-semibold"
+                title="Racha de Animedle"
+              >
+                <Flame size={15} className="fill-primary" />
+                {profileUser?.streak ?? 0}
+                <span className="font-medium text-primary/80">
+                  {(profileUser?.streak ?? 0) === 1 ? 'día' : 'días'}
+                </span>
+              </span>
+            </div>
             {profileUser?.biography && (
               <p className="text-sm text-text-secondary mt-1">{profileUser.biography}</p>
             )}

@@ -93,7 +93,13 @@ export default function Navbar() {
       <div className="hidden lg:block">
         {/* Row 1 — header */}
         <div className="grid grid-cols-[1fr_auto_1fr] items-center px-[6%] h-[90px]">
-          <img src={rekkoLogo} alt="Rekko" className="h-[100px]" />
+          <button
+            onClick={() => navigate('/feed')}
+            className="justify-self-start cursor-pointer"
+            aria-label="Home"
+          >
+            <img src={rekkoLogo} alt="Rekko" className="h-[100px]" />
+          </button>
 
           <SearchBar />
 

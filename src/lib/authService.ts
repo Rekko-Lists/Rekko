@@ -121,8 +121,22 @@ export const authService = {
 
   async getPublicProfile(username: string): Promise<PublicProfile> {
     const res = await axios.get<{ success: boolean; data: PublicProfile }>(
-      `${BASE}/user/${username}?fields=userId,username,biography,profileImage,bannerImage,backgroundImage,reputation,socialAccounts`
+      `${BASE}/user/${username}?fields=userId,username,biography,profileImage,bannerImage,backgroundImage,reputation,socialAccounts,streak`
     );
+    return res.data.data;
+  },
+
+  /**
+   * Marca el Animedle de hoy como completado y suma racha. El backend es la
+   * fuente de verdad anti-trampas: si ya se ganó hoy devuelve alreadyCompleted.
+   */
+  async completeDailyChallenge(
+    username: string
+  ): Promise<{ streak: number; alreadyCompleted: boolean }> {
+    const res = await api.post<{
+      success: boolean;
+      data: { streak: number; alreadyCompleted: boolean };
+    }>(`/user/${username}/complete-daily`);
     return res.data.data;
   },
 
@@ -160,6 +174,18 @@ export const authService = {
     // Backend redirects after sending the email — manual prevents fetch from following it.
     await fetch(`${BASE}/user/${username}/forgot-password`, { method: 'POST', redirect: 'manual' });
   },
+
+  /**
+   * Flujo "Forgot password?" del login: pide el reset por email. El backend
+   * responde 200 con un mensaje neutro exista o no la cuenta (anti-enumeración).
+   */
+  async requestPasswordReset(email: string): Promise<string> {
+    const res = await axios.post<{ success: boolean; message: string }>(
+      `${BASE}/auth/forgot-password`,
+      { email }
+    );
+    return res.data.message;
+  },
 };
 
 export interface SocialLink {
@@ -184,6 +210,7 @@ export interface PublicProfile {
   backgroundImage?: string;
   reputation: number;
   socialAccounts?: { name: string; url: string }[];
+  streak?: number;
 }
 
 export function decodeJwtUserId(token: string): number {

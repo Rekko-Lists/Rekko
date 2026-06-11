@@ -1,7 +1,10 @@
-import { useState, useEffect } from 'react';
-import { Check, X } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Check, X, Flame } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import rekkoLogo from '@/assets/rekko_logo.png';
+import { useAuthStore } from '@/store/useAuthStore';
+import { authService } from '@/lib/authService';
 import Seo from '@/components/seo/Seo';
 import { pageJsonLd } from '@/components/seo/jsonLd';
 import { seoPages } from '@/components/seo/pages';
@@ -40,6 +43,49 @@ interface ChallengeState {
   showConfetti: boolean;
 }
 
+interface SavedDaily {
+  states: ChallengeState[];
+  earned: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Persistencia anti-trampas en localStorage (clave por día UTC, igual que el
+// backend). Restaurar el estado impide rejugar el reto del día; el flag
+// `earned` impide volver a pedir racha. El backend valida igualmente.
+// ---------------------------------------------------------------------------
+
+const STORAGE_PREFIX = 'animedle:v1:';
+
+function storageKey(date: string): string {
+  return `${STORAGE_PREFIX}${date}`;
+}
+
+function loadSavedDaily(date: string): SavedDaily | null {
+  try {
+    const raw = localStorage.getItem(storageKey(date));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as SavedDaily;
+    if (!Array.isArray(parsed.states)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function saveDaily(date: string, data: SavedDaily): void {
+  try {
+    localStorage.setItem(storageKey(date), JSON.stringify(data));
+  } catch {
+    /* localStorage lleno o bloqueado — no es crítico */
+  }
+}
+
+// Un reto está "resuelto" si se acertó, se saltó o se agotaron las vidas.
+function isChallengeResolved(s: ChallengeState): boolean {
+  if (s.solved || s.skipped) return true;
+  return s.guesses.filter((g) => !g.correct).length >= MAX_WRONG_GUESSES;
+}
+
 // ---------------------------------------------------------------------------
 // Styles
 // ---------------------------------------------------------------------------
@@ -63,7 +109,10 @@ const styles = {
 
   // Top bar — dark gradient header like AdminPanel sidebar
   topBar:      'w-full flex items-center justify-between px-4 py-3 sticky top-0 z-10 bg-gradient-to-r from-grad-end to-grad-start border-b border-grad-end sm:px-8',
-  logoImg:     'h-[38px] object-contain brightness-0 invert',
+  logoBtn:     'flex-shrink-0 cursor-pointer transition-transform active:scale-95',
+  logoImg:     'h-[56px] object-contain brightness-0 invert',
+  topBarRight: 'flex items-center gap-2',
+  streakBadge: 'inline-flex items-center gap-1.5 bg-primary/20 border border-primary/40 text-white text-xs font-bold px-3 py-1.5 rounded-pill',
   topBarBadge: 'inline-flex items-center gap-1.5 bg-white/15 border border-white/25 text-white text-xs font-semibold px-3 py-1.5 rounded-pill',
 
   // Title block
@@ -125,11 +174,20 @@ function LoadingSkeleton() {
 // ---------------------------------------------------------------------------
 
 export default function Animedle() {
+  const navigate = useNavigate();
+  const { user, setUser } = useAuthStore();
+
   const [challenges, setChallenges] = useState<ChallengeResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeChallenge, setActiveChallenge] = useState(0);
   const [states, setStates] = useState<ChallengeState[]>([]);
+
+  // Día UTC del reto (lo da el backend) — clave de persistencia y de racha.
+  const [dailyDate, setDailyDate] = useState<string>('');
+  const [streak, setStreak] = useState<number | null>(user?.streak ?? null);
+  // Evita disparar el "completar día" más de una vez por montaje.
+  const earnedRef = useRef(false);
 
   useEffect(() => {
     axios
@@ -137,7 +195,7 @@ export default function Animedle() {
         `${BASE}/challenges/daily`
       )
       .then((res) => {
-        const { challenges: fetchedChallenges } = res.data.data;
+        const { challenges: fetchedChallenges, date } = res.data.data;
         // Backend returns type in uppercase (e.g. "ANIME") — normalise to lowercase
         const normalised = fetchedChallenges.map((c) => ({
           ...c,
@@ -147,20 +205,84 @@ export default function Animedle() {
           console.log('[Animedle] challenges from /daily:', JSON.stringify(normalised, null, 2));
         }
         setChallenges(normalised);
-        setStates(
-          fetchedChallenges.map(() => ({
-            guesses: [],
-            solved: false,
-            skipped: false,
-            currentPhotoIndex: 0,
-            solvedAtPhotoIndex: 0,
-            showConfetti: false,
-          }))
-        );
+        setDailyDate(date);
+
+        // Restaura el progreso guardado de hoy (anti-rejugar). Si no hay o no
+        // cuadra el número de retos, empieza limpio.
+        const saved = loadSavedDaily(date);
+        if (saved && saved.states.length === fetchedChallenges.length) {
+          earnedRef.current = saved.earned;
+          // Nunca relanzamos confetti al restaurar.
+          setStates(saved.states.map((s) => ({ ...s, showConfetti: false })));
+        } else {
+          setStates(
+            fetchedChallenges.map(() => ({
+              guesses: [],
+              solved: false,
+              skipped: false,
+              currentPhotoIndex: 0,
+              solvedAtPhotoIndex: 0,
+              showConfetti: false,
+            }))
+          );
+        }
       })
       .catch(() => setError("Could not load today's challenges. Please try again later."))
       .finally(() => setLoading(false));
   }, []);
+
+  // Mantiene el badge de racha en sync si cambia el usuario (login/refresh).
+  useEffect(() => {
+    if (user?.streak != null) setStreak(user.streak);
+  }, [user?.streak]);
+
+  // Al entrar, trae la racha actual del usuario (el login no la incluye) para
+  // mostrarla de entrada. Tambien refresca si el backend la reseteo por inactividad.
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    authService
+      .getUserByUsername(user.username)
+      .then((fresh) => {
+        if (cancelled || fresh.streak == null) return;
+        setStreak(fresh.streak);
+        setUser({ ...user, streak: fresh.streak });
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.username]);
+
+  // Persiste el progreso del día cada vez que cambia el estado.
+  useEffect(() => {
+    if (!dailyDate || states.length === 0) return;
+    saveDaily(dailyDate, { states, earned: earnedRef.current });
+  }, [states, dailyDate]);
+
+  // Al completar los 4 retos (acierto/fallo/skip) se gana 1 de racha, una sola
+  // vez al día. El backend es el guard real anti-trampas.
+  useEffect(() => {
+    if (!dailyDate || states.length === 0 || earnedRef.current) return;
+    if (!user) return;
+    const allResolved = states.every(isChallengeResolved);
+    if (!allResolved) return;
+
+    earnedRef.current = true;
+    saveDaily(dailyDate, { states, earned: true });
+
+    authService
+      .completeDailyChallenge(user.username)
+      .then((res) => {
+        setStreak(res.streak);
+        setUser({ ...user, streak: res.streak });
+      })
+      .catch(() => {
+        // Si falla la red dejamos reintentar en el próximo cambio de estado.
+        earnedRef.current = false;
+      });
+  }, [states, dailyDate, user, setUser]);
 
   function handleGuess(animeName: string) {
     const challenge = challenges[activeChallenge];
@@ -253,7 +375,9 @@ export default function Animedle() {
         <div className={styles.leftBg} />
         <div className={styles.center}>
           <div className={styles.topBar}>
-            <img src={rekkoLogo} alt="Rekko" className={styles.logoImg} />
+            <button onClick={() => navigate('/feed')} className={styles.logoBtn} aria-label="Home">
+              <img src={rekkoLogo} alt="Rekko" className={styles.logoImg} />
+            </button>
             <span className={styles.topBarBadge}>Daily game</span>
           </div>
           <h1 className={styles.title}>Animedle</h1>
@@ -304,10 +428,20 @@ export default function Animedle() {
           <ConfettiEffect key={`confetti-${activeChallenge}`} />
         )}
 
-        {/* Top bar — logo left, game badge right */}
+        {/* Top bar — logo left (→ home), streak + game badge right */}
         <div className={styles.topBar}>
-          <img src={rekkoLogo} alt="Rekko" className={styles.logoImg} />
-          <span className={styles.topBarBadge}>Daily game</span>
+          <button onClick={() => navigate('/feed')} className={styles.logoBtn} aria-label="Home">
+            <img src={rekkoLogo} alt="Rekko" className={styles.logoImg} />
+          </button>
+          <div className={styles.topBarRight}>
+            {user && streak != null && (
+              <span className={styles.streakBadge} title="Tu racha de Animedle">
+                <Flame size={14} className="fill-primary text-primary" />
+                {streak} {streak === 1 ? 'día' : 'días'}
+              </span>
+            )}
+            <span className={styles.topBarBadge}>Daily game</span>
+          </div>
         </div>
 
         {/* Title with amber accent underline */}
