@@ -101,8 +101,13 @@ export default function Feed() {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const loadingPagesRef = useRef(new Set<number>());
   const likingPostsRef = useRef(new Set<string>());
+  const [initialPostsLoaded, setInitialPostsLoaded] = useState(false);
+  // Solo la primera pagina decide las news: asi la paginacion (append) no
+  // cambia la key ni re-dispara el fetch.
   const newsMalIdsKey = useMemo(() => {
-    const ids = posts.flatMap((post) => post.relatedAnimes.map((anime) => Number(anime.id)));
+    const ids = posts
+      .slice(0, FEED_LIMIT)
+      .flatMap((post) => post.relatedAnimes.map((anime) => Number(anime.id)));
     return [...new Set(ids.filter(Number.isFinite))].slice(0, 4).join(",");
   }, [posts]);
   const randomWidgetLoaders = useMemo(
@@ -177,7 +182,10 @@ export default function Feed() {
         setHasMore(false);
       } finally {
         loadingPagesRef.current.delete(targetPage);
-        if (!signal?.aborted) setLoading(false);
+        if (!signal?.aborted) {
+          setLoading(false);
+          if (targetPage === 1) setInitialPostsLoaded(true);
+        }
       }
     },
     [appendPosts, setHasMore, setLoading, setPosts],
@@ -246,6 +254,11 @@ export default function Feed() {
   }, []);
 
   useEffect(() => {
+    // Espera a que cargue la primera pagina de posts: evita el doble fetch
+    // (fallback en el mount + refetch al llegar los posts). El fallback solo
+    // se usa si la primera pagina llega sin animes relacionados.
+    if (!initialPostsLoaded) return;
+
     const controller = new AbortController();
     const malIds = newsMalIdsKey
       ? newsMalIdsKey.split(",").map((id) => Number(id))
@@ -261,7 +274,7 @@ export default function Feed() {
     });
 
     return () => controller.abort();
-  }, [newsMalIdsKey]);
+  }, [newsMalIdsKey, initialPostsLoaded]);
 
   async function handleDelete(id: string) {
     const postId = Number(id);

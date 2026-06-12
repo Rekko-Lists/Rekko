@@ -1,4 +1,5 @@
 import api from '@/lib/api.ts';
+import { cached, TTL } from '@/lib/clientCache';
 import type {
   Anime,
   AnimeCatalogueResponse,
@@ -152,8 +153,10 @@ function normalizePosts(rawPosts: unknown): AnimePost[] {
 }
 
 export async function getGenres(): Promise<string[]> {
-  const response = await api.get('/anime/genres');
-  return response.data.data.genres as string[];
+  return cached('genres', TTL.ONE_DAY, async () => {
+    const response = await api.get('/anime/genres');
+    return response.data.data.genres as string[];
+  });
 }
 
 export async function getAnimes(
@@ -256,9 +259,14 @@ export async function getRecommendedAnimes(
   };
 }
 
-async function getAnimeWidget(endpoint: string, limit: number, signal?: AbortSignal): Promise<Anime[]> {
-  const response = await api.get(endpoint, { params: { limit }, signal });
-  return normalizeAnimes((response.data.data?.animes ?? []) as Anime[]);
+// Cacheado 10 min por endpoint+limit (datos publicos, iguales para todos).
+// El signal del llamador se ignora a proposito: la promise se comparte entre
+// componentes y abortarla por uno solo rompe a los demas.
+async function getAnimeWidget(endpoint: string, limit: number, _signal?: AbortSignal): Promise<Anime[]> {
+  return cached(`widget:${endpoint}:${limit}`, TTL.TEN_MINUTES, async () => {
+    const response = await api.get(endpoint, { params: { limit } });
+    return normalizeAnimes((response.data.data?.animes ?? []) as Anime[]);
+  });
 }
 
 export async function getTopSeasonalAnimes(limit = 5, signal?: AbortSignal): Promise<Anime[]> {

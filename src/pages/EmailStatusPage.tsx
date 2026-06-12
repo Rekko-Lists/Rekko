@@ -1,7 +1,11 @@
+import { useEffect, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { CheckCircle, XCircle } from 'lucide-react';
 import Seo from '@/components/seo/Seo';
 import { seoPages } from '@/components/seo/pages';
+import { authService } from '@/lib/authService';
+import { getStoredRefreshToken } from '@/lib/tokenStorage';
+import { useAuthStore } from '@/store/useAuthStore';
 
 const MESSAGES: Record<string, { title: string; body: string; ok: boolean }> = {
   success:          { title: 'Done!',                    body: 'Your email has been confirmed.',                        ok: true  },
@@ -17,6 +21,25 @@ export default function EmailStatusPage() {
   const [searchParams] = useSearchParams();
   const status = searchParams.get('status') ?? 'invalid';
   const info = MESSAGES[status] ?? MESSAGES['invalid'];
+  const refreshed = useRef(false);
+
+  // Tras verificar el email, fuerza un refresh del access token para que el
+  // nuevo lleve emailVerified=true al instante (el backend lo exige para
+  // postear). Sin esto habria que esperar a que expire el token (15 min).
+  useEffect(() => {
+    if (status !== 'success' || refreshed.current) return;
+    refreshed.current = true;
+
+    const refreshToken = getStoredRefreshToken();
+    if (!refreshToken) return;
+
+    authService
+      .refresh(refreshToken)
+      .then((newToken) =>
+        useAuthStore.getState().setAccessToken(newToken)
+      )
+      .catch(() => undefined);
+  }, [status]);
 
   return (
     <div className="min-h-screen bg-app-bg flex items-center justify-center font-gabarito px-4">

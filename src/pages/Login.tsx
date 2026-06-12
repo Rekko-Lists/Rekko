@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import Button from '@/components/ui/common/Button';
-import { authService, decodeJwtUserId } from '@/lib/authService';
+import { authService } from '@/lib/authService';
 import { signInWithGoogle, signInWithGoogleRedirect, getGoogleRedirectResult } from '@/lib/firebase';
 import { useAuthStore } from '@/store/useAuthStore';
 import { extractApiError } from '@/lib/apiErrors';
@@ -48,8 +48,7 @@ export default function Login() {
         if (!tokenId) return;
         setLoading(true);
         const { accessToken, refreshToken } = await authService.loginWithGoogle(tokenId);
-        const userId = decodeJwtUserId(accessToken);
-        const fullUser = await authService.getUserById(userId);
+        const fullUser = await authService.getMe(accessToken);
         login(fullUser, accessToken, refreshToken, remember);
         navigate('/feed');
       } catch (err: unknown) {
@@ -68,8 +67,8 @@ export default function Login() {
     setError('');
     setLoading(true);
     try {
-      const { accessToken, refreshToken, user } = await authService.login(email, password);
-      const fullUser = await authService.getUserByUsername(user.username);
+      const { accessToken, refreshToken } = await authService.login(email, password);
+      const fullUser = await authService.getMe(accessToken);
       login(fullUser, accessToken, refreshToken, remember);
       navigate('/feed');
     } catch (err: unknown) {
@@ -86,8 +85,7 @@ export default function Login() {
       const tokenId = await signInWithGoogle();
       logger.info('Google OAuth: Firebase token obtained via popup');
       const { accessToken, refreshToken } = await authService.loginWithGoogle(tokenId);
-      const userId = decodeJwtUserId(accessToken);
-      const fullUser = await authService.getUserById(userId);
+      const fullUser = await authService.getMe(accessToken);
       login(fullUser, accessToken, refreshToken, remember);
       navigate('/feed');
     } catch (err: unknown) {

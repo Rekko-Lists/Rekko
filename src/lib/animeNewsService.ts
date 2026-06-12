@@ -1,3 +1,5 @@
+import { cached, TTL } from '@/lib/clientCache';
+
 export interface AnimeNewsItem {
   id: string;
   title: string;
@@ -34,13 +36,17 @@ function formatNewsDate(value?: string): string {
   });
 }
 
+// Cacheado 10 min por anime: Jikan rate-limitea fuerte y las news cambian poco.
+// El signal se ignora porque la promise se comparte entre montajes.
 export async function getAnimeNews(
   malId: number,
-  signal?: AbortSignal,
+  _signal?: AbortSignal,
 ): Promise<AnimeNewsItem[]> {
-  const response = await fetch(`https://api.jikan.moe/v4/anime/${malId}/news`, {
-    signal,
-  });
+  return cached(`news:${malId}`, TTL.TEN_MINUTES, () => fetchAnimeNews(malId));
+}
+
+async function fetchAnimeNews(malId: number): Promise<AnimeNewsItem[]> {
+  const response = await fetch(`https://api.jikan.moe/v4/anime/${malId}/news`);
 
   if (!response.ok) return [];
 

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import axios from 'axios';
 import api from '@/lib/api';
 import Spinner from '@/components/ui/common/Spinner';
 import ChallengeForm from './ChallengeForm';
@@ -12,8 +11,6 @@ interface ChallengeResponseDTO {
   anime: { malId: number; name: string; imgMedium?: string; imgLarge?: string };
   data: Record<string, unknown>;
 }
-
-const BASE = import.meta.env.VITE_API_BASE_URL as string;
 
 function getLocalDateString(): string {
   const d = new Date();
@@ -77,10 +74,10 @@ export default function ChallengesPanel() {
     setEditingId(null);
     setAddingNew(false);
     try {
-      const res = await axios.get<{
+      const res = await api.get<{
         success: boolean;
         data: { challenges: ChallengeResponseDTO[] };
-      }>(`${BASE}/challenges/${selectedDate}`);
+      }>(`/challenges/${selectedDate}`);
       setChallenges(res.data.data.challenges ?? []);
       setLoadDone(true);
     } catch (e: unknown) {

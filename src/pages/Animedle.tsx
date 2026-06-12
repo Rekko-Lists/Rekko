@@ -242,7 +242,7 @@ export default function Animedle() {
     if (!user) return;
     let cancelled = false;
     authService
-      .getUserByUsername(user.username)
+      .getMe()
       .then((fresh) => {
         if (cancelled || fresh.streak == null) return;
         setStreak(fresh.streak);

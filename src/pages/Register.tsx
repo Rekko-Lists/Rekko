@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Button from '@/components/ui/common/Button';
-import { authService, decodeJwtUserId } from '@/lib/authService';
+import { authService } from '@/lib/authService';
 import { signInWithGoogle } from '@/lib/firebase';
 import { useAuthStore } from '@/store/useAuthStore';
 import Seo from '@/components/seo/Seo';
@@ -79,13 +79,7 @@ export default function Register() {
       const { accessToken, refreshToken } = await authService.loginWithGoogle(tokenId);
       console.log('[Google OAuth] Backend response OK:', { accessToken: accessToken.slice(0, 40), refreshToken: refreshToken.slice(0, 20) });
 
-      console.log('[Google OAuth] Raw JWT payload segment:', accessToken.split('.')[1]);
-      const userId = decodeJwtUserId(accessToken);
-      console.log('[Google OAuth] Decoded userId:', userId);
-
-      console.log('[Google OAuth] Sending GET /user/' + userId);
-      const user = await authService.getUserById(userId);
-      console.log('[Google OAuth] getUserById response:', user);
+      const user = await authService.getMe(accessToken);
 
       login(user, accessToken, refreshToken, false);
       navigate('/feed');
