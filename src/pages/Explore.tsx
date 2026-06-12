@@ -52,7 +52,7 @@ function toSeasonalItems(animes: Anime[]): ExploreSeasonalItem[] {
   return animes.map((anime) => ({
     id: String(anime.malId),
     title: anime.name,
-    cover: anime.imgMedium || anime.imgLarge,
+    cover: anime.imgLarge || anime.imgMedium,
     synopsis: anime.synopsis,
     score: anime.malMean ?? anime.mean,
     meta: typeof anime.status === 'string' ? anime.status.replace(/_/g, ' ') : undefined,
@@ -64,7 +64,7 @@ function toRankedItems(animes: Anime[]): RankedAnimeItem[] {
     id: String(anime.malId),
     rank: index + 1,
     title: anime.name,
-    cover: anime.imgMedium || anime.imgLarge,
+    cover: anime.imgLarge || anime.imgMedium,
   }));
 }
 

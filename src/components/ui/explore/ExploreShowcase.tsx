@@ -37,7 +37,7 @@ const styles = {
   sectionTitle: 'mt-10 text-center text-[24px] font-medium leading-none text-text-main sm:mt-12 sm:text-[30px]',
   sectionUnderline: 'mx-auto mt-2 h-0.5 w-[150px] bg-primary',
   animeCard: 'group flex w-full max-w-[160px] flex-col items-center gap-3 font-gabarito xl:max-w-[255px]',
-  animeCoverWrap: 'relative w-full overflow-hidden rounded-[3px] bg-gradient-to-br from-slate-300 via-slate-500 to-slate-800 aspect-[173/245] shadow-sm',
+  animeCoverWrap: 'relative w-full overflow-hidden rounded-[8px] bg-gradient-to-br from-slate-300 via-slate-500 to-slate-800 aspect-[173/245] shadow-sm',
   animeCover: 'h-full w-full object-cover transition-transform duration-500 group-hover:scale-105',
   animeFallback: 'flex h-full w-full items-end p-3 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.22),_transparent_48%),linear-gradient(145deg,#98a7bd,#4a5568_72%,#212834)]',
   animeOverlay: 'absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100',
