@@ -17,10 +17,11 @@ export const challengeService = {
   },
 
   async getChallengesByDate(date: string): Promise<{ challenges: ChallengeResponseDTO[]; date: string }> {
-    const res = await axios.get<{
+    // Ruta solo-admin: necesita el bearer token del cliente api.
+    const res = await api.get<{
       success: boolean;
       data: { challenges: ChallengeResponseDTO[]; date: string };
-    }>(`${BASE}/challenges/${date}`);
+    }>(`/challenges/${date}`);
     return res.data.data;
   },
 
@@ -39,8 +40,8 @@ export const challengeService = {
     if (params?.malId != null) query.set('malId', String(params.malId));
     if (params?.page != null) query.set('page', String(params.page));
     if (params?.limit != null) query.set('limit', String(params.limit));
-    const res = await axios.get<{ success: boolean; data: ChallengesListResponse }>(
-      `${BASE}/challenges?${query}`
+    const res = await api.get<{ success: boolean; data: ChallengesListResponse }>(
+      `/challenges?${query}`
     );
     return res.data.data;
   },

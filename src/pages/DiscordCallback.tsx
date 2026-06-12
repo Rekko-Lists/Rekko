@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { authService, decodeJwtUserId } from '@/lib/authService';
+import { authService } from '@/lib/authService';
 import { useAuthStore } from '@/store/useAuthStore';
 import Seo from '@/components/seo/Seo';
 import { seoPages } from '@/components/seo/pages';
@@ -25,8 +25,7 @@ export default function DiscordCallback() {
     async function exchange() {
       try {
         const { accessToken, refreshToken } = await authService.loginWithDiscord(code!);
-        const userId = decodeJwtUserId(accessToken);
-        const fullUser = await authService.getUserById(userId);
+        const fullUser = await authService.getMe(accessToken);
         login(fullUser, accessToken, refreshToken, false);
         navigate('/feed');
       } catch {

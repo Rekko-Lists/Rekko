@@ -76,11 +76,19 @@ export const authService = {
     return res.data.data;
   },
 
-  async getUserByUsername(username: string): Promise<AuthUser> {
-    const res = await axios.get<{ success: boolean; data: Record<string, unknown> }>(
-      `${BASE}/user/${username}?fields=userId,email,username,emailVerified,profileImage,role,streak`
+  /**
+   * Datos frescos del usuario autenticado desde GET /auth/me. Si se pasa
+   * accessToken se usa explicitamente (util en login, cuando el token aun
+   * no esta en el store); si no, el interceptor adjunta el del store.
+   */
+  async getMe(accessToken?: string): Promise<AuthUser> {
+    const res = await api.get<{ success: boolean; data: AuthUser }>(
+      '/auth/me',
+      accessToken
+        ? { headers: { Authorization: `Bearer ${accessToken}` } }
+        : undefined
     );
-    const d = res.data.data as unknown as AuthUser;
+    const d = res.data.data;
     return {
       userId: d.userId,
       email: d.email,
@@ -88,23 +96,7 @@ export const authService = {
       emailVerified: d.emailVerified,
       profileImage: d.profileImage,
       role: d.role,
-      streak: (d as { streak?: number }).streak,
-    };
-  },
-
-  async getUserById(userId: number): Promise<AuthUser> {
-    const res = await axios.get<{ success: boolean; data: Record<string, unknown> }>(
-      `${BASE}/user/${userId}?fields=userId,email,username,emailVerified,profileImage,role,streak`
-    );
-    const d = res.data.data as unknown as AuthUser;
-    return {
-      userId: d.userId,
-      email: d.email,
-      username: d.username,
-      emailVerified: d.emailVerified,
-      profileImage: d.profileImage,
-      role: d.role,
-      streak: (d as { streak?: number }).streak,
+      streak: d.streak,
     };
   },
 
@@ -213,13 +205,5 @@ export interface PublicProfile {
   streak?: number;
 }
 
-export function decodeJwtUserId(token: string): number {
-  try {
-    const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-    const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4);
-    const payload = JSON.parse(atob(padded));
-    return Number(payload.userId ?? payload.sub ?? payload.id);
-  } catch {
-    throw new Error('Failed to decode access token');
-  }
-}
+export { decodeAccessToken, decodeJwtUserId } from '@/lib/jwt';
+export type { AccessTokenClaims } from '@/lib/jwt';
