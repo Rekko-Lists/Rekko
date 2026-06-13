@@ -55,6 +55,9 @@ export interface CommentData {
   replyCount?: number;
   hasReplies?: boolean;
   hasLiked: boolean;
+  // The thread endpoint returns each top-level comment with its full nested
+  // subtree already attached, so the client renders every level at once.
+  replies?: CommentData[];
 }
 
 export interface CommentsPage {
@@ -233,6 +236,30 @@ export async function getCommentsByPostId(
     pagination: response.data.data?.pagination ?? {
       page: params.page ?? 1,
       limit: params.limit ?? 20,
+      total: 0,
+      pages: 0,
+    },
+  };
+}
+
+export async function getCommentThread(
+  postId: number,
+  params: { page?: number; limit?: number } = {},
+  signal?: AbortSignal,
+): Promise<CommentsPage> {
+  const response = await api.get<RawCommentsEnvelope>(
+    `/comment/by-post/${postId}/thread`,
+    {
+      params: { page: 1, limit: 30, ...params },
+      signal,
+    },
+  );
+
+  return {
+    comments: response.data.data?.comments ?? [],
+    pagination: response.data.data?.pagination ?? {
+      page: params.page ?? 1,
+      limit: params.limit ?? 30,
       total: 0,
       pages: 0,
     },

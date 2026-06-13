@@ -6,6 +6,7 @@ import rekkoSword from '@/assets/rekko_sword.png';
 import SearchBar  from '@/components/ui/common/SearchBar';
 import Avatar     from '@/components/ui/common/Avatar';
 import Button     from '@/components/ui/common/Button';
+import WelcomeBadge from '@/components/layout/WelcomeBadge';
 import { useAuthStore } from '@/store/useAuthStore';
 import { authService } from '@/lib/authService';
 import { getStoredRefreshToken } from '@/lib/tokenStorage';
@@ -40,6 +41,8 @@ export default function Navbar() {
         <button onClick={() => navigate('/feed')} className="flex-shrink-0" aria-label="Home">
           <img src={rekkoLogo} alt="Rekko" className="h-[48px]" />
         </button>
+
+        {user && <WelcomeBadge compact />}
 
         <div className="flex-1 min-w-0">
           <SearchBar />
@@ -93,13 +96,16 @@ export default function Navbar() {
       <div className="hidden lg:block">
         {/* Row 1 — header */}
         <div className="grid grid-cols-[1fr_auto_1fr] items-center px-[6%] h-[90px]">
-          <button
-            onClick={() => navigate('/feed')}
-            className="justify-self-start cursor-pointer"
-            aria-label="Home"
-          >
-            <img src={rekkoLogo} alt="Rekko" className="h-[100px]" />
-          </button>
+          <div className="flex items-center gap-3 justify-self-start">
+            <button
+              onClick={() => navigate('/feed')}
+              className="cursor-pointer"
+              aria-label="Home"
+            >
+              <img src={rekkoLogo} alt="Rekko" className="h-[100px]" />
+            </button>
+            {user && <WelcomeBadge />}
+          </div>
 
           <SearchBar />
 

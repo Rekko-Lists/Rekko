@@ -1,3 +1,38 @@
 {
-  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }]
+  "rewrites": [
+    {
+      "source": "/profile/:username",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(bot|facebookexternalhit|whatsapp|telegram|slackbot|discord|twitter|pinterest|embedly|iframely|skypeuripreview|vkshare|linkedin|redditbot|google|bing|applebot).*"
+        }
+      ],
+      "destination": "/api/og?type=profile&id=:username"
+    },
+    {
+      "source": "/post/:id",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(bot|facebookexternalhit|whatsapp|telegram|slackbot|discord|twitter|pinterest|embedly|iframely|skypeuripreview|vkshare|linkedin|redditbot|google|bing|applebot).*"
+        }
+      ],
+      "destination": "/api/og?type=post&id=:id"
+    },
+    {
+      "source": "/animes/:malId",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(bot|facebookexternalhit|whatsapp|telegram|slackbot|discord|twitter|pinterest|embedly|iframely|skypeuripreview|vkshare|linkedin|redditbot|google|bing|applebot).*"
+        }
+      ],
+      "destination": "/api/og?type=anime&id=:malId"
+    },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ]
 }

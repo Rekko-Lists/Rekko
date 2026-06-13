@@ -36,6 +36,15 @@ export default {
         "gradient-cta": "linear-gradient(180deg, #788397 0%, #212834 100%)",
         "gradient-banner": "linear-gradient(180deg, #FF7700 0%, #FF9E00 100%)",
       },
+      keyframes: {
+        shimmer: {
+          "0%": { backgroundPosition: "-150% 0" },
+          "100%": { backgroundPosition: "150% 0" },
+        },
+      },
+      animation: {
+        shimmer: "shimmer 1.4s linear infinite",
+      },
     },
   },
   plugins: [require("daisyui")],
