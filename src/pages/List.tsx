@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import {
   LayoutGrid, AlignJustify, BookOpen,
   AlertCircle, RefreshCw,
-  Check, Eye, Clock, X, Pause,
+  Check, Eye, Clock, X, Pause, Plus, Download,
   type LucideIcon,
 } from 'lucide-react';
 import Seo from '@/components/seo/Seo';
@@ -13,6 +13,9 @@ import ListCardView from '@/components/ui/list/ListCardView';
 import ListCatalogView from '@/components/ui/list/ListCatalogView';
 import ListTableView from '@/components/ui/list/ListTableView';
 import ListEditModal from '@/components/ui/list/ListEditModal';
+import AddAnimeModal from '@/components/ui/list/AddAnimeModal';
+import ImportModal from '@/components/ui/import/ImportModal';
+import { setWatchState } from '@/lib/animeService';
 import { useAuthStore } from '@/store/useAuthStore';
 import type { WatchState } from '@/types/anime';
 
@@ -171,6 +174,10 @@ export default function List() {
   const [activeTab, setActiveTab] = useState<TabFilter>('all');
   const [viewMode,  setViewMode]  = useState<ViewMode>('cards');
   const [editEntry, setEditEntry] = useState<UserListEntry | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+
+  const existingMalIds = useMemo(() => new Set(entries.map((e) => e.malId)), [entries]);
 
   const counts = useMemo(() => {
     const map: Partial<Record<ListState, number>> = {};
@@ -253,18 +260,36 @@ export default function List() {
           })}
         </div>
 
-        <div className={styles.modeSwitcher}>
-          {VIEW_MODES.map(({ id, Icon, label }) => (
-            <button
-              key={id}
-              title={label}
-              onClick={() => setViewMode(id)}
-              className={viewMode === id ? styles.modeBtnActive : styles.modeBtn}
-            >
-              <Icon size={13} />
-              <span className={styles.modeBtnLabel}>{label}</span>
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowImportModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] text-xs font-medium text-text-secondary border border-border hover:border-primary hover:text-primary transition-colors"
+          >
+            <Download size={14} />
+            <span className={styles.modeBtnLabel}>Import</span>
+          </button>
+
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] text-xs font-semibold text-white bg-gradient-to-b from-grad-start to-grad-end hover:opacity-90 transition-opacity"
+          >
+            <Plus size={14} />
+            <span className={styles.modeBtnLabel}>Add anime</span>
+          </button>
+
+          <div className={styles.modeSwitcher}>
+            {VIEW_MODES.map(({ id, Icon, label }) => (
+              <button
+                key={id}
+                title={label}
+                onClick={() => setViewMode(id)}
+                className={viewMode === id ? styles.modeBtnActive : styles.modeBtn}
+              >
+                <Icon size={13} />
+                <span className={styles.modeBtnLabel}>{label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -288,6 +313,26 @@ export default function List() {
         <div className={styles.tableWrap}>
           <ListTableView entries={filtered} onEdit={setEditEntry} />
         </div>
+      )}
+
+      {/* Import modal */}
+      {showImportModal && (
+        <ImportModal
+          onClose={() => setShowImportModal(false)}
+          onImported={() => refresh()}
+        />
+      )}
+
+      {/* Add modal */}
+      {showAddModal && (
+        <AddAnimeModal
+          existingMalIds={existingMalIds}
+          onClose={() => setShowAddModal(false)}
+          onAdd={async (malId, state, episodes) => {
+            await setWatchState(malId, state, episodes);
+            refresh();
+          }}
+        />
       )}
 
       {/* Edit modal */}

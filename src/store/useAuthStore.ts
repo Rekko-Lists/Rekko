@@ -10,6 +10,8 @@ export interface AuthUser {
   profileImage?: string;
   role?: 'USER' | 'MODERATOR' | 'ADMIN';
   streak?: number;
+  /** ISO timestamp of account creation — drives the new-user welcome flow. */
+  createdAt?: string;
 }
 
 interface AuthState {

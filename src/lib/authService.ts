@@ -97,6 +97,7 @@ export const authService = {
       profileImage: d.profileImage,
       role: d.role,
       streak: d.streak,
+      createdAt: d.createdAt,
     };
   },
 

@@ -14,8 +14,6 @@ interface Props {
   activeReplyId: number | null;
   onReply: (commentId: number) => void;
   onSubmitReply: (parentCommentId: number, message: string) => Promise<void>;
-  repliesMap: Record<number, CommentData[]>;
-  onShowReplies: (commentId: number) => void;
   isAuthenticated: boolean;
 }
 
@@ -43,6 +41,10 @@ const styles = {
   error: "px-6 py-8 text-center text-status-red",
 };
 
+// Replies deeper than this no longer offer a reply button, but they are still
+// rendered so the whole thread is visible without extra clicks.
+const MAX_REPLY_DEPTH = 4;
+
 export default function CommentsVirtualList({
   comments,
   loadingMore,
@@ -53,8 +55,6 @@ export default function CommentsVirtualList({
   activeReplyId,
   onReply,
   onSubmitReply,
-  repliesMap,
-  onShowReplies,
   isAuthenticated,
 }: Props) {
   return (
@@ -72,12 +72,8 @@ export default function CommentsVirtualList({
               depth={0}
               activeReplyId={activeReplyId}
               onLike={onLike}
-              isReplying={activeReplyId === comment.commentId}
               onReply={onReply}
               onSubmitReply={onSubmitReply}
-              replies={repliesMap[comment.commentId]}
-              repliesMap={repliesMap}
-              onShowReplies={onShowReplies}
               isAuthenticated={isAuthenticated}
             />
           ))}
@@ -93,12 +89,8 @@ interface CommentRowProps {
   depth: number;
   activeReplyId: number | null;
   onLike: (commentId: number) => void;
-  isReplying: boolean;
   onReply: (commentId: number) => void;
   onSubmitReply: (parentCommentId: number, message: string) => Promise<void>;
-  replies?: CommentData[];
-  repliesMap: Record<number, CommentData[]>;
-  onShowReplies: (commentId: number) => void;
   isAuthenticated: boolean;
 }
 
@@ -107,20 +99,21 @@ function CommentRow({
   depth,
   activeReplyId,
   onLike,
-  isReplying,
   onReply,
   onSubmitReply,
-  replies,
-  repliesMap,
-  onShowReplies,
   isAuthenticated,
 }: CommentRowProps) {
   const [replyText, setReplyText] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  // Replies are expanded by default; users can collapse a noisy branch.
+  const [collapsed, setCollapsed] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const hasExpandedReplies = Boolean(replies);
-  const canReply = isAuthenticated && depth < 4;
+  const replies = comment.replies ?? [];
+  const hasReplies = replies.length > 0;
+  const canReply = isAuthenticated && depth < MAX_REPLY_DEPTH;
+  const isReplying = activeReplyId === comment.commentId;
+  const isNested = depth > 0;
 
   async function handleReplySubmit(e: FormEvent) {
     e.preventDefault();
@@ -133,8 +126,6 @@ function CommentRow({
       setSubmitting(false);
     }
   }
-
-  const isNested = depth > 0;
 
   return (
     <article className={isNested ? styles.commentRowNested : styles.commentRow}>
@@ -170,13 +161,13 @@ function CommentRow({
               Reply
             </button>
           )}
-          {(comment.hasReplies || (replies && replies.length > 0)) && (
+          {hasReplies && (
             <button
               type="button"
               className={styles.repliesToggle}
-              onClick={() => onShowReplies(comment.commentId)}
+              onClick={() => setCollapsed((prev) => !prev)}
             >
-              {hasExpandedReplies ? "Hide replies" : `Show ${comment.replyCount ?? ""} replies`}
+              {collapsed ? `Show ${replies.length} ${replies.length === 1 ? "reply" : "replies"}` : "Hide replies"}
             </button>
           )}
         </div>
@@ -202,21 +193,17 @@ function CommentRow({
           </form>
         )}
 
-        {hasExpandedReplies && replies!.length > 0 && (
+        {hasReplies && !collapsed && (
           <div className={styles.repliesSection}>
-            {replies!.map((reply) => (
+            {replies.map((reply) => (
               <CommentRow
                 key={reply.commentId}
                 comment={reply}
                 depth={depth + 1}
                 activeReplyId={activeReplyId}
                 onLike={onLike}
-                isReplying={activeReplyId === reply.commentId}
                 onReply={onReply}
                 onSubmitReply={onSubmitReply}
-                replies={repliesMap[reply.commentId]}
-                repliesMap={repliesMap}
-                onShowReplies={onShowReplies}
                 isAuthenticated={isAuthenticated}
               />
             ))}

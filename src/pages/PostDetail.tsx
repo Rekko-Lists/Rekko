@@ -10,8 +10,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   createComment,
   deletePost,
-  getCommentReplies,
-  getCommentsByPostId,
+  getCommentThread,
   getPostById,
   getPopularPosts,
   likeComment,
@@ -53,6 +52,55 @@ function normalizeRelated(post: PostDetailData) {
   }));
 }
 
+/** Returns a new tree with the matching comment replaced by `updater(comment)`. */
+function updateCommentInTree(
+  list: CommentData[],
+  commentId: number,
+  updater: (comment: CommentData) => CommentData,
+): CommentData[] {
+  return list.map((comment) => {
+    if (comment.commentId === commentId) return updater(comment);
+    if (comment.replies?.length) {
+      return { ...comment, replies: updateCommentInTree(comment.replies, commentId, updater) };
+    }
+    return comment;
+  });
+}
+
+/** Returns a new tree with `reply` appended under the comment `parentId`. */
+function insertReplyInTree(
+  list: CommentData[],
+  parentId: number,
+  reply: CommentData,
+): CommentData[] {
+  return list.map((comment) => {
+    if (comment.commentId === parentId) {
+      return {
+        ...comment,
+        hasReplies: true,
+        replyCount: (comment.replyCount ?? 0) + 1,
+        replies: [...(comment.replies ?? []), reply],
+      };
+    }
+    if (comment.replies?.length) {
+      return { ...comment, replies: insertReplyInTree(comment.replies, parentId, reply) };
+    }
+    return comment;
+  });
+}
+
+/** Finds a comment anywhere in the tree (used to read its current like state). */
+function findCommentInTree(list: CommentData[], commentId: number): CommentData | undefined {
+  for (const comment of list) {
+    if (comment.commentId === commentId) return comment;
+    if (comment.replies?.length) {
+      const found = findCommentInTree(comment.replies, commentId);
+      if (found) return found;
+    }
+  }
+  return undefined;
+}
+
 export default function PostDetail() {
   const { postId: postIdParam } = useParams<{ postId: string }>();
   const navigate = useNavigate();
@@ -74,7 +122,6 @@ export default function PostDetail() {
   const [news, setNews] = useState<AnimeNewsItem[]>([]);
   const [recommendations, setRecommendations] = useState<RecommendationItem[]>([]);
   const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
-  const [repliesMap, setRepliesMap] = useState<Record<number, CommentData[]>>({});
   const viewportRef = useRef<HTMLDivElement>(null);
   const likingPostRef = useRef(false);
   const likingCommentsRef = useRef(new Set<number>());
@@ -150,7 +197,7 @@ export default function PostDetail() {
     setLoadingMore(true);
 
     try {
-      const data = await getCommentsByPostId(postId, {
+      const data = await getCommentThread(postId, {
         page: nextPage,
         limit: COMMENTS_LIMIT,
       });
@@ -220,38 +267,19 @@ export default function PostDetail() {
     }
 
     try {
-      await createComment({ postId, message: trimmed, parentCommentId });
+      const newReply = await createComment({ postId, message: trimmed, parentCommentId });
       setActiveReplyId(null);
-      // Refresh replies for this parent
-      const replies = await getCommentReplies(parentCommentId);
-      setRepliesMap((prev) => ({ ...prev, [parentCommentId]: replies }));
-      // Ensure the parent comment reflects that it now has replies so the
-      // toggle button stays visible even if the user hides then re-expands.
-      setComments((prev) =>
-        prev.map((c) =>
-          c.commentId === parentCommentId
-            ? { ...c, hasReplies: true, replyCount: (c.replyCount ?? 0) + 1 }
-            : c
-        )
-      );
-    } catch (err: unknown) {
-      setError(extractApiError(err));
-    }
-  }
-
-  async function handleShowReplies(commentId: number) {
-    if (repliesMap[commentId]) {
-      // Toggle off
-      setRepliesMap((prev) => {
-        const next = { ...prev };
-        delete next[commentId];
-        return next;
-      });
-      return;
-    }
-    try {
-      const replies = await getCommentReplies(commentId);
-      setRepliesMap((prev) => ({ ...prev, [commentId]: replies }));
+      if (newReply) {
+        const enriched: CommentData = {
+          ...newReply,
+          replies: [],
+          user: newReply.user ?? (currentUser
+            ? { username: currentUser.username, profileImage: currentUser.profileImage ?? "" }
+            : null),
+        };
+        setComments((prev) => insertReplyInTree(prev, parentCommentId, enriched));
+        setCommentsTotal((prev) => prev + 1);
+      }
     } catch (err: unknown) {
       setError(extractApiError(err));
     }
@@ -305,80 +333,40 @@ export default function PostDetail() {
       return;
     }
 
-    const current = comments.find((c) => c.commentId === commentId);
-
-    // Check if it's a reply inside repliesMap
-    if (!current) {
-      let parentId: number | null = null;
-      let replyComment: CommentData | undefined;
-      for (const [pid, replies] of Object.entries(repliesMap)) {
-        const found = replies.find((r) => r.commentId === commentId);
-        if (found) { parentId = Number(pid); replyComment = found; break; }
-      }
-      if (!replyComment || parentId === null) return;
-
-      likingCommentsRef.current.add(commentId);
-      const optimistic = {
-        ...replyComment,
-        hasLiked: !replyComment.hasLiked,
-        likes: replyComment.hasLiked ? Math.max(0, replyComment.likes - 1) : replyComment.likes + 1,
-      };
-      setRepliesMap((prev) => ({
-        ...prev,
-        [parentId!]: prev[parentId!].map((r) => r.commentId === commentId ? optimistic : r),
-      }));
-      try {
-        const updated = replyComment.hasLiked ? await unlikeComment(commentId) : await likeComment(commentId);
-        if (updated) {
-          setRepliesMap((prev) => ({
-            ...prev,
-            [parentId!]: prev[parentId!].map((r) =>
-              r.commentId === commentId ? { ...r, likes: updated.likes ?? optimistic.likes, hasLiked: optimistic.hasLiked } : r,
-            ),
-          }));
-        }
-      } catch (err: unknown) {
-        setRepliesMap((prev) => ({
-          ...prev,
-          [parentId!]: prev[parentId!].map((r) => r.commentId === commentId ? replyComment! : r),
-        }));
-        setError(extractApiError(err));
-      } finally {
-        likingCommentsRef.current.delete(commentId);
-      }
-      return;
-    }
+    const current = findCommentInTree(comments, commentId);
+    if (!current) return;
 
     likingCommentsRef.current.add(commentId);
-    const optimistic = {
-      ...current,
-      hasLiked: !current.hasLiked,
-      likes: current.hasLiked ? Math.max(0, current.likes - 1) : current.likes + 1,
-    };
+    const wasLiked = current.hasLiked;
     setComments((prev) =>
-      prev.map((comment) => (comment.commentId === commentId ? optimistic : comment)),
+      updateCommentInTree(prev, commentId, (c) => ({
+        ...c,
+        hasLiked: !c.hasLiked,
+        likes: c.hasLiked ? Math.max(0, c.likes - 1) : c.likes + 1,
+      })),
     );
 
     try {
-      const updated = current.hasLiked
+      const updated = wasLiked
         ? await unlikeComment(commentId)
         : await likeComment(commentId);
       if (updated) {
         setComments((prev) =>
-          prev.map((comment) =>
-            comment.commentId === commentId
-              ? {
-                  ...comment,
-                  likes: updated.likes ?? optimistic.likes,
-                  hasLiked: optimistic.hasLiked,
-                }
-              : comment,
-          ),
+          updateCommentInTree(prev, commentId, (c) => ({
+            ...c,
+            likes: updated.likes ?? c.likes,
+            hasLiked: !wasLiked,
+          })),
         );
       }
     } catch (err: unknown) {
+      // Revert to the pre-click state on failure.
       setComments((prev) =>
-        prev.map((comment) => (comment.commentId === commentId ? current : comment)),
+        updateCommentInTree(prev, commentId, (c) => ({
+          ...c,
+          hasLiked: wasLiked,
+          likes: current.likes,
+        })),
       );
       setError(extractApiError(err));
     } finally {
@@ -484,8 +472,6 @@ export default function PostDetail() {
             activeReplyId={activeReplyId}
             onReply={(id) => setActiveReplyId((prev) => (prev === id ? null : id))}
             onSubmitReply={handleSubmitReply}
-            repliesMap={repliesMap}
-            onShowReplies={handleShowReplies}
             isAuthenticated={isAuthenticated}
           />
         </main>

@@ -17,6 +17,7 @@ const List = lazy(() => import("@/pages/List"));
 const Profile = lazy(() => import("@/pages/Profile"));
 const Animedle = lazy(() => import("@/pages/Animedle"));
 const Settings = lazy(() => import("@/pages/Settings"));
+const Welcome = lazy(() => import("@/pages/Welcome"));
 const DiscordCallback = lazy(() => import("@/pages/DiscordCallback"));
 const EmailStatusPage = lazy(() => import("@/pages/EmailStatusPage"));
 const ResetPasswordPage = lazy(() => import("@/pages/ResetPasswordPage"));
@@ -79,6 +80,7 @@ export const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           { path: "list", element: page(<List />) },
+          { path: "welcome", element: page(<Welcome />) },
           { path: "settings", element: page(<Settings />) },
         ],
       },
