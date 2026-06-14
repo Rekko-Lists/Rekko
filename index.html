@@ -18,6 +18,15 @@
       font-weight: 100 900;
       font-display: swap;
     }
+
+    @layer utilities {
+      @media (max-width: 767px) {
+        .cky-revisit-consent {
+          left: auto !important;
+          @apply right-5 bottom-24 !important;
+        }
+      }
+    }
   </style>
 
   <script id="cookieyes" type="text/javascript" src="https://cdn-cookieyes.com/client_data/98e839aa23b7429362af39d1/script.js"></script>
