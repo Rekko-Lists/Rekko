@@ -18,18 +18,45 @@
       font-weight: 100 900;
       font-display: swap;
     }
-
-    @layer utilities {
-      @media (max-width: 767px) {
-        .cky-revisit-consent {
-          left: auto !important;
-          @apply right-5 bottom-24 !important;
-        }
-      }
-    }
   </style>
 
   <script id="cookieyes" type="text/javascript" src="https://cdn-cookieyes.com/client_data/98e839aa23b7429362af39d1/script.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      // Creamos la regla CSS que queremos meter dentro de CookieYes
+      const estiloMovil = `
+        @media (max-width: 767px) {
+          .cky-revisit-consent {
+            left: auto !important;
+            right: 20px !important;
+            bottom: 90px !important;
+          }
+        }
+      `;
+      
+      // Creamos una etiqueta <style> en tu HTML global para asegurar el tiro
+      const styleTag = document.createElement("style");
+      styleTag.innerHTML = estiloMovil;
+      document.head.appendChild(styleTag);
+
+      // El truco maestro: Esperamos a que CookieYes cree su Shadow DOM e inyectamos el CSS dentro
+      const miIntervalo = setInterval(() => {
+        const ckyElement = document.getElementById("cky-consent-element") || document.querySelector(".cky-revisit-consent");
+        if (ckyElement) {
+          // Si usa shadowRoot, le metemos el estilo dentro de su cápsula armada
+          if (ckyElement.shadowRoot) {
+            const shadowStyle = document.createElement("style");
+            shadowStyle.innerHTML = estiloMovil;
+            ckyElement.shadowRoot.appendChild(shadowStyle);
+            clearInterval(miIntervalo); // Ya lo hemos hackeado, paramos el bucle
+          }
+        }
+      }, 300); // Revisa cada 300ms hasta que el botón aparezca
+
+      // Por seguridad, dejamos de buscar a los 10 segundos para no consumir recursos
+      setTimeout(() => clearInterval(miIntervalo), 10000);
+    });
+  </script>
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-74XS2PG2ZF"></script>
