@@ -9,7 +9,10 @@
 // tsconfig and compiled by Vercel's own Node runtime.
 
 const API_BASE_URL =
-  process.env.API_BASE_URL || process.env.VITE_API_BASE_URL || '';
+  process.env.API_BASE_URL ||
+  (process.env.NODE_ENV === 'development'
+    ? process.env.VITE_API_BASE_URL_DEV
+    : process.env.VITE_API_BASE_URL_PROD) || '';
 
 const SITE_NAME = 'Rekko';
 const FALLBACK_IMAGE = '/rekko_logo.png';
