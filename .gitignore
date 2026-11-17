@@ -37,6 +37,9 @@ Thumbs.db
 *.temp
 
 # Agents and local tooling
+.serena/
+.beads/
+.beads.gate.lock
 .agents/skills
 .claude/settings.local.json
 skills-lock.json
