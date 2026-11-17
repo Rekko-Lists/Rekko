@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Check, X, Flame } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import rekkoLogo from '@/assets/rekko_logo.png';
+import rekkoLogo from '@/assets/rekko_logo_dark.png';
 import { useAuthStore } from '@/store/useAuthStore';
 import { authService } from '@/lib/authService';
 import Seo from '@/components/seo/Seo';
@@ -110,7 +110,7 @@ const styles = {
   // Top bar — dark gradient header like AdminPanel sidebar
   topBar:      'w-full flex items-center justify-between px-4 py-3 sticky top-0 z-10 bg-gradient-to-r from-grad-end to-grad-start border-b border-grad-end sm:px-8',
   logoBtn:     'flex-shrink-0 cursor-pointer transition-transform active:scale-95',
-  logoImg:     'h-[56px] object-contain brightness-0 invert',
+  logoImg:     'h-[56px] object-contain',
   topBarRight: 'flex items-center gap-2',
   streakBadge: 'inline-flex items-center gap-1.5 bg-primary/20 border border-primary/40 text-white text-xs font-bold px-3 py-1.5 rounded-pill',
   topBarBadge: 'inline-flex items-center gap-1.5 bg-white/15 border border-white/25 text-white text-xs font-semibold px-3 py-1.5 rounded-pill',

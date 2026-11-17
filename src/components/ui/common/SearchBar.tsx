@@ -18,7 +18,7 @@ const styles = {
   wrapper: "relative w-full max-w-[380px] mx-auto font-gabarito",
   form: "relative",
   input:
-    "w-full h-[40px] pl-4 pr-10 bg-[rgba(246,246,246,0.6)] border-[1.5px] border-border rounded-pill text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-primary transition-colors",
+    "w-full h-[40px] pl-4 pr-10 bg-[rgba(246,246,246,0.6)] dark:bg-surface border-[1.5px] border-border rounded-pill text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-primary transition-colors",
   icon: "absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted",
   dropdown:
     "absolute left-0 right-0 top-[44px] bg-surface border border-border rounded-card shadow-card z-50 overflow-hidden",

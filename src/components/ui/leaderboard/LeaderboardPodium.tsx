@@ -34,14 +34,14 @@ const rankStyles = {
 const styles = {
   wrap: "relative mx-auto mb-12 grid min-h-[330px] w-full max-w-[850px] grid-cols-3 items-end gap-2 pt-14 sm:gap-5",
   spot: "leaderboard-pop relative flex flex-col items-center text-center transition-transform hover:-translate-y-2",
-  avatar: "absolute -top-10 z-20 rounded-full ring-4 ring-white",
+  avatar: "absolute -top-10 z-20 rounded-full ring-4 ring-white dark:ring-[#242a33]",
   icon: "absolute -top-[78px] z-30",
-  cloudBox: "relative flex w-full flex-col items-center justify-end rounded-[32px] bg-white/50 px-3 pb-5",
-  cloud: "absolute inset-x-0 bottom-7 mx-auto w-[92%] object-contain drop-shadow-[0_14px_20px_rgba(0,0,0,0.12)]",
+  cloudBox: "relative flex w-full flex-col items-center justify-end rounded-[32px] bg-white/50 dark:bg-surface px-3 pb-5",
+  cloud: "absolute inset-x-0 bottom-7 mx-auto w-[92%] object-contain drop-shadow-[0_14px_20px_rgba(0,0,0,0.12)] dark:opacity-20",
   rank: "relative z-10 text-[42px] font-black leading-none tracking-tight",
   name: "relative z-10 mt-3 max-w-full truncate text-sm font-semibold text-text-main",
   rep: "relative z-10 text-xs text-text-muted",
-  shimmer: "leaderboard-shimmer bg-[linear-gradient(110deg,#1d2433_0%,#FF9E00_42%,#1d2433_70%)] bg-[length:220%_100%] bg-clip-text text-transparent",
+  shimmer: "leaderboard-shimmer bg-[linear-gradient(110deg,#1d2433_0%,#FF9E00_42%,#1d2433_70%)] dark:bg-[linear-gradient(110deg,#ffffff_0%,#FFB94D_42%,#ffffff_70%)] bg-[length:220%_100%] bg-clip-text text-transparent",
 };
 
 export default function LeaderboardPodium({ users }: Props) {

@@ -9,17 +9,17 @@ interface Props {
 const styles = {
   section: 'mt-12',
   frame:
-    'relative overflow-hidden rounded-[20px] border border-border bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(244,244,244,0.88))] p-4 shadow-[0_18px_50px_rgba(33,40,52,0.10)] md:p-5',
+    'relative overflow-hidden rounded-[20px] border border-border bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(244,244,244,0.88))] dark:bg-none dark:bg-surface p-4 shadow-[0_18px_50px_rgba(33,40,52,0.10)] md:p-5',
   glow: 'pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-primary/20 blur-3xl',
   cloud:
-    'pointer-events-none absolute inset-x-0 top-0 h-32 bg-[url("/bg-clouds-banner.png")] bg-cover bg-center opacity-70',
+    'pointer-events-none absolute inset-x-0 top-0 h-32 bg-[url("/bg-clouds-banner.png")] bg-cover bg-center opacity-70 dark:opacity-10',
   header: 'relative z-10 mb-5 flex flex-col items-center text-center',
   eyebrow: 'text-[11px] font-black uppercase tracking-[0.3em] text-primary',
   title: 'mt-1 text-[30px] font-medium leading-none text-text-main md:text-[34px]',
   subtitle: 'mt-2 max-w-[620px] text-sm leading-snug text-text-muted',
   grid: 'relative z-10 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 min-[1800px]:grid-cols-7',
   day: 'min-h-[160px] rounded-[14px] border border-border-light bg-app-bg/85 p-3 transition hover:-translate-y-0.5 hover:shadow-card',
-  dayToday: 'border-primary/60 bg-primary/10 shadow-[0_8px_22px_rgba(255,158,0,0.16)]',
+  dayToday: 'border-primary/60 bg-primary/10 dark:bg-[#4a3520] shadow-[0_8px_22px_rgba(255,158,0,0.16)]',
   dayTitle: 'mb-3 flex items-center justify-between gap-2 text-sm font-black text-text-main',
   count: 'rounded-full bg-surface px-2 py-0.5 text-[11px] font-bold text-primary shadow-sm',
   list: 'flex flex-col gap-2',

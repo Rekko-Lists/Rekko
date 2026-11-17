@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Database, Calendar } from 'lucide-react';
-import rekkoLogo from '@/assets/rekko_logo.png';
+import BrandLogo from '@/components/ui/common/BrandLogo';
 import SeedPanel from '@/components/admin/SeedPanel';
 import ChallengesPanel from '@/components/admin/ChallengesPanel';
 
@@ -28,7 +28,7 @@ export default function AdminPanel() {
       <div className={styles.inner}>
       <aside className={styles.sidebar}>
         <div className={styles.sidebarTop}>
-          <img src={rekkoLogo} alt="Rekko" className={styles.logo} />
+          <BrandLogo className={styles.logo} />
           <span className={styles.sidebarLabel}>Admin</span>
         </div>
         <nav className={styles.nav}>
