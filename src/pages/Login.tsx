@@ -14,7 +14,7 @@ const styles = {
   card:      'bg-surface w-full max-w-[400px] rounded-[10px] shadow-card px-6 py-8 flex flex-col gap-3 sm:px-12 sm:py-10',
   title:     'text-[32px] font-normal text-text-main text-center mb-0',
   successBanner: 'bg-status-green/10 border border-status-green rounded-[5px] px-3 py-2 text-xs text-status-green text-center',
-  input:     'w-full h-[42px] rounded-btn border border-border bg-[rgba(246,246,246,0.6)] shadow-input px-3 text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-text-secondary',
+  input:     'w-full h-[42px] rounded-btn border border-border bg-[rgba(246,246,246,0.6)] dark:bg-app-bg shadow-input px-3 text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-text-secondary',
   row:       'flex items-center justify-between text-xs',
   check:     'flex items-center gap-2 cursor-pointer text-text-secondary',
   forgot:    'text-primary text-xs cursor-pointer hover:underline',

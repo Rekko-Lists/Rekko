@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, NavLink } from 'react-router-dom';
 import { LogOut, Swords } from 'lucide-react';
-import rekkoLogo  from '@/assets/rekko_logo.png';
+import BrandLogo from '@/components/ui/common/BrandLogo';
 import rekkoSword from '@/assets/rekko_sword.png';
 import SearchBar  from '@/components/ui/common/SearchBar';
 import Avatar     from '@/components/ui/common/Avatar';
@@ -39,7 +39,7 @@ export default function Navbar() {
       {/* ── Mobile header (< lg) — compact: logo, search, animedle, avatar ── */}
       <div className="lg:hidden flex items-center gap-2 px-3 h-[60px]">
         <button onClick={() => navigate('/feed')} className="flex-shrink-0" aria-label="Home">
-          <img src={rekkoLogo} alt="Rekko" className="h-[48px]" />
+          <BrandLogo className="h-[48px]" />
         </button>
 
         {user && <WelcomeBadge compact />}
@@ -90,7 +90,7 @@ export default function Navbar() {
           </div>
         )}
       </div>
-      <div className="lg:hidden h-[1.5px] bg-black/15 mx-3" />
+      <div className="lg:hidden h-[1.5px] bg-black/15 dark:bg-border mx-3" />
 
       {/* ── Desktop header (lg+) — original two-row layout ── */}
       <div className="hidden lg:block">
@@ -102,7 +102,7 @@ export default function Navbar() {
               className="cursor-pointer"
               aria-label="Home"
             >
-              <img src={rekkoLogo} alt="Rekko" className="h-[100px]" />
+              <BrandLogo className="h-[100px]" />
             </button>
             {user && <WelcomeBadge />}
           </div>
@@ -161,7 +161,7 @@ export default function Navbar() {
         </div>
 
         {/* Divider 1 — inset */}
-        <div className="h-[1.5px] bg-black/15 mx-[6%]" />
+        <div className="h-[1.5px] bg-black/15 dark:bg-border mx-[6%]" />
 
         {/* Row 2 — tabs */}
         <div className="flex items-center justify-center gap-10 h-[44px]">
@@ -180,7 +180,7 @@ export default function Navbar() {
         </div>
 
         {/* Divider 2 — inset */}
-        <div className="h-[1px] bg-black/15 mx-[6%]" />
+        <div className="h-[1px] bg-black/15 dark:bg-border mx-[6%]" />
       </div>
 
       <CreatePostModal isOpen={showPostModal} onClose={() => setShowPostModal(false)} />

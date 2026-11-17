@@ -45,6 +45,18 @@ type Section = 'general' | 'security';
 export default function Settings() {
   const { user, setUser } = useAuthStore();
   const [section, setSection] = useState<Section>('general');
+  const [darkMode, setDarkMode] = useState(() => document.documentElement.classList.contains('dark'));
+
+  function changeTheme(dark: boolean) {
+    setDarkMode(dark);
+    document.documentElement.classList.toggle('dark', dark);
+    document.documentElement.dataset.theme = dark ? 'rekkoDark' : 'rekko';
+    try {
+      localStorage.setItem('rekko-theme', dark ? 'dark' : 'light');
+    } catch {
+      // The theme still works for this session if storage is unavailable.
+    }
+  }
 
   // Username change
   const [newUsername, setNewUsername] = useState('');
@@ -293,6 +305,19 @@ export default function Settings() {
                   <CheckCircle size={16} /> Email verified
                 </div>
               )}
+              <div className={styles.section}>
+                <h2 className={styles.sectionHead}>Appearance</h2>
+                <label className="flex items-center gap-3 text-sm text-text-main cursor-pointer w-fit">
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    checked={darkMode}
+                    onChange={e => changeTheme(e.target.checked)}
+                    className="toggle toggle-primary"
+                  />
+                  Dark mode
+                </label>
+              </div>
             </>
           )}
 

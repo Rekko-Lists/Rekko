@@ -2,6 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --surface: 255 255 255;
+  --app-bg: 244 244 244;
+  --border: 197 197 197;
+  --border-light: 217 217 217;
+  --text-main: 32 32 32;
+  --text-secondary: 104 104 104;
+  --text-muted: 155 155 155;
+  color-scheme: light;
+}
+
+:root.dark {
+  --surface: 36 42 51;
+  --app-bg: 24 28 35;
+  --border: 85 94 108;
+  --border-light: 65 74 87;
+  --text-main: 236 238 242;
+  --text-secondary: 190 198 209;
+  --text-muted: 166 175 188;
+  color-scheme: dark;
+}
+
+/* Legacy opaque white cards predate the semantic surface token. */
+:where(.dark) .bg-white {
+  --tw-bg-opacity: 1;
+  background-color: rgb(var(--surface) / var(--tw-bg-opacity));
+}
+
+:where(.dark) button.bg-gradient-cta {
+  box-shadow: inset 0 0 0 1px rgb(var(--border));
+}
+
 @font-face {
   font-family: "Gabarito";
   src: url("/fonts/Gabarito-VariableFont_wght.ttf") format("truetype");

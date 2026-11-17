@@ -291,7 +291,7 @@ export default function Profile() {
           )}
           {isOwnProfile && (
             <button
-              className="absolute top-3 right-3 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors"
+              className="absolute top-3 right-3 w-8 h-8 bg-surface/80 rounded-full flex items-center justify-center hover:bg-surface transition-colors"
               onClick={() => setUploadModal('banner')}
             >
               <Edit size={13} className="text-text-main" />

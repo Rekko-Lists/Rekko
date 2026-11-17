@@ -3,4 +3,4 @@ Allow: /
 
 Disallow: /oauth/
 
-Sitemap: https://rekko-one.vercel.app/sitemap.xml
+Sitemap: https://rekko-lists.net/sitemap.xml

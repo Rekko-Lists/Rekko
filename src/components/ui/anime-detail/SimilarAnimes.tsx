@@ -20,7 +20,7 @@ const styles = {
   cardCenter:  'left-1/2 -translate-x-1/2 w-[120px] h-[170px] shadow-[0px_10px_28px_0px_rgba(0,0,0,0.45)] z-20 hover:-translate-y-1 hover:-translate-x-1/2',
   cardRight:   'right-0 w-[100px] h-[150px] rotate-[6deg] translate-y-3 shadow-[0px_6px_18px_0px_rgba(0,0,0,0.30)] z-0 hover:-translate-y-1 hover:rotate-[8deg]',
   img:         'w-full h-full object-cover',
-  viewMore:    'mt-4 px-4 h-[34px] bg-white shadow-[0px_4px_5px_0px_rgba(0,0,0,0.25)] rounded-card text-[#202020] text-[14px] font-gabarito hover:bg-app-bg transition-colors',
+  viewMore:    'mt-4 px-4 h-[34px] bg-surface shadow-[0px_4px_5px_0px_rgba(0,0,0,0.25)] rounded-card text-text-main text-[14px] font-gabarito hover:bg-app-bg transition-colors',
   placeholder: 'bg-border-light',
   emptyText:   'mt-3 text-text-muted text-[13px]',
 };

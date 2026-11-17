@@ -8,7 +8,7 @@ interface Props {
 }
 
 const styles = {
-  list: "mx-auto flex w-full max-w-[780px] flex-col divide-y divide-border overflow-hidden rounded-card border border-border bg-white/60",
+  list: "mx-auto flex w-full max-w-[780px] flex-col divide-y divide-border overflow-hidden rounded-card border border-border bg-surface/60",
   row: "flex items-center gap-3 px-5 py-3 transition-colors hover:bg-primary/5",
   rank: "w-10 text-sm font-bold text-primary",
   user: "min-w-0 flex-1 text-sm font-medium text-text-main hover:text-primary",

@@ -1,3 +1,5 @@
+import BrandLogo from '@/components/ui/common/BrandLogo';
+
 const styles = {
   wrapper:  'flex items-center justify-center',
   logo:     'h-24 w-auto object-contain flex-shrink-0',
@@ -13,7 +15,7 @@ export default function PersonalRecommendation() {
   return (
     <div className={styles.wrapper}>
       <div className={styles.textLogoWrapper}>
-        <img src="/rekko_logo.png" alt="Rekko" className={styles.logo} />
+        <BrandLogo className={styles.logo} />
         <p className={styles.label}>Personal Recommendation:</p>
       </div>
       <section className={styles.card} aria-label="Personal Recommendation">
