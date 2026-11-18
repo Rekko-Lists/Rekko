@@ -11,7 +11,7 @@ const styles = {
   page:      'min-h-screen bg-app-bg flex items-center justify-center font-gabarito px-4',
   card:      'bg-surface w-full max-w-[400px] rounded-[10px] shadow-card px-6 py-8 flex flex-col gap-3 sm:px-12 sm:py-10',
   title:     'text-[32px] font-normal text-text-main text-center mb-0',
-  input:     'w-full h-[42px] rounded-btn border border-border bg-[rgba(246,246,246,0.6)] shadow-input px-3 text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-text-secondary',
+  input:     'w-full h-[42px] rounded-btn border border-border bg-[rgba(246,246,246,0.6)] dark:bg-app-bg shadow-input px-3 text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-text-secondary',
   error:     'text-xs text-status-red text-center -mt-1',
   divider:   'flex items-center gap-3 text-text-muted text-xs',
   line:      'flex-1 h-px bg-border',

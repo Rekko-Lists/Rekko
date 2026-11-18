@@ -10,7 +10,7 @@ const styles = {
   card:    'bg-surface w-full max-w-[400px] rounded-[10px] shadow-card px-6 py-8 flex flex-col gap-4 sm:px-12 sm:py-10',
   title:   'text-[32px] font-normal text-text-main text-center mb-0',
   subtitle:'text-sm text-text-muted text-center -mt-2',
-  input:   'w-full h-[42px] rounded-btn border border-border bg-[rgba(246,246,246,0.6)] shadow-input px-3 text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-text-secondary',
+  input:   'w-full h-[42px] rounded-btn border border-border bg-[rgba(246,246,246,0.6)] dark:bg-app-bg shadow-input px-3 text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-text-secondary',
   error:   'text-xs text-status-red text-center',
   okBanner:'bg-status-green/10 border border-status-green rounded-[5px] px-3 py-3 text-sm text-status-green text-center',
   link:    'text-center text-xs text-text-muted',

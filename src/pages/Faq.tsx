@@ -233,7 +233,7 @@ export default function Faq() {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Search FAQ..."
-                        className="w-full h-[40px] pl-4 pr-10 bg-[rgba(246,246,246,0.6)] border-[1.5px] border-border rounded-pill text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-primary transition-colors"
+                        className="w-full h-[40px] pl-4 pr-10 bg-[rgba(246,246,246,0.6)] dark:bg-surface border-[1.5px] border-border rounded-pill text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-primary transition-colors"
                     />
 
                     <FAQAccordion faqs={filteredFaqs} />
