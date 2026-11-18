@@ -97,8 +97,13 @@ export const authService = {
       profileImage: d.profileImage,
       role: d.role,
       streak: d.streak,
+      darkMode: d.darkMode,
       createdAt: d.createdAt,
     };
+  },
+
+  async updateTheme(darkMode: boolean): Promise<void> {
+    await api.patch('/auth/me/theme', { darkMode });
   },
 
   async getUserProfile(username: string): Promise<UserProfileData> {

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { storeRefreshToken, clearStoredRefreshToken } from '@/lib/tokenStorage';
 import { decodeAccessToken } from '@/lib/jwt';
+import { applyTheme } from '@/lib/theme';
 
 export interface AuthUser {
   userId: number;
@@ -10,6 +11,7 @@ export interface AuthUser {
   profileImage?: string;
   role?: 'USER' | 'MODERATOR' | 'ADMIN';
   streak?: number;
+  darkMode?: boolean;
   /** ISO timestamp of account creation — drives the new-user welcome flow. */
   createdAt?: string;
 }
@@ -29,7 +31,10 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()((set) => ({
   user: null,
   accessToken: null,
-  setUser: (user) => set({ user }),
+  setUser: (user) => {
+    if (typeof user.darkMode === 'boolean') applyTheme(user.darkMode);
+    set({ user });
+  },
   setAccessToken: (accessToken) =>
     set((state) => {
       if (!accessToken) return { accessToken };
@@ -48,6 +53,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
   login: (user, accessToken, refreshToken, rememberMe) => {
     storeRefreshToken(refreshToken, rememberMe);
     const claims = decodeAccessToken(accessToken);
+    if (typeof user.darkMode === 'boolean') applyTheme(user.darkMode);
     set({ accessToken, user: { ...user, ...claims } });
   },
   logout: () => {

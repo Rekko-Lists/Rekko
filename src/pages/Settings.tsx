@@ -3,6 +3,7 @@ import { Edit, Lock, Settings as SettingsIcon, CheckCircle, XCircle } from 'luci
 import Button from '@/components/ui/common/Button';
 import { useAuthStore } from '@/store/useAuthStore';
 import { authService } from '@/lib/authService';
+import { saveTheme } from '@/lib/theme';
 import type { SocialLink } from '@/lib/authService';
 import { extractApiError } from '@/lib/apiErrors';
 import { logger } from '@/lib/logger';
@@ -46,15 +47,24 @@ export default function Settings() {
   const { user, setUser } = useAuthStore();
   const [section, setSection] = useState<Section>('general');
   const [darkMode, setDarkMode] = useState(() => document.documentElement.classList.contains('dark'));
+  const [themeSaving, setThemeSaving] = useState(false);
+  const [themeError, setThemeError] = useState('');
 
-  function changeTheme(dark: boolean) {
+  async function changeTheme(dark: boolean) {
+    if (!user || themeSaving) return;
+    const previous = darkMode;
     setDarkMode(dark);
-    document.documentElement.classList.toggle('dark', dark);
-    document.documentElement.dataset.theme = dark ? 'rekkoDark' : 'rekko';
+    setThemeSaving(true);
+    setThemeError('');
     try {
-      localStorage.setItem('rekko-theme', dark ? 'dark' : 'light');
+      await saveTheme(dark, authService.updateTheme);
+      const current = useAuthStore.getState().user;
+      if (current?.userId === user.userId) setUser({ ...current, darkMode: dark });
     } catch {
-      // The theme still works for this session if storage is unavailable.
+      setDarkMode(previous);
+      setThemeError('Could not save your theme. Please try again.');
+    } finally {
+      setThemeSaving(false);
     }
   }
 
@@ -312,11 +322,13 @@ export default function Settings() {
                     type="checkbox"
                     role="switch"
                     checked={darkMode}
+                    disabled={themeSaving}
                     onChange={e => changeTheme(e.target.checked)}
                     className="toggle toggle-primary"
                   />
                   Dark mode
                 </label>
+                {themeError && <p role="alert" className={`${styles.feedback} ${styles.err}`}>{themeError}</p>}
               </div>
             </>
           )}
