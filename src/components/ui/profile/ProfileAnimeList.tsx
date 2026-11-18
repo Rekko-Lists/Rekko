@@ -19,7 +19,7 @@ const styles = {
   statLabel:   'text-[10px] text-text-secondary mt-0.5 whitespace-nowrap',
   statDivider: 'w-px h-6 bg-border',
   skeleton:    'px-5 py-8 flex justify-center',
-  skLine:      'h-3 bg-slate-100 rounded animate-pulse',
+  skLine:      'h-3 bg-slate-100 dark:bg-slate-800 rounded animate-pulse',
 };
 
 const STATE_COLORS: Record<ListState, string> = {

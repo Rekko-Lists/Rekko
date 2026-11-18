@@ -5,7 +5,7 @@ const styles = {
   logo:     'h-24 w-auto object-contain flex-shrink-0',
   card:     'relative w-full max-w-[449px] h-[188px] bg-surface border border-border rounded-btn font-gabarito flex items-center justify-center overflow-hidden flex-shrink-0',
   label:    'font-gabarito font-bold text-[20px] text-text-secondary text-center px-6',
-  overlay:  'absolute inset-0 bg-[rgba(244,244,244,0.7)] flex items-center justify-center pointer-events-none',
+  overlay:  'absolute inset-0 bg-app-bg/70 flex items-center justify-center pointer-events-none',
   badge:    'px-3 py-1 rounded-pill bg-primary text-white text-[12px] font-semibold uppercase tracking-wide',
   illus:    'h-48 w-auto overflow-hidden flex-shrink-0 rotate-45 relative translate-x-[-100px] -z-10',
   textLogoWrapper: 'flex flex-col text-center'
