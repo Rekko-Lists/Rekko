@@ -80,7 +80,7 @@ function CatalogCard({ entry, onEdit }: { entry: UserListEntry; onEdit?: (e: Use
   const hasBroadcast = !isMovie && entry.broadcast?.dayOfWeek && entry.broadcast.dayOfWeek !== 'Unknown';
 
   return (
-    <div className={styles.card} onClick={() => onEdit?.(entry)}>
+    <div className={styles.card} role={onEdit ? 'button' : undefined} tabIndex={onEdit ? 0 : undefined} aria-label={onEdit ? `Edit ${entry.name}` : undefined} onClick={() => onEdit?.(entry)} onKeyDown={(e) => { if (onEdit && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onEdit(entry); } }}>
       <div className={styles.cover}>
         {entry.imgMedium ? (
           <img src={entry.imgMedium} alt={entry.name} className={styles.coverImg} />

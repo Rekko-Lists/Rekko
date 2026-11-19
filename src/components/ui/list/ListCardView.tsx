@@ -74,7 +74,7 @@ function AnimeListCard({ entry, onEdit }: { entry: UserListEntry; onEdit?: (e: U
   const isMovie = entry.mediaType === 'movie';
 
   return (
-    <div className={styles.card} onClick={() => onEdit?.(entry)}>
+    <div className={styles.card} role={onEdit ? 'button' : undefined} tabIndex={onEdit ? 0 : undefined} aria-label={onEdit ? `Edit ${entry.name}` : undefined} onClick={() => onEdit?.(entry)} onKeyDown={(e) => { if (onEdit && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onEdit(entry); } }}>
       <div className={styles.poster}>
         {entry.imgLarge ? (
           <img src={entry.imgLarge} alt={entry.name} className={styles.posterImg} />

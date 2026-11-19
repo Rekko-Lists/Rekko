@@ -61,49 +61,21 @@ export default function PostsCarousel({
   showHeader = true,
   currentAnime,
 }: Props) {
-  const [visualIndex, setVisualIndex] = useState(1);
-  const [withTransition, setWithTransition] = useState(true);
+  const [visualIndex, setVisualIndex] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
-    setVisualIndex(posts.length > 1 ? 1 : 0);
-    setWithTransition(false);
-  }, [posts.length]);
-
-  useEffect(() => {
-    if (!withTransition) {
-      const frame = requestAnimationFrame(() => setWithTransition(true));
-      return () => cancelAnimationFrame(frame);
-    }
-  }, [withTransition]);
-
-  const carouselPosts =
-    posts.length > 1 ? [posts[posts.length - 1], ...posts, posts[0]] : posts;
+    setVisualIndex(0);
+  }, [malId, posts.length]);
 
   const handleViewAll = () => navigate(`/animes/${malId}/posts`);
 
   const handlePrev = () => {
-    if (posts.length === 0) return;
-    setWithTransition(true);
-    setVisualIndex((prev) => prev - 1);
+    setVisualIndex((prev) => Math.max(0, prev - 1));
   };
 
   const handleNext = () => {
-    if (posts.length === 0) return;
-    setWithTransition(true);
-    setVisualIndex((prev) => prev + 1);
-  };
-
-  const handleTransitionEnd = () => {
-    if (posts.length <= 1) return;
-
-    if (visualIndex === 0) {
-      setWithTransition(false);
-      setVisualIndex(posts.length);
-    } else if (visualIndex === posts.length + 1) {
-      setWithTransition(false);
-      setVisualIndex(1);
-    }
+    setVisualIndex((prev) => Math.min(posts.length - 1, prev + 1));
   };
 
   return (
@@ -143,11 +115,10 @@ export default function PostsCarousel({
               className={styles.track}
               style={{
                 transform: `translate(calc(-${POST_W / 2}px - ${visualIndex * (POST_W + POST_GAP)}px), -50%)`,
-                transitionDuration: withTransition ? "300ms" : "0ms",
+                transitionDuration: "300ms",
               }}
-              onTransitionEnd={handleTransitionEnd}
             >
-              {carouselPosts.map((post, postIndex) => (
+              {posts.map((post, postIndex) => (
                 <PostMini
                   key={`${post.id || "post"}-${postIndex}`}
                   post={post}
@@ -165,7 +136,7 @@ export default function PostsCarousel({
           className={`${styles.navBtn} ${styles.navLeft}`}
           onClick={handlePrev}
           aria-label="Previous post"
-          disabled={posts.length === 0}
+          disabled={visualIndex === 0}
         >
           <ChevronLeft size={16} />
         </button>
@@ -174,7 +145,7 @@ export default function PostsCarousel({
           className={`${styles.navBtn} ${styles.navRight}`}
           onClick={handleNext}
           aria-label="Next post"
-          disabled={posts.length === 0}
+          disabled={visualIndex >= posts.length - 1}
         >
           <ChevronRight size={16} />
         </button>

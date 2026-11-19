@@ -128,7 +128,9 @@ export default function Login() {
           </div>
         )}
 
+        <label htmlFor="email" className="text-sm text-text-secondary -mb-2">Email</label>
         <input
+          id="email"
           className={styles.input}
           type="email"
           placeholder="Email"
@@ -136,7 +138,9 @@ export default function Login() {
           onChange={e => { setEmail(e.target.value); setError(''); }}
           autoComplete="email"
         />
+        <label htmlFor="password" className="text-sm text-text-secondary -mb-2">Password</label>
         <input
+          id="password"
           className={styles.input}
           type="password"
           placeholder="Password"

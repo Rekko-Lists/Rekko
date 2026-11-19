@@ -25,11 +25,11 @@ const styles = {
   row:      'flex items-center gap-2',
   select:   'h-[36px] border border-border rounded-[5px] px-3 text-sm bg-surface cursor-pointer focus:outline-none text-text-main',
   trash:    'text-text-muted cursor-pointer hover:text-status-red transition-colors',
-  addLine:  'flex items-center gap-1.5 text-sm',
+  addLine:  'flex flex-wrap items-center gap-1.5 text-sm',
   addBtn:   'text-primary cursor-pointer hover:underline font-medium',
   muted:    'text-text-muted',
   advBtn:   'text-text-secondary cursor-pointer hover:text-text-main flex items-center gap-0.5',
-  applyBtn: 'h-[26px] bg-primary text-white rounded-[5px] px-4 text-sm font-semibold cursor-pointer hover:bg-primary-dark transition-colors',
+  applyBtn: 'min-h-[44px] whitespace-nowrap bg-primary text-white rounded-[5px] px-4 text-sm font-semibold cursor-pointer hover:bg-primary-dark transition-colors',
 };
 
 export default function QuickFilter({ properties, onApply, onOpenAdvanced }: QuickFilterProps) {

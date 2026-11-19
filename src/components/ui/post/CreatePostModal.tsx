@@ -1,5 +1,4 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
-import { createPortal } from 'react-dom';
 import { X, ImageIcon } from 'lucide-react';
 import { createPost } from '@/lib/postService';
 import { searchAnimes } from '@/lib/searchService';
@@ -21,6 +20,8 @@ interface Props {
 export default function CreatePostModal({ isOpen, onClose }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const animeInputRef = useRef<HTMLInputElement>(null);
+  const cancelButtonRef = useRef<HTMLButtonElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -34,6 +35,12 @@ export default function CreatePostModal({ isOpen, onClose }: Props) {
   const [animeResults, setAnimeResults] = useState<Anime[]>([]);
   const [selectedAnimes, setSelectedAnimes] = useState<Anime[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
+
+  useEffect(() => {
+    if (animeResults.length || searchLoading) {
+      resultsRef.current?.scrollIntoView({ block: 'nearest' });
+    }
+  }, [animeResults, searchLoading]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -144,6 +151,11 @@ export default function CreatePostModal({ isOpen, onClose }: Props) {
   function addAnime(anime: Anime) {
     if (selectedAnimes.length >= MAX_ANIMES) return;
     if (selectedAnimes.some((a) => a.malId === anime.malId)) return;
+    if (selectedAnimes.length === MAX_ANIMES - 1) {
+      cancelButtonRef.current?.focus();
+    } else {
+      animeInputRef.current?.focus();
+    }
     setSelectedAnimes((prev) => [...prev, anime]);
     setAnimeQuery('');
     setAnimeResults([]);
@@ -194,7 +206,7 @@ export default function CreatePostModal({ isOpen, onClose }: Props) {
         <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-border">
           <h2 className="text-[20px] font-semibold text-text-main">Nueva publicación</h2>
           <button
-            className="text-text-muted hover:text-text-main transition-colors"
+            className="min-w-11 min-h-11 inline-flex items-center justify-center text-text-muted hover:text-text-main transition-colors"
             onClick={onClose}
             aria-label="Close modal"
           >
@@ -257,7 +269,7 @@ export default function CreatePostModal({ isOpen, onClose }: Props) {
                   className="w-full max-h-48 object-cover rounded-[8px] border border-border"
                 />
                 <button
-                  className="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1 hover:bg-black/80 transition-colors"
+                  className="absolute top-2 right-2 min-w-11 min-h-11 flex items-center justify-center bg-black/60 text-white rounded-full hover:bg-black/80 transition-colors"
                   onClick={removePhoto}
                   aria-label="Remove image"
                 >
@@ -298,7 +310,7 @@ export default function CreatePostModal({ isOpen, onClose }: Props) {
                     {anime.name}
                     <button
                       onClick={() => removeAnime(anime.malId)}
-                      className="hover:text-primary/70 transition-colors"
+                      className="min-w-11 min-h-11 inline-flex items-center justify-center hover:text-primary/70 transition-colors"
                       aria-label={`Remove ${anime.name}`}
                     >
                       <X size={12} />
@@ -308,7 +320,7 @@ export default function CreatePostModal({ isOpen, onClose }: Props) {
               </div>
             )}
 
-            {/* Search input + dropdown (dropdown rendered in portal to escape modal scroll clipping) */}
+            {/* Search results remain in the modal's scrollable flow. */}
             {selectedAnimes.length < MAX_ANIMES && (
               <div className="relative">
                 <input
@@ -321,17 +333,9 @@ export default function CreatePostModal({ isOpen, onClose }: Props) {
                 />
               </div>
             )}
-            {(animeResults.length > 0 || searchLoading) && animeInputRef.current && (() => {
-              const rect = animeInputRef.current!.getBoundingClientRect();
-              return createPortal(
+            {(animeResults.length > 0 || searchLoading) && (
               <div
-                style={{
-                  position: 'fixed',
-                  top: rect.bottom + 4,
-                  left: rect.left,
-                  width: rect.width,
-                  zIndex: 9999,
-                }}
+                ref={resultsRef}
                 className="bg-surface border border-border rounded-[8px] shadow-card max-h-48 overflow-y-auto"
               >
                 {searchLoading && (
@@ -341,7 +345,7 @@ export default function CreatePostModal({ isOpen, onClose }: Props) {
                   <button
                     key={anime.malId}
                     className="w-full flex items-center gap-3 px-3 py-2 hover:bg-app-bg transition-colors text-left"
-                    onMouseDown={(e) => { e.preventDefault(); addAnime(anime); }}
+                     onClick={() => addAnime(anime)}
                   >
                     {anime.imgMedium && (
                       <img
@@ -353,10 +357,8 @@ export default function CreatePostModal({ isOpen, onClose }: Props) {
                     <span className="text-sm text-text-main line-clamp-2">{anime.name}</span>
                   </button>
                 ))}
-              </div>,
-              document.body
-            );
-            })()}
+              </div>
+            )}
           </div>
         </div>
 
@@ -367,7 +369,8 @@ export default function CreatePostModal({ isOpen, onClose }: Props) {
           )}
           <div className="flex justify-end gap-3">
             <button
-              className="text-sm text-text-muted hover:text-text-main transition-colors"
+              ref={cancelButtonRef}
+              className="min-h-11 px-3 text-sm text-text-muted hover:text-text-main transition-colors"
               onClick={onClose}
               disabled={loading}
             >

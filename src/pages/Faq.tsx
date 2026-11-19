@@ -233,10 +233,18 @@ export default function Faq() {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Search FAQ..."
+                        aria-label="Search FAQ"
                         className="w-full h-[40px] pl-4 pr-10 bg-[rgba(246,246,246,0.6)] dark:bg-surface border-[1.5px] border-border rounded-pill text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-primary transition-colors"
                     />
 
-                    <FAQAccordion faqs={filteredFaqs} />
+                    {filteredFaqs.length === 0 ? (
+                        <div role="status" className="text-sm text-text-secondary">
+                            No matching questions.{" "}
+                            <button type="button" className="text-primary underline" onClick={() => setSearch("")}>
+                                Clear search
+                            </button>
+                        </div>
+                    ) : <FAQAccordion faqs={filteredFaqs} />}
 
                     <a href="https://github.com/Rekko-Lists">
                         © 2026 Rekko · Made with ❤️ for the anime community.

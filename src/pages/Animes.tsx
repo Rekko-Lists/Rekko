@@ -580,7 +580,7 @@ export default function Animes() {
         ]}
       />
       {/* Sticky control bar — SubNav + QuickFilter scroll with the page header */}
-      <div className="sticky top-[62px] z-20 bg-app-bg lg:top-[136px]">
+      <div className="sticky top-[var(--header-height,136px)] z-20 bg-app-bg">
         <SubNav
           activeTab={activeTab}
           onTabChange={handleTabChange}

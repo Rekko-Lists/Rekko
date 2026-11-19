@@ -37,14 +37,14 @@ export default function Navbar() {
     <nav className="bg-app-bg w-full">
 
       {/* ── Mobile header (< lg) — compact: logo, search, animedle, avatar ── */}
-      <div className="lg:hidden flex items-center gap-2 px-3 h-[60px]">
+      <div className="lg:hidden flex flex-wrap items-center justify-between gap-x-2 px-3 pb-2">
         <button onClick={() => navigate('/feed')} className="flex-shrink-0" aria-label="Home">
           <BrandLogo className="h-[48px]" />
         </button>
 
         {user && <WelcomeBadge compact />}
 
-        <div className="flex-1 min-w-0">
+        <div className="order-last w-full">
           <SearchBar />
         </div>
 

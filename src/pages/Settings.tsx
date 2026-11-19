@@ -28,7 +28,7 @@ const styles = {
   input:       'w-full max-w-[200px] h-[32px] border border-border rounded-[5px] px-3 text-sm text-text-main bg-surface focus:outline-none focus:border-text-secondary',
   inputMd:     'w-full max-w-[260px] h-[32px] border border-border rounded-[5px] px-3 text-sm text-text-main bg-surface focus:outline-none focus:border-text-secondary',
   textarea:    'w-full max-w-[400px] h-[110px] border border-border rounded-[5px] px-3 py-2 text-sm text-text-main bg-surface resize-none focus:outline-none focus:border-text-secondary placeholder:text-text-muted',
-  linkInput:   'flex-1 h-[28px] border border-border rounded-[5px] px-3 text-sm text-text-main bg-surface focus:outline-none',
+  linkInput:   'flex-1 min-w-0 h-[28px] border border-border rounded-[5px] px-3 text-sm text-text-main bg-surface focus:outline-none',
   selectSmall: 'h-[28px] border border-border rounded-[5px] px-2 text-sm text-text-main bg-surface focus:outline-none capitalize',
   addLink:     'text-sm text-primary cursor-pointer hover:underline',
   secRow:      'border border-border rounded-[5px] px-4 py-3 flex items-center justify-between text-sm text-text-main',

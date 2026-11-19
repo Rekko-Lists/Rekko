@@ -1,15 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { X, Upload, FileText, CheckCircle2, AlertTriangle } from 'lucide-react';
 import PlatformSelector, { type ImportPlatform } from '@/components/ui/import/PlatformSelector';
 import { importAnilist, importMalXml, type ImportResult } from '@/lib/importService';
 import { extractApiError } from '@/lib/apiErrors';
+import ListDialog from '@/components/ui/list/ListDialog';
 
 const styles = {
   backdrop:    'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm',
-  panel:       'bg-white rounded-[14px] shadow-[0_8px_32px_rgba(0,0,0,0.25)] w-full max-w-md font-gabarito overflow-hidden',
+  panel:       'bg-white rounded-[14px] shadow-[0_8px_32px_rgba(0,0,0,0.25)] w-full max-w-md max-h-full overflow-y-auto font-gabarito',
   header:      'flex items-center gap-3 p-5 border-b border-border-light',
   title:       'flex-1 text-base font-semibold text-text-main',
-  closeBtn:    'w-7 h-7 rounded-full hover:bg-border flex items-center justify-center transition-colors flex-shrink-0',
+  closeBtn:    'w-11 h-11 rounded-full hover:bg-border flex items-center justify-center transition-colors flex-shrink-0',
   closeIcon:   'text-text-secondary',
   body:        'p-5 space-y-5',
   label:       'text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2 block',
@@ -48,14 +49,6 @@ export default function ImportModal({ defaultPlatform = 'mal', onClose, onImport
   const [result, setResult] = useState<ImportResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
-    }
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [onClose]);
-
   // Reset transient inputs when switching source.
   function selectPlatform(next: ImportPlatform) {
     setPlatform(next);
@@ -83,11 +76,11 @@ export default function ImportModal({ defaultPlatform = 'mal', onClose, onImport
   }
 
   return (
-    <div className={styles.backdrop} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+    <ListDialog label="Import your list" onClose={onClose}>
       <div className={styles.panel}>
         <div className={styles.header}>
           <h2 className={styles.title}>{result ? 'Import complete' : 'Import your list'}</h2>
-          <button onClick={onClose} className={styles.closeBtn}>
+          <button onClick={onClose} aria-label="Close import" className={styles.closeBtn}>
             <X size={14} className={styles.closeIcon} />
           </button>
         </div>
@@ -133,15 +126,15 @@ export default function ImportModal({ defaultPlatform = 'mal', onClose, onImport
                   <div className={styles.fileChip}>
                     <FileText size={15} className="text-primary" />
                     <span className="flex-1 truncate">{file.name}</span>
-                    <button onClick={() => setFile(null)} className="text-text-muted hover:text-status-red">
+                    <button onClick={() => setFile(null)} aria-label="Remove selected file" className="text-text-muted hover:text-status-red">
                       <X size={14} />
                     </button>
                   </div>
                 ) : (
-                  <div className={styles.dropzone} onClick={() => fileInputRef.current?.click()}>
+                  <button type="button" className={`${styles.dropzone} w-full`} onClick={() => fileInputRef.current?.click()}>
                     <Upload size={20} className={styles.dropIcon} />
                     <span className={styles.dropText}>Click to choose your exported XML file</span>
-                  </div>
+                  </button>
                 )}
                 <p className={styles.hint}>
                   In MyAnimeList go to <strong>List → Export</strong>, download the anime list,
@@ -150,14 +143,14 @@ export default function ImportModal({ defaultPlatform = 'mal', onClose, onImport
               </div>
             ) : (
               <div>
-                <label className={styles.label}>AniList username</label>
+                <label htmlFor="anilist-username" className={styles.label}>AniList username</label>
                 <input
                   type="text"
+                  id="anilist-username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="e.g. your-anilist-name"
                   className={styles.input}
-                  autoFocus
                   autoComplete="off"
                   onKeyDown={(e) => { if (e.key === 'Enter') void handleSubmit(); }}
                 />
@@ -191,6 +184,6 @@ export default function ImportModal({ defaultPlatform = 'mal', onClose, onImport
           )}
         </div>
       </div>
-    </div>
+    </ListDialog>
   );
 }

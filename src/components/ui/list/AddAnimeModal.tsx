@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { X, Check, Search, ArrowLeft, Star, Plus } from 'lucide-react';
 import { searchAnimes, type Anime } from '@/lib/searchService';
 import type { WatchState } from '@/types/anime';
+import ListDialog from './ListDialog';
 
 const DEBOUNCE_MS = 300;
 const MIN_CHARS = 3;
@@ -19,7 +20,7 @@ const styles = {
   panel:        'bg-white rounded-[10px] shadow-[0_8px_32px_rgba(0,0,0,0.25)] w-full max-w-md font-gabarito overflow-hidden flex flex-col max-h-[85vh]',
   header:       'flex items-center gap-3 p-5 border-b border-border-light',
   headerTitle:  'flex-1 text-base font-semibold text-text-main',
-  closeBtn:     'w-7 h-7 rounded-full hover:bg-border flex items-center justify-center transition-colors flex-shrink-0',
+  closeBtn:     'w-11 h-11 rounded-full hover:bg-border flex items-center justify-center transition-colors flex-shrink-0',
   closeIcon:    'text-text-secondary',
   searchWrap:   'relative px-5 pt-4',
   searchIcon:   'absolute left-8 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none',
@@ -79,14 +80,6 @@ export default function AddAnimeModal({ onClose, onAdd, existingMalIds }: Props)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
-    }
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [onClose]);
-
   useEffect(() => () => {
     abortRef.current?.abort();
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -138,7 +131,7 @@ export default function AddAnimeModal({ onClose, onAdd, existingMalIds }: Props)
   }
 
   return (
-    <div className={styles.backdrop} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+    <ListDialog label="Add anime" onClose={onClose}>
       <div className={styles.panel}>
         {selected ? (
           <>
@@ -156,7 +149,7 @@ export default function AddAnimeModal({ onClose, onAdd, existingMalIds }: Props)
                     .join(' · ')}
                 </p>
               </div>
-              <button onClick={onClose} className={styles.closeBtn}>
+              <button onClick={onClose} aria-label="Close add anime" className={styles.closeBtn}>
                 <X size={14} className={styles.closeIcon} />
               </button>
             </div>
@@ -196,7 +189,7 @@ export default function AddAnimeModal({ onClose, onAdd, existingMalIds }: Props)
           <>
             <div className={styles.header}>
               <h2 className={styles.headerTitle}>Add anime</h2>
-              <button onClick={onClose} className={styles.closeBtn}>
+              <button onClick={onClose} aria-label="Close add anime" className={styles.closeBtn}>
                 <X size={14} className={styles.closeIcon} />
               </button>
             </div>
@@ -209,7 +202,6 @@ export default function AddAnimeModal({ onClose, onAdd, existingMalIds }: Props)
                 onChange={handleChange}
                 placeholder="Search an anime by name…"
                 className={styles.searchInput}
-                autoFocus
                 autoComplete="off"
               />
             </div>
@@ -265,6 +257,6 @@ export default function AddAnimeModal({ onClose, onAdd, existingMalIds }: Props)
           </>
         )}
       </div>
-    </div>
+    </ListDialog>
   );
 }

@@ -71,8 +71,8 @@ const styles = {
   tabCountActive:'bg-primary text-white',
   tabCountIdle:  'bg-border text-text-secondary',
   modeSwitcher:  'flex items-center gap-0.5 bg-white dark:bg-app-bg border border-border rounded-[6px] p-0.5',
-  modeBtn:       'flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] text-xs font-medium transition-all text-text-secondary hover:text-text-main',
-  modeBtnActive: 'flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] text-xs font-semibold transition-all bg-[#212834] text-white dark:bg-primary dark:text-[#212834]',
+  modeBtn:       'flex min-w-11 min-h-11 items-center justify-center gap-1.5 px-3 py-1.5 rounded-[4px] text-xs font-medium transition-all text-text-secondary hover:text-text-main',
+  modeBtnActive: 'flex min-w-11 min-h-11 items-center justify-center gap-1.5 px-3 py-1.5 rounded-[4px] text-xs font-semibold transition-all bg-[#212834] text-white dark:bg-primary dark:text-[#212834]',
   modeBtnLabel:  'hidden sm:inline',
   errorWrap:     'flex flex-col items-center justify-center py-24 gap-3 text-center',
   errorIcon:     'text-status-red opacity-60',
@@ -263,7 +263,8 @@ export default function List() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowImportModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] text-xs font-medium text-text-secondary border border-border hover:border-primary hover:text-primary transition-colors"
+            aria-label="Import list"
+            className="flex min-w-11 min-h-11 items-center justify-center gap-1.5 px-3 py-1.5 rounded-[6px] text-xs font-medium text-text-secondary border border-border hover:border-primary hover:text-primary transition-colors"
           >
             <Download size={14} />
             <span className={styles.modeBtnLabel}>Import</span>
@@ -271,7 +272,8 @@ export default function List() {
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] text-xs font-semibold text-white bg-gradient-to-b from-grad-start to-grad-end hover:opacity-90 transition-opacity"
+            aria-label="Add anime"
+            className="flex min-w-11 min-h-11 items-center justify-center gap-1.5 px-3 py-1.5 rounded-[6px] text-xs font-semibold text-white bg-gradient-to-b from-grad-start to-grad-end hover:opacity-90 transition-opacity"
           >
             <Plus size={14} />
             <span className={styles.modeBtnLabel}>Add anime</span>
@@ -282,6 +284,8 @@ export default function List() {
               <button
                 key={id}
                 title={label}
+                aria-label={label}
+                aria-pressed={viewMode === id}
                 onClick={() => setViewMode(id)}
                 className={viewMode === id ? styles.modeBtnActive : styles.modeBtn}
               >

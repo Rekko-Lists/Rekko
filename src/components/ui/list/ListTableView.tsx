@@ -61,7 +61,7 @@ const styles = {
   scoreVal:    'inline-flex items-center gap-1 text-sm font-semibold text-text-main',
   scoreNone:   'text-xs text-border',
   tdEdit:      'py-2 px-3',
-  editBtn:     'w-[28px] h-[28px] rounded-[4px] border border-border flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-border hover:border-primary',
+  editBtn:     'w-11 h-11 rounded-[4px] border border-border flex items-center justify-center hover:bg-border hover:border-primary',
   editIcon:    'text-text-secondary',
   starIcon:    'text-primary',
 };
@@ -218,7 +218,7 @@ function ListRow({
 
       {showEdit && (
         <td className={styles.tdEdit}>
-          <button onClick={() => onEdit?.(entry)} className={styles.editBtn}>
+          <button onClick={() => onEdit?.(entry)} aria-label={`Edit ${entry.name}`} className={styles.editBtn}>
             <Edit2 size={12} className={styles.editIcon} />
           </button>
         </td>

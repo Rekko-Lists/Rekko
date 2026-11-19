@@ -25,10 +25,11 @@ export default function FAQAccordion({ faqs }: Props) {
                         <button
                             className="w-full text-left p-4 font-medium flex justify-between items-center hover:bg-base-200 transition"
                             onClick={() => setOpenIndex(isOpen ? null : index)}
+                            aria-expanded={isOpen}
                         >
                             {faq.question}
 
-                            <span className="text-lg">
+                            <span className="text-lg" aria-hidden="true">
                                 {isOpen ? "−" : "+"}
                             </span>
                         </button>

@@ -21,7 +21,7 @@ const styles = {
     "w-full h-[40px] pl-4 pr-10 bg-[rgba(246,246,246,0.6)] dark:bg-surface border-[1.5px] border-border rounded-pill text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-primary transition-colors",
   icon: "absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted",
   dropdown:
-    "absolute left-0 right-0 top-[44px] bg-surface border border-border rounded-card shadow-card z-50 overflow-hidden",
+    "absolute left-0 right-0 top-[44px] bg-surface border border-border rounded-card shadow-card z-50 max-h-[60vh] overflow-y-auto",
   sectionHeader:
     "px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-widest text-text-muted select-none",
   sectionDivider: "border-t border-border",
@@ -39,7 +39,7 @@ const styles = {
   // Post icon placeholder
   postIcon:
     "w-8 h-8 flex-shrink-0 rounded-[4px] bg-border flex items-center justify-center text-text-muted",
-  itemTitle: "text-sm text-text-main truncate",
+  itemTitle: "text-sm text-text-main break-words",
   itemMeta: "text-xs text-text-muted truncate",
   status: "px-3 py-2 text-xs text-text-muted text-center",
   error: "px-3 py-2 text-xs text-status-red text-center",

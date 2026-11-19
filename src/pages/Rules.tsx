@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import AnimeNewsCard from "@/components/ui/feed/AnimeNewsCard";
@@ -52,6 +52,7 @@ const styles = {
 
 export default function Rules() {
     const navigate = useNavigate();
+    const contentRef = useRef<HTMLDivElement>(null);
     const user = useAuthStore((s) => s.user);
     const siteLinks = useMemo<SiteLinkItem[]>(
         () => [
@@ -116,6 +117,49 @@ export default function Rules() {
         );
         return shuffled.slice(0, 2);
     }, [randomWidgetLoaders]);
+
+    useEffect(() => {
+        const table = contentRef.current?.querySelector("table");
+        const container = table?.parentElement;
+        if (!table || !container) return;
+
+        const hint = document.createElement("p");
+        hint.id = "rules-table-scroll-hint";
+        hint.className = "text-sm font-semibold text-base-content mb-2";
+        hint.textContent = "Scroll horizontally to see the full table (use the arrow keys).";
+        hint.hidden = true;
+        container.before(hint);
+        container.classList.add("focus-visible:outline", "focus-visible:outline-2", "focus-visible:outline-offset-2", "focus-visible:outline-primary");
+
+        const update = () => {
+            const overflowing = container.scrollWidth > container.clientWidth;
+            hint.hidden = !overflowing;
+            if (overflowing) {
+                container.setAttribute("tabindex", "0");
+                container.setAttribute("role", "region");
+                container.setAttribute("aria-label", "Rules summary table");
+                container.setAttribute("aria-describedby", hint.id);
+            } else {
+                container.removeAttribute("tabindex");
+                container.removeAttribute("role");
+                container.removeAttribute("aria-label");
+                container.removeAttribute("aria-describedby");
+            }
+        };
+        const observer = new ResizeObserver(update);
+        observer.observe(container);
+        observer.observe(table);
+        update();
+        return () => {
+            observer.disconnect();
+            hint.remove();
+            container.classList.remove("focus-visible:outline", "focus-visible:outline-2", "focus-visible:outline-offset-2", "focus-visible:outline-primary");
+            container.removeAttribute("tabindex");
+            container.removeAttribute("role");
+            container.removeAttribute("aria-label");
+            container.removeAttribute("aria-describedby");
+        };
+    }, []);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -210,7 +254,7 @@ export default function Rules() {
             <div className={styles.divider} />
 
             <main className={styles.center}>
-                <div className="rounded-card border border-border bg-surface p-8">
+                <div ref={contentRef} className="rounded-card border border-border bg-surface p-8">
                     <MarkdownRenderer content={aboutMarkdown} />
                 </div>
             </main>

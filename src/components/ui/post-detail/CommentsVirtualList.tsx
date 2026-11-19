@@ -19,7 +19,7 @@ interface Props {
 
 const styles = {
   commentsHead: "px-6 py-4 border-b border-border text-sm font-semibold text-text-main",
-  commentsViewport: "h-[620px] overflow-y-auto",
+  commentsViewport: "h-[620px] overflow-y-auto scroll-pt-20",
   commentRow: "border-b border-border px-6 py-4 flex gap-3 bg-app-bg",
   commentRowNested: "flex gap-2 pt-2",
   commentContent: "min-w-0 flex-1",
@@ -30,13 +30,13 @@ const styles = {
   commentMessageNested: "mt-0.5 text-xs text-text-main leading-relaxed",
   commentActions: "mt-2 flex gap-4 text-xs text-text-muted",
   commentActionsNested: "mt-1 flex gap-3 text-[11px] text-text-muted",
-  replyBtn: "hover:text-primary transition-colors",
-  repliesToggle: "hover:text-primary transition-colors",
+  replyBtn: "min-h-11 min-w-11 scroll-mt-20 hover:text-primary transition-colors",
+  repliesToggle: "min-h-11 hover:text-primary transition-colors",
   repliesSection: "mt-2 ml-2 flex flex-col gap-2 border-l-2 border-border-light pl-3",
   replyInputWrap: "mt-2 flex gap-2 items-start",
-  replyInput: "flex-1 text-xs border border-border rounded-[5px] px-2 py-1.5 bg-surface text-text-main resize-none focus:outline-none focus:border-text-secondary placeholder:text-text-muted",
-  replySubmit: "text-[11px] px-2.5 py-1.5 bg-primary text-white rounded-[5px] hover:bg-primary-dark transition-colors disabled:opacity-60",
-  replyCancel: "text-[11px] px-2 py-1.5 text-text-muted hover:text-text-main",
+  replyInput: "flex-1 min-w-0 scroll-mt-20 text-xs border border-border rounded-[5px] px-2 py-1.5 bg-surface text-text-main resize-none focus:outline-none focus:border-text-secondary placeholder:text-text-muted",
+  replySubmit: "min-h-11 min-w-11 text-[11px] px-2.5 py-1.5 bg-primary text-white rounded-[5px] hover:bg-primary-dark transition-colors disabled:opacity-60",
+  replyCancel: "min-h-11 min-w-11 text-[11px] px-2 py-1.5 text-text-muted hover:text-text-main",
   state: "px-6 py-8 text-center text-text-muted",
   error: "px-6 py-8 text-center text-status-red",
 };
@@ -143,7 +143,7 @@ function CommentRow({
         <div className={isNested ? styles.commentActionsNested : styles.commentActions}>
           <button
             type="button"
-            className={`flex items-center gap-1 ${comment.hasLiked ? "text-primary" : ""}`}
+            className={`min-h-11 min-w-11 flex items-center gap-1 ${comment.hasLiked ? "text-primary" : ""}`}
             onClick={() => onLike(comment.commentId)}
           >
             <Heart size={isNested ? 10 : 11} fill={comment.hasLiked ? "#FF9E00" : "none"} className={comment.hasLiked ? "text-primary" : ""} />
