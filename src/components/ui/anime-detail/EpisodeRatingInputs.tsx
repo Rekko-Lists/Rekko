@@ -11,12 +11,12 @@ interface Props {
 }
 
 const styles = {
-  wrap:        'relative w-[209px] mx-auto flex items-center gap-2 font-gabarito',
+  wrap:        'w-full max-w-[260px] mx-auto flex flex-wrap justify-center items-center gap-2 font-gabarito',
   pill:        'flex shrink-0 items-center gap-1 h-[22px] whitespace-nowrap bg-white border border-border rounded-[5px] px-2 text-[12px] text-text-main',
   pillLabel:   'text-text-muted text-[11px]',
   pillInput:   'w-[28px] text-primary text-[12px] font-semibold bg-transparent text-center focus:outline-none disabled:cursor-not-allowed',
   pillTotal:   'whitespace-nowrap text-text-main text-[12px]',
-  saveBtn:     'absolute left-[181px] h-[22px] px-2 rounded-[5px] bg-primary text-white text-[11px] font-semibold hover:bg-primary-dark transition-colors disabled:cursor-not-allowed disabled:opacity-60',
+  saveBtn:     'h-[22px] px-2 rounded-[5px] bg-primary text-white text-[11px] font-semibold hover:bg-primary-dark transition-colors disabled:cursor-not-allowed disabled:opacity-60',
   ratingPill:  'flex items-center gap-1 h-[22px] bg-white border border-border rounded-[5px] px-2 text-[12px] text-text-main relative',
   ratingSel:   'appearance-none bg-transparent text-[12px] text-text-main pr-3 focus:outline-none cursor-pointer disabled:cursor-not-allowed',
 };

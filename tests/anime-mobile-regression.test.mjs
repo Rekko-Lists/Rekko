@@ -18,6 +18,12 @@ test('episode total cannot wrap or shrink inside its pill', async () => {
   assert.match(episode, /pillTotal:.*whitespace-nowrap/);
 });
 
+test('episode save button participates in wrapping layout rather than overlapping the rating', async () => {
+  const episode = await source('anime-detail/EpisodeRatingInputs.tsx');
+  assert.match(episode, /wrap:.*flex-wrap/);
+  assert.doesNotMatch(episode, /saveBtn:.*absolute/);
+});
+
 test('recommendations render each post once and stop at the ends', async () => {
   const carousel = await source('anime-detail/PostsCarousel.tsx');
   assert.match(carousel, /posts\.map\(\(post/);
